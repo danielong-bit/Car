@@ -1,8 +1,8 @@
 {
   "vehicleId": "porsche-macan-s",
-  "mainImage": "assets/audi-s5/main-car-16x9.jpg",
+  "mainImage": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
   "vehicleName": "Porsche Macan S",
-  "vehicleSub": "Porsche Japan recon luxury edition · Interactive detail model",
+  "vehicleSub": "Porsche Japan Recon Edition · 2.9L Twin-Turbo V6 (Demo Model)",
   "price": "RM 468,000",
   "hotspots": [
     {
@@ -11,44 +11,31 @@
       "type": "image",
       "x": "68%",
       "y": "48%",
-      "imageSrc": "assets/audi-s5/main-car-16x9.jpg",
-      "title": "Porsche Macan S Powertrain",
-      "eyebrow": "ENGINE & HYBRID",
-      "description": "Inspecting Porsche Macan S powerplant and efficiency system.",
+      "imageSrc": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
+      "title": "Porsche 2.9L Twin-Turbo V6",
+      "eyebrow": "ENGINE & TURBO",
+      "description": "375 hp twin-turbocharged V6 with 7-speed PDK dual-clutch transmission and Porsche Traction Management (PTM) AWD.",
       "specs": [
-        [
-          "Model",
-          "Porsche Macan S"
-        ],
-        [
-          "Power",
-          "Japan Spec"
-        ],
-        [
-          "Condition",
-          "Recon Verified"
-        ]
+        ["Engine", "2.9L V6 Twin-Turbo"],
+        ["Power", "375 hp @ 5,200 - 6,700 rpm"],
+        ["Torque", "520 Nm @ 1,850 - 5,000 rpm"],
+        ["Transmission", "7-Speed PDK Dual-Clutch"]
       ]
     },
     {
       "id": "interior",
-      "label": "Cabin",
+      "label": "Cockpit",
       "type": "image",
       "x": "50%",
       "y": "42%",
-      "imageSrc": "assets/audi-s5/main-car-16x9.jpg",
-      "title": "Porsche Macan S Executive Cockpit",
-      "eyebrow": "LUXURY CABIN",
-      "description": "Premium materials and seating ergonomics.",
+      "imageSrc": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
+      "title": "Porsche Driver-Oriented Cockpit",
+      "eyebrow": "INTERIOR & TECH",
+      "description": "Glass-look center console with direct touch control, Sport Chrono clock, and 10.9-inch Porsche Communication Management (PCM).",
       "specs": [
-        [
-          "Steering",
-          "Right-hand drive"
-        ],
-        [
-          "Cabin",
-          "Japan Spec Grade"
-        ]
+        ["Steering", "GT Sports Steering Wheel in Leather"],
+        ["Audio", "Bose Surround Sound System"],
+        ["Seats", "14-Way Power Sport Seats with Memory"]
       ]
     },
     {
@@ -57,19 +44,13 @@
       "type": "image",
       "x": "78%",
       "y": "74%",
-      "imageSrc": "assets/audi-s5/main-car-16x9.jpg",
-      "title": "Alloy Wheel & Caliper Setup",
+      "imageSrc": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
+      "title": "Macan S Wheels & Porsche Calipers",
       "eyebrow": "CHASSIS & BRAKES",
-      "description": "Alloy wheels and suspension package.",
+      "description": "20-inch Macan S wheels with red 6-piston aluminum monobloc fixed calipers and internally vented brake discs.",
       "specs": [
-        [
-          "Wheels",
-          "Factory Option Alloy"
-        ],
-        [
-          "Brakes",
-          "Performance Calipers"
-        ]
+        ["Wheels", "20-inch Macan S Alloy Wheels"],
+        ["Brakes", "Red 6-Piston Front Calipers (360 mm)"]
       ]
     }
   ]

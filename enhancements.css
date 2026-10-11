@@ -74,3 +74,315 @@ button, a, input, select { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 }
+
+/* =========================================================
+   LUXURY CONSULTANT & BRANDING SECTION
+   ========================================================= */
+.consultant-section {
+  padding: 80px 0 60px;
+  border-top: 1px solid var(--line, rgba(255,255,255,.12));
+}
+.consultant-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 420px) 1fr;
+  gap: 40px;
+  align-items: start;
+}
+.consultant-card {
+  background: linear-gradient(180deg, #12181e, #0a0e12);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 20px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.35);
+}
+.consultant-avatar-wrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--accent, #e5c158);
+  margin-bottom: 6px;
+}
+.consultant-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.consultant-card h3 {
+  font-size: 26px;
+  margin: 0;
+  font-family: Space Grotesk, sans-serif;
+  font-weight: 700;
+}
+.consultant-role {
+  color: var(--accent, #e5c158);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin: -6px 0 6px;
+}
+.consultant-bio {
+  color: #adb9c1;
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 0;
+}
+.consultant-contact-list {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid rgba(255,255,255,.1);
+  padding-top: 16px;
+  font-size: 12px;
+  color: #c5d0d6;
+}
+.consultant-contact-list div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.consultant-pillars {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+.pillar-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 16px;
+  padding: 24px;
+  transition: transform .2s ease, border-color .2s ease;
+}
+.pillar-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(220,255,61,.3);
+}
+.pillar-icon {
+  font-size: 26px;
+  margin-bottom: 12px;
+}
+.pillar-card h4 {
+  font-size: 17px;
+  font-family: Space Grotesk, sans-serif;
+  margin: 0 0 8px;
+  color: #fff;
+  font-weight: 600;
+}
+.pillar-card p {
+  color: #9ba7af;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* =========================================================
+   DELIVERED WITH CONFIDENCE (CUSTOMER STORIES)
+   ========================================================= */
+.deliveries-section {
+  padding: 80px 0 60px;
+  border-top: 1px solid var(--line, rgba(255,255,255,.12));
+}
+.deliveries-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.delivery-card {
+  background: linear-gradient(180deg, #10161b, #090d10);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.delivery-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.4);
+  border-color: rgba(220,255,61,.3);
+}
+.delivery-photo-wrap {
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+}
+.delivery-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.delivery-grade-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(5,8,10,.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(244,196,48,.35);
+  color: #f4c430;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 999px;
+  letter-spacing: .08em;
+}
+.delivery-consent-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(5,8,10,.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.15);
+  color: #8c9ba4;
+  font-size: 9px;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+.delivery-content {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.delivery-date {
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: var(--accent, #e5c158);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.delivery-vehicle {
+  font-size: 19px;
+  font-family: Space Grotesk, sans-serif;
+  margin: 6px 0 4px;
+  font-weight: 700;
+}
+.delivery-customer {
+  color: #8fa0aa;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+.delivery-caption {
+  color: #cbd5db;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+.delivery-quote {
+  margin-top: auto;
+  padding: 12px 14px;
+  background: rgba(255,255,255,.03);
+  border-left: 2px solid var(--accent, #e5c158);
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  font-size: 12px;
+  color: #9aa8b1;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   CAR BUYING KNOWLEDGE & GUIDE CARDS
+   ========================================================= */
+.guides-section {
+  padding: 70px 0 60px;
+  border-top: 1px solid var(--line, rgba(255,255,255,.12));
+}
+.guides-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.guide-card {
+  background: linear-gradient(180deg, #10151a, #090c0f);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  transition: all .2s ease;
+}
+.guide-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(220,255,61,.3);
+}
+.guide-tag {
+  color: var(--accent, #e5c158);
+  font-size: 9px;
+  letter-spacing: .14em;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.guide-card h3 {
+  font-size: 20px;
+  margin: 0 0 12px;
+  font-family: Space Grotesk, sans-serif;
+  line-height: 1.25;
+  font-weight: 600;
+}
+.guide-card p {
+  color: #9ba7af;
+  font-size: 12px;
+  line-height: 1.65;
+  margin: 0 0 16px;
+}
+.guide-bullets {
+  padding-left: 18px;
+  margin: 0;
+  color: #c2cdd3;
+  font-size: 12px;
+  display: grid;
+  gap: 8px;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   TOUR TEASER BANNER (AUDI S5)
+   ========================================================= */
+.tour-teaser-section {
+  padding: 40px 0 70px;
+}
+.tour-teaser-banner {
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 20px;
+  background: linear-gradient(135deg, #131b22, #0b0f13);
+  padding: 36px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+}
+.tour-teaser-copy h3 {
+  font-size: clamp(26px, 3vw, 38px);
+  font-family: Space Grotesk, sans-serif;
+  margin: 6px 0 10px;
+  font-weight: 700;
+}
+.tour-teaser-copy p {
+  color: #a4b2ba;
+  font-size: 13px;
+  max-width: 580px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   RESPONSIVE ADJUSTMENTS FOR NEW SECTIONS
+   ========================================================= */
+@media (max-width: 1050px) {
+  .consultant-layout { grid-template-columns: 1fr; }
+  .deliveries-grid { grid-template-columns: repeat(2, 1fr); }
+  .guides-grid { grid-template-columns: repeat(2, 1fr); }
+  .tour-teaser-banner { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 680px) {
+  .consultant-pillars { grid-template-columns: 1fr; }
+  .deliveries-grid { grid-template-columns: 1fr; }
+  .guides-grid { grid-template-columns: 1fr; }
+  .tour-teaser-banner { padding: 26px 20px; }
+}
+

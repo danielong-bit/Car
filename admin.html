@@ -11,7 +11,7 @@
   <!-- Top Navigation Bar -->
   <header class="admin-header">
     <div class="admin-brand">
-      <a href="/" class="admin-brand-link">
+      <a href="index.html" class="admin-brand-link">
         <span class="brand-badge">ADMIN</span>
         <span class="brand-title">Japan Recon · Showroom Studio</span>
       </a>
@@ -55,6 +55,9 @@
         <button type="button" class="admin-btn admin-btn-secondary" id="resetConfigBtn" title="恢复预设的奥迪S5配置">
           <span>🔄 恢复默认</span>
         </button>
+        <button type="button" class="admin-btn admin-btn-secondary" id="exportVehiclesJsonBtn" title="下载最新的 vehicles.json 用于直接提交到 GitHub Pages 仓库">
+          <span>📦 导出库存JSON</span>
+        </button>
         <button type="button" class="admin-btn admin-btn-secondary" id="exportConfigBtn" title="导出当前配置为 JSON 文件">
           <span>📥 导出配置</span>
         </button>
@@ -67,7 +70,7 @@
       </div>
 
       <div class="preview-links">
-        <a href="/" target="_blank" class="preview-link-btn" title="在新标签页预览首页展厅">
+        <a href="index.html" target="_blank" class="preview-link-btn" title="在新标签页预览首页展厅">
           <span>首页展厅 ↗</span>
         </a>
         <a href="calculator.html" target="_blank" class="preview-link-btn" id="headerCalcLink" title="在新标签页测试金融计算器">
@@ -88,7 +91,7 @@
         <strong>Showroom Studio 专为电脑宽屏设计 (Desktop Only)</strong>
         <p>为保证 16:9 画布毫米级坐标定位、全景视频预览及多维库存成本核算体验，请使用电脑桌面端浏览器访问。手机端建议直接访问前台展厅。</p>
       </div>
-      <a href="/" class="admin-btn admin-btn-primary">返回前台展厅 ↗</a>
+      <a href="index.html" class="admin-btn admin-btn-primary">返回前台展厅 ↗</a>
     </div>
   </aside>
 
@@ -204,6 +207,9 @@
         </button>
         <button type="button" class="inspector-tab" data-tab="vehicle" id="tabVehicleBtn" title="整车参数与经销商成本利润测算">
           <span>🚗 库存&成本</span>
+        </button>
+        <button type="button" class="inspector-tab" data-tab="media" id="tabMediaBtn" title="媒体库与永久存储管理">
+          <span>🖼️ 媒体库</span>
         </button>
         <button type="button" class="inspector-tab" data-tab="leads" id="tabLeadsBtn" title="客户线索跟进与销售顾问分配">
           <span>👥 预约线索 <span class="tab-badge" id="leadsTabBadge">3</span></span>
@@ -720,7 +726,7 @@
             <a href="calculator.html?vehicle=audi-s5" target="_blank" class="admin-btn admin-btn-secondary" id="openDedicatedCalcBtn">
               <span>在独立计算器中打开此车 ↗</span>
             </a>
-            <a href="/" target="_blank" class="admin-btn admin-btn-secondary">
+            <a href="index.html" target="_blank" class="admin-btn admin-btn-secondary">
               <span>在前台展厅库中查看 ↗</span>
             </a>
           </div>
@@ -872,6 +878,52 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Tab: Media Library & Asset Upload -->
+      <div class="inspector-content" id="panelMedia" style="display: none;">
+        <div class="panel-section-title">
+          <div>
+            <h3>媒体库与永久存储 (Media Library)</h3>
+            <p>上传车身照片、机舱特写或日本拍卖单，生成永久稳定访问链接</p>
+          </div>
+          <div class="inspector-actions">
+            <button type="button" class="admin-btn admin-btn-secondary" id="refreshMediaListBtn">🔄 刷新资源</button>
+          </div>
+        </div>
+
+        <!-- Media Upload Zone -->
+        <div class="media-upload-zone" id="mediaUploadZone" style="border: 2px dashed rgba(255,255,255,.2); border-radius: 12px; padding: 24px 16px; text-align: center; margin-bottom: 20px; background: rgba(255,255,255,.02); cursor: pointer;">
+          <input type="file" id="mediaLibraryFileInput" accept="image/*,video/mp4" class="sr-only">
+          <div style="font-size: 28px; margin-bottom: 8px;">📤</div>
+          <strong>点击或拖拽媒体文件至此上传</strong>
+          <p style="color: #8da0ab; font-size: 11px; margin: 4px 0 0;">支持 JPG, PNG, WEBP, MP4 格式 · 永久保存于 assets/uploads/</p>
+          <div id="uploadProgressIndicator" style="display: none; margin-top: 10px; color: var(--accent, #e5c158); font-size: 12px;">正在持久化上传至服务器...</div>
+        </div>
+
+        <!-- Focal Point / Crop Preview Tool -->
+        <div class="focal-point-tool" style="background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 14px; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong style="font-size: 12px;">🎯 焦点与视觉裁切微调 (Focal Point Alignment)</strong>
+            <span style="font-size: 11px; color: #8da0ab;" id="focalCoordsLabel">center center</span>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="admin-btn admin-btn-secondary focal-preset-btn" data-focal="center center">居中 (Center)</button>
+            <button type="button" class="admin-btn admin-btn-secondary focal-preset-btn" data-focal="center top">车顶优先 (Top)</button>
+            <button type="button" class="admin-btn admin-btn-secondary focal-preset-btn" data-focal="center bottom">底盘优先 (Bottom)</button>
+            <button type="button" class="admin-btn admin-btn-secondary focal-preset-btn" data-focal="left center">车头优先 (Left)</button>
+            <button type="button" class="admin-btn admin-btn-secondary focal-preset-btn" data-focal="right center">车尾优先 (Right)</button>
+          </div>
+        </div>
+
+        <!-- Uploaded Media Grid -->
+        <div class="media-library-grid-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <strong style="font-size: 12px;">已存储媒体文件 (<span id="mediaCountBadge">0</span>)</strong>
+          <small style="color: #8da0ab;">点击即可应用至主车图或复制URL</small>
+        </div>
+        <div class="media-library-grid" id="mediaLibraryGrid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-height: 380px; overflow-y: auto; padding-right: 4px;">
+          <div style="color: #8da0ab; font-size: 12px; grid-column: span 2; text-align: center; padding: 20px;">正在加载媒体库...</div>
         </div>
       </div>
 
@@ -1059,6 +1111,25 @@
         <button type="button" class="admin-btn admin-btn-secondary" id="cancelConfirmDialogBtn">取消</button>
         <button type="button" class="admin-btn admin-btn-danger" id="okConfirmDialogBtn">确认删除</button>
       </div>
+    </div>
+  <!-- Admin Passcode Gate (Protected Dealership Management) -->
+  <dialog class="admin-dialog" id="adminAuthGateModal" style="z-index: 9999;">
+    <div class="dialog-card" style="max-width: 440px; text-align: center; padding: 32px 24px;">
+      <div style="font-size: 40px; margin-bottom: 12px;">🔐</div>
+      <h3 style="margin-bottom: 8px;">Authorized Showroom Studio Access</h3>
+      <p style="color: #92a2ac; font-size: 13px; line-height: 1.5; margin-bottom: 20px;">
+        This portal manages inventory publishing, confidential importer margins, and customer leads. Please enter your consultant security passcode.
+      </p>
+      <form id="adminAuthGateForm" onsubmit="return false;" style="display: grid; gap: 14px;">
+        <div style="text-align: left;">
+          <label for="adminAuthPasscodeInput" style="font-size: 12px; color: #cbd5db; font-weight: 600;">Consultant Passcode</label>
+          <input type="password" id="adminAuthPasscodeInput" class="admin-input" placeholder="Enter studio passcode (admin8888)" required autofocus style="text-align: center; font-size: 18px; letter-spacing: .2em;">
+          <p id="adminAuthErrorMsg" style="color: #ff5252; font-size: 11px; margin-top: 6px; display: none;">Incorrect passcode. Please check with showroom administration.</p>
+        </div>
+        <button type="submit" class="admin-btn admin-btn-primary" id="adminAuthSubmitBtn" style="padding: 12px; font-weight: 600; width: 100%;">
+          <span>Unlock Admin Studio 🔓</span>
+        </button>
+      </form>
     </div>
   </dialog>
 

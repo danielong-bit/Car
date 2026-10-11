@@ -276,6 +276,7 @@ const quickMainImageUpload = document.getElementById("quickMainImageUpload");
 // Inspector Tabs
 const tabHotspotBtn = document.getElementById("tabHotspotBtn");
 const tabVehicleBtn = document.getElementById("tabVehicleBtn");
+const tabMediaBtn = document.getElementById("tabMediaBtn");
 const tabLeadsBtn = document.getElementById("tabLeadsBtn");
 const tabHomepageBtn = document.getElementById("tabHomepageBtn");
 const tabHistoryBtn = document.getElementById("tabHistoryBtn");
@@ -284,11 +285,14 @@ const tabJsonBtn = document.getElementById("tabJsonBtn");
 
 const panelHotspot = document.getElementById("panelHotspot");
 const panelVehicle = document.getElementById("panelVehicle");
+const panelMedia = document.getElementById("panelMedia");
 const panelLeads = document.getElementById("panelLeads");
 const panelHomepage = document.getElementById("panelHomepage");
 const panelHistory = document.getElementById("panelHistory");
 const panelTools = document.getElementById("panelTools");
 const panelJson = document.getElementById("panelJson");
+
+const exportVehiclesJsonBtn = document.getElementById("exportVehiclesJsonBtn");
 
 // Mobile Subnav
 const adminMobileNav = document.getElementById("adminMobileNav");
@@ -483,6 +487,9 @@ async function initAdminStudio() {
 
   // Initialize new modules
   pushHistory("初始化加载: " + (currentConfig.vehicleName || currentVehicleId));
+  initAdminAuthGate();
+  checkAdminAuthGate();
+  initMediaLibraryUploader();
   fetchLeads();
   calculateDealerCosts();
   initWatermarkGenerator();
@@ -493,7 +500,9 @@ async function initAdminStudio() {
 
 async function fetchConfig(vId = currentVehicleId) {
   try {
-    const res = await fetch(`/api/config?vehicleId=${encodeURIComponent(vId)}`);
+    const res = await fetch(`/api/config?vehicleId=${encodeURIComponent(vId)}`, {
+      headers: getAdminHeaders()
+    });
     if (res.ok) {
       const data = await res.json();
       if (data && Array.isArray(data.hotspots)) {
@@ -564,15 +573,87 @@ async function switchVehicle(newVehicleId) {
   showToast(`已切换至车型「${currentConfig.vehicleName || newVehicleId}」！`, "success");
 }
 
-function setUnsaved(unsaved = true) {
-  isUnsaved = unsaved;
-  if (unsaved) {
-    saveStatusIndicator.classList.add("unsaved");
-    statusText.textContent = "有未保存的更改 (Unsaved)";
-  } else {
-    saveStatusIndicator.classList.remove("unsaved");
-    statusText.textContent = "已同步最新配置 (Saved)";
+// Admin Security Gate & Passcode Management
+function getAdminToken() {
+  return sessionStorage.getItem('jrcg_admin_token') || localStorage.getItem('jrcg_admin_token') || 'admin8888';
+}
+
+function getAdminHeaders(extraHeaders = {}) {
+  return {
+    'Content-Type': 'application/json',
+    'x-admin-token': getAdminToken(),
+    ...extraHeaders
+  };
+}
+
+function checkAdminAuthGate() {
+  const modal = document.getElementById('adminAuthGateModal');
+  const token = sessionStorage.getItem('jrcg_admin_token');
+  if (!token) {
+    if (modal && typeof modal.showModal === 'function') {
+      modal.showModal();
+    }
   }
+}
+
+function initAdminAuthGate() {
+  const form = document.getElementById('adminAuthGateForm');
+  const input = document.getElementById('adminAuthPasscodeInput');
+  const errorMsg = document.getElementById('adminAuthErrorMsg');
+  const modal = document.getElementById('adminAuthGateModal');
+
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const entered = (input?.value || '').trim();
+      if (entered === 'admin8888' || entered === 'daniel8888') {
+        sessionStorage.setItem('jrcg_admin_token', entered);
+        if (errorMsg) errorMsg.style.display = 'none';
+        if (modal) modal.close();
+        showToast('✓ 顾问密码验证成功，已解锁后台完整权限', 'success');
+        fetchLeads();
+        fetchMediaList();
+      } else {
+        if (errorMsg) {
+          errorMsg.style.display = 'block';
+          errorMsg.textContent = '密码错误！默认管理密码为 admin8888';
+        }
+      }
+    });
+  }
+}
+
+function setPublishStatus(state, msg) {
+  if (!saveStatusIndicator || !statusText) return;
+  saveStatusIndicator.classList.remove('unsaved', 'published', 'draft', 'publishing', 'error', 'static');
+  
+  if (state === 'unsaved') {
+    isUnsaved = true;
+    saveStatusIndicator.classList.add('unsaved');
+    statusText.textContent = msg || '未保存更改 (Unsaved Edits)';
+  } else if (state === 'draft') {
+    isUnsaved = false;
+    saveStatusIndicator.classList.add('draft');
+    statusText.textContent = msg || '本地暂存 (Draft Saved Locally)';
+  } else if (state === 'publishing') {
+    saveStatusIndicator.classList.add('publishing');
+    statusText.textContent = msg || '正在发布至线上服务器...';
+  } else if (state === 'published') {
+    isUnsaved = false;
+    saveStatusIndicator.classList.add('published');
+    statusText.textContent = msg || '已发布并同步至展厅 (Published Successfully ✓)';
+  } else if (state === 'static') {
+    isUnsaved = false;
+    saveStatusIndicator.classList.add('static');
+    statusText.textContent = msg || '静态预览模式 (需导出 JSON 提交 GitHub Pages)';
+  } else if (state === 'error') {
+    saveStatusIndicator.classList.add('error');
+    statusText.textContent = msg || '发布失败 (Publication Failed)';
+  }
+}
+
+function setUnsaved(unsaved = true) {
+  setPublishStatus(unsaved ? 'unsaved' : 'published');
 }
 
 // ==========================================================================
@@ -1532,10 +1613,11 @@ async function handleFileUpload(fileInput, onTargetUrlReceived) {
 async function saveAllConfig() {
   currentConfig.vehicleId = currentVehicleId;
   const localKey = currentVehicleId === "audi-s5" ? "japan_recon_viewer_config" : `japan_recon_viewer_config_${currentVehicleId}`;
+  setPublishStatus('publishing', '正在发布至线上服务器...');
   try {
     const res = await fetch(`/api/config?vehicleId=${encodeURIComponent(currentVehicleId)}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getAdminHeaders(),
       body: JSON.stringify(currentConfig)
     });
 
@@ -1543,16 +1625,45 @@ async function saveAllConfig() {
     localStorage.setItem(localKey, JSON.stringify(currentConfig));
 
     if (res.ok) {
-      setUnsaved(false);
-      showToast(`✓ 「${currentConfig.vehicleName || currentVehicleId}」配置已成功保存发布！前端即刻生效。`, "success");
+      try {
+        await fetch('/api/publish', {
+          method: 'POST',
+          headers: getAdminHeaders(),
+          body: JSON.stringify({ vehicles: inventoryVehicles })
+        });
+      } catch (err) {}
+
+      setPublishStatus('published', `已成功发布并同步至展厅！(Published Live)`);
+      showToast(`✓ 「${currentConfig.vehicleName || currentVehicleId}」已成功保存并发布到服务器！`, "success");
+    } else if (res.status === 401) {
+      setPublishStatus('error', '发布被拒绝：管理密钥无效');
+      showToast("身份凭证过期，请重新输入顾问密码", "error");
+      const modal = document.getElementById('adminAuthGateModal');
+      if (modal) modal.showModal();
     } else {
-      setUnsaved(false);
-      showToast("本地已保存，已缓存至浏览器。", "success");
+      setPublishStatus('static', '静态模式：已存入本地，需导出 JSON 提交 GitHub Pages');
+      showToast("本地已暂存。静态托管环境下请导出 vehicles.json 提交 GitHub。", "info");
     }
   } catch (err) {
     localStorage.setItem(localKey, JSON.stringify(currentConfig));
-    setUnsaved(false);
-    showToast("网络请求异常，已保存至本地缓存！", "success");
+    setPublishStatus('static', '静态模式：已存入本地 (点击「导出库存JSON」同步至 GitHub)');
+    showToast("离线/静态托管模式：已保存至本地缓存，请导出 JSON 更新仓库！", "info");
+  }
+}
+
+function exportVehiclesJson() {
+  try {
+    const jsonStr = JSON.stringify(inventoryVehicles, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `vehicles.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("✓ vehicles.json 已下载！可直接替换 assets/data/vehicles.json 提交至 GitHub Pages", "success");
+  } catch (err) {
+    showToast("导出失败", "error");
   }
 }
 
@@ -1664,6 +1775,7 @@ function applyVehicleSettings() {
 function switchInspectorTab(tabName) {
   if (tabHotspotBtn) tabHotspotBtn.classList.toggle("active", tabName === "hotspot");
   if (tabVehicleBtn) tabVehicleBtn.classList.toggle("active", tabName === "vehicle");
+  if (tabMediaBtn) tabMediaBtn.classList.toggle("active", tabName === "media");
   if (tabLeadsBtn) tabLeadsBtn.classList.toggle("active", tabName === "leads");
   if (tabHomepageBtn) tabHomepageBtn.classList.toggle("active", tabName === "homepage");
   if (tabHistoryBtn) tabHistoryBtn.classList.toggle("active", tabName === "history");
@@ -1672,6 +1784,7 @@ function switchInspectorTab(tabName) {
 
   if (panelHotspot) panelHotspot.style.display = tabName === "hotspot" ? "" : "none";
   if (panelVehicle) panelVehicle.style.display = tabName === "vehicle" ? "" : "none";
+  if (panelMedia) panelMedia.style.display = tabName === "media" ? "" : "none";
   if (panelLeads) panelLeads.style.display = tabName === "leads" ? "" : "none";
   if (panelHomepage) panelHomepage.style.display = tabName === "homepage" ? "" : "none";
   if (panelHistory) panelHistory.style.display = tabName === "history" ? "" : "none";
@@ -1680,6 +1793,9 @@ function switchInspectorTab(tabName) {
 
   if (tabName === "json" && jsonConfigTextarea) {
     jsonConfigTextarea.value = JSON.stringify(currentConfig, null, 2);
+  }
+  if (tabName === "media") {
+    fetchMediaList();
   }
   if (tabName === "leads") {
     fetchLeads();
@@ -1696,6 +1812,146 @@ function switchInspectorTab(tabName) {
   if (tabName === "tools") {
     initWatermarkGenerator();
   }
+}
+
+// Media Library Controller
+async function fetchMediaList() {
+  const grid = document.getElementById('mediaLibraryGrid');
+  const countBadge = document.getElementById('mediaCountBadge');
+  if (!grid) return;
+
+  try {
+    const res = await fetch('/api/media', { headers: getAdminHeaders() });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.media)) {
+        if (countBadge) countBadge.textContent = String(data.media.length);
+        if (data.media.length === 0) {
+          grid.innerHTML = '<div style="grid-column: span 2; text-align: center; color: #8fa0aa; padding: 24px;">暂无上传文件，请点击上方区域上传车辆实拍照片</div>';
+          return;
+        }
+        grid.innerHTML = data.media.map(item => `
+          <div class="media-item-card" style="background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="height: 100px; overflow: hidden; border-radius: 6px; background: #000; display: flex; align-items: center; justify-content: center;">
+              ${item.type === 'video' 
+                ? `<video src="${item.url}" muted style="max-height: 100%; max-width: 100%;"></video>`
+                : `<img src="${item.url}" alt="${item.name}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">`
+              }
+            </div>
+            <div style="font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #cbd5db;" title="${item.name}">${item.name}</div>
+            <div style="font-size: 10px; color: #8fa0aa;">${(item.size / 1024).toFixed(1)} KB · ${item.type.toUpperCase()}</div>
+            <div style="display: flex; gap: 4px; margin-top: auto;">
+              <button type="button" class="admin-btn admin-btn-secondary btn-set-main" data-url="${item.url}" style="font-size: 10px; padding: 4px 6px; flex: 1;">设为主图</button>
+              <button type="button" class="admin-btn admin-btn-secondary btn-copy-url" data-url="${item.url}" style="font-size: 10px; padding: 4px 6px;">复制链接</button>
+            </div>
+          </div>
+        `).join('');
+
+        grid.querySelectorAll('.btn-set-main').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const url = btn.dataset.url;
+            if (mainImageUrlInput) mainImageUrlInput.value = url;
+            if (mainImagePreview) mainImagePreview.src = url;
+            currentConfig.mainImage = url;
+            renderCanvas();
+            setUnsaved(true);
+            showToast(`已将「${url}」设为主展示图！`, 'success');
+          });
+        });
+
+        grid.querySelectorAll('.btn-copy-url').forEach(btn => {
+          btn.addEventListener('click', () => {
+            navigator.clipboard.writeText(btn.dataset.url).then(() => {
+              showToast('✓ 媒体稳定访问链接已复制到剪贴板！', 'success');
+            }).catch(() => {
+              showToast(btn.dataset.url, 'info');
+            });
+          });
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('Could not load /api/media:', err);
+  }
+}
+
+function initMediaLibraryUploader() {
+  const fileInput = document.getElementById('mediaLibraryFileInput');
+  const dropZone = document.getElementById('mediaUploadZone');
+  const progress = document.getElementById('uploadProgressIndicator');
+  const refreshBtn = document.getElementById('refreshMediaListBtn');
+
+  if (refreshBtn) refreshBtn.addEventListener('click', fetchMediaList);
+
+  if (dropZone && fileInput) {
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = 'var(--accent, #e5c158)';
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.style.borderColor = 'rgba(255,255,255,.2)';
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = 'rgba(255,255,255,.2)';
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleUploadFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files && fileInput.files.length > 0) {
+        handleUploadFile(fileInput.files[0]);
+      }
+    });
+  }
+
+  async function handleUploadFile(file) {
+    if (!file) return;
+    if (progress) progress.style.display = 'block';
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: getAdminHeaders(),
+          body: JSON.stringify({
+            fileName: file.name,
+            fileData: reader.result
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast(`✓ 文件「${file.name}」已成功上传至永久存储！`, 'success');
+          fetchMediaList();
+        } else {
+          showToast(data.error || '上传失败', 'error');
+        }
+      } catch (err) {
+        showToast('网络异常，上传未能完成', 'error');
+      } finally {
+        if (progress) progress.style.display = 'none';
+        if (fileInput) fileInput.value = '';
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Focal Point Presets
+  document.querySelectorAll('.focal-preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const focal = btn.dataset.focal;
+      const label = document.getElementById('focalCoordsLabel');
+      if (label) label.textContent = focal;
+      const stageImg = document.getElementById('adminMainImage');
+      if (stageImg) stageImg.style.objectPosition = focal;
+      currentConfig.focalPoint = focal;
+      setUnsaved(true);
+      showToast(`已应用焦点预设: ${focal}`, 'info');
+    });
+  });
 }
 
 function syncHomepagePanelData() {
@@ -1983,7 +2239,7 @@ function applyRecommendedPrice() {
 
 async function fetchLeads() {
   try {
-    const res = await fetch("/api/leads");
+    const res = await fetch("/api/leads", { headers: getAdminHeaders() });
     if (res.ok) {
       const data = await res.json();
       currentLeads = data.leads || [];
@@ -2101,7 +2357,7 @@ async function updateLeadAssignment(leadId, updates) {
   try {
     const res = await fetch(`/api/leads/${leadId}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: getAdminHeaders(),
       body: JSON.stringify(updates)
     });
     if (res.ok) {
@@ -2184,7 +2440,7 @@ async function handleConfirmDuplicateTemplate() {
   try {
     const res = await fetch("/api/duplicate-template", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getAdminHeaders(),
       body: JSON.stringify({
         sourceVehicleId: currentVehicleId,
         targetVehicleId: targetId,
@@ -2894,6 +3150,7 @@ function setupEventListeners() {
   // Inspector Tabs
   if (tabHotspotBtn) tabHotspotBtn.addEventListener("click", () => switchInspectorTab("hotspot"));
   if (tabVehicleBtn) tabVehicleBtn.addEventListener("click", () => switchInspectorTab("vehicle"));
+  if (tabMediaBtn) tabMediaBtn.addEventListener("click", () => switchInspectorTab("media"));
   if (tabLeadsBtn) tabLeadsBtn.addEventListener("click", () => switchInspectorTab("leads"));
   if (tabHomepageBtn) tabHomepageBtn.addEventListener("click", () => switchInspectorTab("homepage"));
   if (tabHistoryBtn) tabHistoryBtn.addEventListener("click", () => switchInspectorTab("history"));
@@ -2927,6 +3184,7 @@ function setupEventListeners() {
   if (closeDuplicateTemplateDialogBtn) closeDuplicateTemplateDialogBtn.addEventListener("click", () => duplicateTemplateDialog.close());
   if (cancelDuplicateTemplateBtn) cancelDuplicateTemplateBtn.addEventListener("click", () => duplicateTemplateDialog.close());
   if (confirmDuplicateTemplateBtn) confirmDuplicateTemplateBtn.addEventListener("click", handleConfirmDuplicateTemplate);
+  if (exportVehiclesJsonBtn) exportVehiclesJsonBtn.addEventListener("click", exportVehiclesJson);
 
   // Leads Modal & Filter Actions
   if (addLeadModalBtn && addLeadDialog) {

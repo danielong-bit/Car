@@ -1,4 +1,4 @@
-const vehicles = [
+let vehicles = [
   {
     id:'audi-s5', brand:'Audi', model:'S5 Avant', body:'Wagon', year:2025, mileage:'12,500 km (demo)', power:'349 hp (demo)', engine:'3.0L TFSI V6 Turbo', torque:'500 Nm (demo)', color:'Daytona Grey', price:'RM 438,000', image:'assets/audi-s5/main-car-16x9.jpg', sub:'Interactive photo and video demo',
     actualPage:'audi.html', preview:'assets/audi-s5/main-car-preview.jpg',
@@ -135,6 +135,49 @@ try {
     }
   });
 } catch (e) {}
+
+// Dynamic Loader for Published Catalog (Single Source of Truth)
+async function loadPublishedCatalog() {
+  try {
+    const res = await fetch('assets/data/vehicles.json');
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        vehicles = data;
+        try {
+          const overrides = JSON.parse(localStorage.getItem('jrcg_vehicle_overrides') || '{}');
+          Object.keys(overrides).forEach(vId => {
+            const v = vehicles.find(item => item.id === vId);
+            if (v && overrides[vId]) {
+              if (overrides[vId].price) v.price = overrides[vId].price;
+              if (overrides[vId].name) {
+                const parts = overrides[vId].name.split(' ');
+                if (parts.length > 1) {
+                  v.brand = parts[0];
+                  v.model = parts.slice(1).join(' ');
+                }
+              }
+              if (overrides[vId].year) v.year = parseInt(overrides[vId].year, 10) || v.year;
+              if (overrides[vId].mileage) v.mileage = overrides[vId].mileage;
+              if (overrides[vId].engine) v.engine = overrides[vId].engine;
+            }
+          });
+        } catch (e) {}
+
+        if (typeof renderInventory === 'function') renderInventory();
+        if (typeof populateCalcPickers === 'function') populateCalcPickers();
+      }
+    }
+  } catch (err) {
+    console.warn('Using bundled catalog fallback:', err);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadPublishedCatalog);
+} else {
+  setTimeout(loadPublishedCatalog, 0);
+}
 
 const inventoryGrid = document.getElementById('inventoryGrid');
 const brandFilter = document.getElementById('brandFilter');
@@ -514,7 +557,27 @@ if (dialogBookViewingBtn && appointmentDialog) {
 const dialogWhatsappBtn = document.getElementById('dialogWhatsappBtn');
 if (dialogWhatsappBtn) {
   dialogWhatsappBtn.addEventListener('click', () => {
-    if (demoDialog) demoDialog.showModal();
+    const targetCar = currentVehicle || vehicles[0];
+    if (!targetCar) return;
+    const msg = [
+      `👋 Hello Daniel Ong!`,
+      ``,
+      `I would like to enquire about this reconditioned stock vehicle:`,
+      `🚗 *${targetCar.brand} ${targetCar.model}* (${targetCar.year})`,
+      `💰 *Listed Price:* ${targetCar.price}`,
+      `⚙️ *Powertrain:* ${targetCar.engine || 'N/A'} · ${targetCar.power || 'N/A'}`,
+      `🛣️ *Mileage:* ${targetCar.mileage || 'N/A'}`,
+      `🎨 *Color:* ${targetCar.color || 'N/A'}`,
+      ``,
+      `Could you please share:`,
+      `1. Japanese auction sheet & grade inspection report`,
+      `2. Showroom viewing slot at Glenmarie 3S centre`,
+      `3. Indicative bank loan installment & AP documents?`,
+      ``,
+      `Thank you!`
+    ].join('\n');
+    const waUrl = `https://wa.me/60123456789?text=${encodeURIComponent(msg)}`;
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
   });
 }
 
