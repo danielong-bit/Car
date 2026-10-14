@@ -1,0 +1,17 @@
+{
+  "name": "japan-recon-car-gallery",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "npm test",
+    "lint": "node --check app.js && node --check audi-experience.js && node --check admin.js && node --check site-ui.js && node --check server.js",
+    "test": "node tests/check-assets.mjs"
+  },
+  "dependencies": {
+    "d3": "^7.9.0",
+    "express": "^4.21.2"
+  }
+}

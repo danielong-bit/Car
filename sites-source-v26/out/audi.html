@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script>document.documentElement.classList.add('js-enabled');</script>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Interactive Audi S5 Avant example for Danny Recon">
+  <title>Audi S5 Avant | Danny Recon</title>
+  <link rel="stylesheet" href="audi-experience.css?v=20261011-unified">
+  <link rel="stylesheet" href="enhancements.css?v=20261011-unified">
+  <link rel="preload" href="assets/fonts/nimbus-sans-regular.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="showroom.css?v=20261011-unified">
+  <link rel="stylesheet" href="design-system.css?v=select-v26">
+  <script src="design-system.js?v=20261011-unified"></script>
+<link rel="stylesheet" href="/site-languages.css?v=26"><script src="/site-languages.js?v=26" defer></script></head>
+<body class="vehicle-tour">
+  <a class="skip-link" href="#mainContent">Skip to content</a>
+  <div class="demo">Demo vehicle · Photos and specifications are unverified</div>
+
+  <header class="wrap top">
+    <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">DR</span><span class="brand-copy"><strong>Danny Recon</strong><small>Car Gallery</small></span></a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primaryNav">Menu</button>
+    <nav id="primaryNav" aria-label="Primary navigation">
+      <a href="#experience">Experience</a>
+      <a href="#gallery">Gallery</a>
+      <a href="calculator.html?vehicle=audi-s5" id="navCalcLink">Calculator</a>
+      <a href="./#inventory">All cars</a>
+    </nav>
+  </header>
+
+  <main id="mainContent" tabindex="-1">
+    <section class="wrap hero" id="experience">
+      <div class="hero-copy">
+
+        <h1>Audi S5 <span>Avant</span></h1>
+        <p class="lede">Choose a part below the photo.</p>
+      </div>
+
+      <div class="experience-shell" id="experienceShell" data-scene="overview" data-category="overview">
+        <div class="experience-frame tour-frame" id="experienceFrame">
+          <div class="media-plane" id="mediaPlane" role="region" aria-label="Car photos and feature videos">
+            <div class="media-zoom-canvas" id="mediaZoomCanvas">
+              <img class="experience-overview viewer-main-image" id="overviewImage" src="assets/audi-s5/main-car-16x9.jpg" alt="Audi S5 Avant in Daytona Grey metallic - 16:9 interactive viewer" width="1280" height="720" decoding="async" fetchpriority="high">
+              <video class="viewer-video" id="viewerVideo" playsinline muted preload="none" aria-hidden="true"></video>
+              <img class="experience-detail-image viewer-detail-image" id="detailImage" alt="" aria-hidden="true">
+              <div class="hotspots viewer-hotspots" id="hotspots" aria-label="Vehicle feature hotspots"></div>
+              <div class="sub-hotspots viewer-sub-hotspots" id="subHotspots" aria-label="Feature sub-hotspots" style="display:none;"></div>
+            </div>
+
+            <button class="viewer-back-btn" id="viewerBackBtn" type="button" aria-label="Back to vehicle overview">
+              <span class="viewer-back-icon">←</span>
+              <span class="viewer-back-label">Back to Vehicle</span>
+            </button>
+
+            <button class="showroom-zoom-pill" id="mediaZoomPill" type="button" aria-label="Reset zoom level">
+              <span class="zoom-icon" aria-hidden="true">＋</span>
+              <span id="mediaZoomValue">1.0x</span>
+              <span class="zoom-reset-hint">Reset</span>
+            </button>
+
+            <div class="experience-topline">
+              <span>INTERACTIVE VEHICLE VIEWER · 16:9</span>
+              <span id="sceneLabel">OVERVIEW</span>
+            </div>
+
+            <div class="detail-status" id="detailStatus">
+              <span>SELECT A PART</span>
+              <strong>Click a hotspot to start inspection</strong>
+            </div>
+          </div>
+
+      <div class="viewer-tools" aria-label="Car viewer controls">
+  <div class="feature-shortcuts" data-feature-shortcuts role="group" aria-label="Explore vehicle features"></div>
+  <div class="viewer-controls" role="group" aria-label="Zoom and return controls">
+    <button type="button" data-viewer-back disabled>← Whole car</button>
+    <button type="button" data-zoom="out" aria-label="Zoom out">−</button>
+    <output data-zoom-value aria-label="Zoom level">1.0×</output>
+    <button type="button" data-zoom="in" aria-label="Zoom in">+</button>
+    <button type="button" data-zoom="reset">Reset zoom</button>
+  </div>
+  <p class="viewer-help" data-viewer-help></p>
+  <div class="media-feedback" data-media-status role="status" hidden><span></span><button type="button" data-media-retry hidden>Retry video</button></div>
+</div>
+          <aside class="tour-panel" id="tourPanel">
+            <div>
+              <p class="kicker" id="detailEyebrow">VEHICLE OVERVIEW</p>
+              <h2 id="detailTitle" aria-live="polite">Choose what you want to inspect.</h2>
+              <p class="tour-description" id="detailDescription">Open the engine bay, move into the cabin, inspect the wheel and brake hardware, view the audio detail or check the cargo area.</p>
+            </div>
+
+            <div class="tour-subnav" id="tourSubnav" aria-label="Detail options"></div>
+            <details class="part-specification"><summary>Part details</summary><div class="tour-specs" id="tourSpecs"></div></details>
+
+            <!-- V6 TFSI Engine Exhaust Sound Player -->
+            <div class="exhaust-sound-player" id="exhaustSoundPlayer" aria-label="3.0L V6 TFSI Engine Exhaust Sound Simulator">
+              <div class="sound-player-header">
+                <div class="sound-player-titles">
+                  <span class="sound-eyebrow">ACOUSTIC DEMO</span>
+                  <strong class="sound-title">3.0L V6 TFSI Exhaust Sound</strong>
+                </div>
+                <div class="sound-wave-bars" id="soundWaveBars" aria-hidden="true">
+                  <span></span><span></span><span></span><span></span><span></span>
+                </div>
+              </div>
+              <div class="sound-controls">
+                <button type="button" class="sound-btn" id="soundColdStartBtn" data-mode="cold_start">
+                  <span class="sound-btn-icon">⚡</span>
+                  <span>Cold Start</span>
+                </button>
+                <button type="button" class="sound-btn" id="soundIdleBtn" data-mode="idle">
+                  <span class="sound-btn-icon">〰️</span>
+                  <span>Idle Purr</span>
+                </button>
+                <button type="button" class="sound-btn" id="soundRevBtn" data-mode="rev">
+                  <span class="sound-btn-icon">🔥</span>
+                  <span>Dynamic Rev</span>
+                </button>
+                <button type="button" class="sound-btn sound-stop-btn" id="soundStopBtn" aria-label="Stop sound playback" title="Stop Sound">
+                  <span>⏹</span>
+                </button>
+              </div>
+              <div class="sound-status-bar">
+                <span class="sound-status-dot" id="soundStatusDot"></span>
+                <span class="sound-status-text" id="soundStatusText">Stereo Synthesizer Ready (Hot-V Twin-Scroll V6)</span>
+              </div>
+            </div>
+
+            <button class="detail-back" id="detailBack" type="button" aria-label="Back to vehicle overview">
+              <span>←</span> Back to car
+            </button>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap section" id="gallery">
+      <div class="heading">
+        <div><h2>More photos</h2></div>
+        <p>Tap a photo to view it full screen.</p>
+      </div>
+
+      <div class="tabs">
+        <button class="active" type="button" data-filter="all">All</button>
+        <button type="button" data-filter="exterior">Exterior</button>
+        <button type="button" data-filter="interior">Interior</button>
+        <button type="button" data-filter="detail">Details</button>
+      </div>
+
+      <div class="gallery">
+        <button class="tile" type="button" data-kind="exterior">
+          <img loading="lazy" decoding="async" src="assets/audi-s5/main-car-16x9.jpg" alt="Audi S5 Avant in Daytona Grey metallic" width="1280" height="720"><span>Front 3/4</span>
+        </button>
+        <button class="tile" type="button" data-kind="exterior">
+          <img loading="lazy" decoding="async" src="assets/audi-s5/boot_16x9.jpg" alt="Audi S5 Avant open cargo area with powered tailgate" width="1280" height="720"><span>Powered Tailgate</span>
+        </button>
+        <button class="tile" type="button" data-kind="interior">
+          <img loading="lazy" decoding="async" src="assets/audi-s5/dashboard_16x9.jpg" alt="Audi S5 Avant digital dashboard and cockpit" width="1280" height="720"><span>Cockpit & MMI</span>
+        </button>
+        <button class="tile" type="button" data-kind="detail">
+          <img loading="lazy" decoding="async" src="assets/audi-s5/engine_16x9.jpg" alt="Audi S5 Avant 3.0L TFSI V6 turbo engine bay" width="1280" height="720"><span>V6 Engine bay</span>
+        </button>
+        <button class="tile" type="button" data-kind="detail">
+          <img loading="lazy" decoding="async" src="assets/audi-s5/wheel_16x9.jpg" alt="Audi S5 Avant 20-inch S-design wheel and red brake caliper" width="1280" height="720"><span>Wheel + brake</span>
+        </button>
+        <button class="tile" type="button" data-kind="interior">
+          <img loading="lazy" decoding="async" src="assets/audi-s5/audio_16x9.jpg" alt="Bang and Olufsen 3D sound speaker in Audi S5 Avant" width="1280" height="720"><span>Bang & Olufsen</span>
+        </button>
+        <button class="tile" type="button" data-kind="interior">
+          <img loading="lazy" decoding="async" src="assets/audi-s5/climate_16x9.jpg" alt="Audi S5 Avant deluxe rear climate controls" width="1280" height="720"><span>Rear climate</span>
+        </button>
+        <button class="tile" type="button" data-kind="interior">
+          <img loading="lazy" decoding="async" src="assets/audi-s5/seats_16x9.jpg" alt="Audi S5 Avant contoured fine Nappa leather S sport seats" width="1280" height="720"><span>S Sport Seats</span>
+        </button>
+      </div>
+    </section>
+
+  <section class="ds-tour-contact" aria-labelledby="tourContactTitle"><h2 id="tourContactTitle">See this car for yourself.</h2><p>Speak with Danny about the Audi S5 Avant or request a showroom viewing in Selangor.</p><div class="ds-tour-actions"><a class="primary-button" data-whatsapp-vehicle="audi-s5" href="https://wa.me/60125686528" target="_blank" rel="noopener noreferrer"><svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/><path d="M8 10h8M8 14h5"/></svg> Enquire on WhatsApp</a><a class="ghost-button" href="calculator.html?vehicle=audi-s5&amp;viewing=1"><svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 11h18m-12 5h2m3 0h2"/></svg> Book a viewing</a><a class="ghost-button" href="calculator.html?vehicle=audi-s5">Calculate financing ↗</a></div></section>
+  </main>
+
+  <footer class="wrap"><span>Made by Danny. For Illustration only.</span><a href="./#inventory">← Browse all cars</a></footer>
+
+  <dialog id="lightbox">
+    <div class="light">
+      <button class="close" id="closeLightbox" type="button" aria-label="Close image">×</button>
+      <img id="lightboxImg" alt="">
+    </div>
+  </dialog>
+
+  <script src="catalog.js?v=20261011-unified"></script>
+  <script src="showroom-data.js?v=20261011-unified"></script>
+  <script src="audi-experience.js?v=20261011-unified"></script>
+  <script>window.JRCG.trackView("audi-s5");</script>
+  <script src="site-ui.js?v=20261011-unified"></script>
+</body>
+</html>

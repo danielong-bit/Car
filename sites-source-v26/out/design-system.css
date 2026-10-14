@@ -1,0 +1,172 @@
+/* Danny Recon: shared visual tokens and components across every page. */
+@font-face{font-family:Danny Sans;src:url('assets/fonts/nimbus-sans-regular.woff') format('woff');font-weight:400 500;font-display:swap}
+@font-face{font-family:Danny Sans;src:url('assets/fonts/nimbus-sans-bold.woff') format('woff');font-weight:600 800;font-display:swap}
+:root,html[data-theme="platinum"]{color-scheme:light;--ds-bg:#f5f6f8;--ds-surface:#fff;--ds-raised:#eef0f3;--ds-text:#17202e;--ds-muted:#526071;--ds-subtle:#697687;--ds-border:#d8dee6;--ds-accent:#c92236;--ds-accent-hover:#ab192c;--ds-on-accent:#fff;--ds-accent-soft:#fbecee;--ds-success:#087e59;--ds-warning:#996014;--ds-danger:#b82236;--ds-shadow:0 8px 28px rgba(24,32,45,.06);--ds-radius:16px;--ds-control-radius:9px;--ds-font:Danny Sans,Arial,sans-serif;--ds-motion:180ms;--ds-ink:#151e2b}
+html[data-theme="apex"]{color-scheme:dark;--ds-bg:#10141b;--ds-surface:#191f29;--ds-raised:#242c38;--ds-text:#f5f6f8;--ds-muted:#b2bdcd;--ds-subtle:#9caabb;--ds-border:#354052;--ds-accent:#d83146;--ds-accent-hover:#bc2539;--ds-accent-soft:#38212a;--ds-success:#7bdbc0;--ds-warning:#f6ce83;--ds-danger:#ff9dab;--ds-shadow:0 8px 28px rgba(0,0,0,.16)}
+html[data-theme="sapphire"]{color-scheme:dark;--ds-bg:#0e1721;--ds-surface:#172330;--ds-raised:#223244;--ds-text:#f2f6fb;--ds-muted:#b1c1d4;--ds-subtle:#9aacc2;--ds-border:#34485f;--ds-accent:#087aad;--ds-accent-hover:#06658f;--ds-accent-soft:#173548;--ds-success:#7bdbc0;--ds-warning:#f6ce83;--ds-danger:#ff9dab;--ds-shadow:0 8px 28px rgba(0,0,0,.16)}
+html[data-theme="gold"]{color-scheme:dark;--ds-bg:#171512;--ds-surface:#242019;--ds-raised:#312b21;--ds-text:#faf6ed;--ds-muted:#c7bcaa;--ds-subtle:#b7a995;--ds-border:#4a4032;--ds-accent:#9a681e;--ds-accent-hover:#835616;--ds-accent-soft:#3c3021;--ds-success:#98dabd;--ds-warning:#f6ce83;--ds-danger:#ff9dab;--ds-shadow:0 8px 28px rgba(0,0,0,.16)}
+html:root{--bg:var(--ds-bg);--panel:var(--ds-surface);--panel-2:var(--ds-raised);--text:var(--ds-text);--muted:var(--ds-muted);--line:var(--ds-border);--accent:var(--ds-accent);--ui-accent:var(--ds-accent);--accent-soft:var(--ds-accent-soft);--ink:var(--ds-on-accent);--shadow:var(--ds-shadow);--radius:var(--ds-radius)}
+body.home,body.vehicle-tour,body.admin-body{background:var(--ds-bg)!important;background-image:none!important;color:var(--ds-text);font-family:var(--ds-font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body :is(h1,h2,h3,h4,h5,.brand-copy,.brand-mark,.brand-title,.brand-badge,.card-price,.card-meta){font-family:var(--ds-font)}
+body :is(button,input,select,textarea){font-family:var(--ds-font)}
+body :is(button,a,input,select,textarea,summary):focus-visible{outline:3px solid color-mix(in srgb,var(--ds-accent) 75%,transparent);outline-offset:3px}
+button:not(:disabled),summary{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.5}
+body :is(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),select,textarea){background:var(--ds-surface);color:var(--ds-text);border:1px solid var(--ds-border);border-radius:var(--ds-control-radius);font-size:14px;min-height:44px;padding:10px 12px}
+body input::placeholder,body textarea::placeholder{color:var(--ds-subtle)}
+body :is(.primary-button,.card-links .card-open-link,.admin-btn-primary,.sales-action-primary){display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:1px solid var(--ds-accent);border-radius:var(--ds-control-radius);background:var(--ds-accent);color:var(--ds-on-accent);font-size:13px;font-weight:600;letter-spacing:0;text-decoration:none;box-shadow:none;transition:background var(--ds-motion),border-color var(--ds-motion),transform var(--ds-motion)}
+body :is(.primary-button,.card-links .card-open-link,.admin-btn-primary):hover{background:var(--ds-accent-hover);border-color:var(--ds-accent-hover);color:var(--ds-on-accent);filter:none;box-shadow:none;transform:translateY(-1px)}
+body :is(.ghost-button,.card-calc-link,.card-compare-btn,.filter-reset,.filter-compare-btn,.menu-toggle,.detail-back,.theme-toggle-btn){min-height:44px;border:1px solid var(--ds-border);border-radius:var(--ds-control-radius);background:var(--ds-surface);color:var(--ds-text);font-size:13px;font-weight:500;box-shadow:none;text-decoration:none;transition:background var(--ds-motion),border-color var(--ds-motion)}
+body :is(.ghost-button,.card-calc-link,.card-compare-btn,.filter-reset,.filter-compare-btn,.detail-back,.theme-toggle-btn):hover{background:var(--ds-raised);border-color:var(--ds-accent);transform:none;box-shadow:none}
+.ds-icon{display:block;flex:none;width:20px;height:20px;stroke-width:1.8}
+.home .site-header,.vehicle-tour .top{height:auto;min-height:82px;gap:24px;padding:14px 0;border-bottom:1px solid var(--ds-border);background:transparent}
+.site-header .brand{flex:none;gap:10px}.site-header .brand-mark{width:42px;height:42px;border:0;border-radius:10px;background:var(--ds-accent);color:#fff;font-size:14px;letter-spacing:.03em}
+.site-header .brand-copy strong{font-size:14px;letter-spacing:.04em}.site-header .brand-copy small{font-size:10px;letter-spacing:.1em}
+/* Lift the car above the caption instead of letting the caption cover the body. */
+.home .slide-img{object-position:center bottom!important;transform:translateY(-40px);transition:none}
+.home .showcase-slide.active .slide-img{transform:translateY(-40px)}
+@media(max-width:820px){.home .slide-img,.home .showcase-slide.active .slide-img{transform:translateY(-56px)}}
+.vehicle-tour .top .brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex:none}
+.vehicle-tour .top .brand-mark{display:grid;place-items:center;width:42px;height:42px;border-radius:10px;background:var(--ds-accent);color:#fff;font-size:14px;font-weight:700}
+.vehicle-tour .top .brand-copy{display:grid;gap:4px;line-height:1.1}.vehicle-tour .top .brand-copy strong{font-size:14px;letter-spacing:.04em;text-transform:uppercase}.vehicle-tour .top .brand-copy small{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ds-muted)}
+.site-header nav{gap:14px;flex:1;justify-content:flex-end}.site-header nav>a{font-size:13px;line-height:1.3;white-space:nowrap}.site-header nav .active{color:var(--ds-accent)}
+.theme-toggle-btn{padding:0 11px;font-size:11px}.theme-btn-dot{background:var(--ds-accent);box-shadow:none}.theme-dropdown-menu{background:var(--ds-surface);border-color:var(--ds-border);box-shadow:var(--ds-shadow)}
+.theme-opt-item{color:var(--ds-text)}.theme-opt-item.active,.theme-opt-item:hover{background:var(--ds-accent-soft)}
+.demo-banner,.vehicle-tour .demo{background:var(--ds-raised);color:var(--ds-muted);font-size:10px;border-color:var(--ds-border);letter-spacing:.04em}
+.catalog-copy h1{color:var(--ds-text);font-weight:700}.home .catalog-intro{gap:42px;padding:30px 0}.car-card{background:var(--ds-surface);border-color:var(--ds-border);box-shadow:var(--ds-shadow)}
+.car-card:hover{border-color:color-mix(in srgb,var(--ds-accent) 45%,var(--ds-border));box-shadow:0 12px 32px rgba(0,0,0,.09);transform:translateY(-3px)}
+.card-info{padding:20px}.card-info h3{font-weight:600;font-size:22px}.card-info .card-price{color:var(--ds-text);font-size:21px}.card-specs{border-color:var(--ds-border)}.card-specs small{font-size:11px}.card-specs strong{font-size:13px}
+.filters{padding:16px;border:1px solid var(--ds-border);border-radius:var(--ds-radius);background:var(--ds-surface)}.filters :is(input,select){font-size:13px;background:var(--ds-bg)}
+.card-links{gap:8px}.card-footer-row{gap:10px}.section-heading h2,.vehicle-tour .heading h2{color:var(--ds-text);font-size:28px;font-weight:600;letter-spacing:-.035em}
+/* Shared dialogs, detail drawers and customer enquiry actions. */
+body dialog{box-sizing:border-box;border:1px solid var(--ds-border);border-radius:20px;background:var(--ds-surface);color:var(--ds-text);box-shadow:0 24px 90px rgba(0,0,0,.25);max-height:calc(100dvh - 40px)}
+body dialog::backdrop{background:rgba(12,19,30,.64);backdrop-filter:blur(5px)}
+.dialog-shell,.dialog-topline,.vehicle-copy,.demo-dialog-box,.compare-dialog-shell,.compare-topline{background:var(--ds-surface);color:var(--ds-text);border-color:var(--ds-border)}
+body :is(.dialog-close,.close){display:grid;place-items:center;width:36px;height:36px;border:1px solid var(--ds-border);border-radius:50%;background:var(--ds-raised);color:var(--ds-text);font-size:24px;box-shadow:none}
+.dialog-topline{color:var(--ds-muted);font-size:10px;letter-spacing:.08em}.vehicle-copy h2{color:var(--ds-text);font-size:32px}.quick-specs{gap:12px}.quick-specs>div,.spec-details,.vehicle-dialog-actions-card,.dialog-calc-callout{border-color:var(--ds-border);background:var(--ds-raised);color:var(--ds-text);box-shadow:none}
+.vehicle-sub,.quick-specs small,.spec-row span,.dialog-calc-label,.dialog-calc-sub-note{color:var(--ds-muted)}.quick-specs strong,.spec-row strong,.dialog-calc-price{color:var(--ds-text)}
+.enquiry-action-box,.dialog-enquiry-actions,.aside-enquiry{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-color:var(--ds-border);background:transparent;padding-top:20px;margin-top:0}
+body :is(.appointment-enquiry-button,.whatsapp-enquiry-button){display:flex;align-items:center;gap:14px;min-width:0;min-height:78px;padding:16px 18px;border:1px solid var(--ds-border);border-radius:12px;background:var(--ds-surface);color:var(--ds-text);text-align:left;box-shadow:none;transition:background var(--ds-motion),border-color var(--ds-motion),transform var(--ds-motion)}
+body .appointment-enquiry-button{background:var(--ds-accent);border-color:var(--ds-accent);color:#fff}
+body :is(.appointment-enquiry-button,.whatsapp-enquiry-button):hover{filter:none;transform:translateY(-1px);box-shadow:none;border-color:var(--ds-accent)}
+body .appointment-enquiry-button:hover{background:var(--ds-accent-hover)}
+body :is(.action-btn-icon,.whatsapp-btn-icon){display:grid;place-items:center;width:38px;height:38px;flex:none;border-radius:10px;background:var(--ds-raised);color:var(--ds-success);font-size:16px}
+body .appointment-enquiry-button .action-btn-icon{background:rgba(255,255,255,.14);color:#fff}
+body :is(.action-btn-text,.whatsapp-btn-text){flex:1;min-width:0;display:grid;gap:4px}
+body :is(.action-btn-text,.whatsapp-btn-text) strong{color:inherit;font-size:14px;font-weight:600;line-height:1.3}
+body :is(.action-btn-text,.whatsapp-btn-text) small{color:var(--ds-muted);font-size:12px;line-height:1.4}
+body .appointment-enquiry-button small{color:rgba(255,255,255,.87)}
+.appointment-dialog{width:min(660px,calc(100% - 32px));padding:0;overflow:auto}.appointment-dialog-box{padding:32px;background:var(--ds-surface)}
+.appointment-header{padding:0 44px 22px 0;border-bottom:1px solid var(--ds-border);margin-bottom:22px;background:transparent;text-align:left}
+.appointment-badge{display:inline-flex;border:0;border-radius:6px;background:var(--ds-accent-soft);color:var(--ds-accent);font-size:10px;font-weight:600;letter-spacing:.1em;padding:5px 8px}
+.appointment-header h2{margin:12px 0 8px;font-size:30px;line-height:1.1;letter-spacing:-.03em;color:var(--ds-text)}.appointment-sub{font-size:13px;color:var(--ds-muted)}
+.appointment-form{gap:20px}.appointment-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.app-field{display:grid;gap:7px}.app-field:first-child{grid-column:1/-1}
+.appointment-form label{color:var(--ds-text);font-size:12px;font-weight:600;text-transform:none;letter-spacing:0}.appointment-form :is(input,select){width:100%;box-sizing:border-box;min-width:0}
+.appointment-notes{display:grid;gap:7px}.appointment-footer{padding-top:20px;border-top:1px solid var(--ds-border);margin:0}.appointment-submit-btn{width:100%}.ds-booking-help{font-size:12px;color:var(--ds-muted);margin:0 0 12px;line-height:1.5}
+.appointment-success-view{gap:16px;padding:20px 0;text-align:center}.appointment-success-view h3{font-size:26px;color:var(--ds-text)}.appointment-success-view p{color:var(--ds-muted);font-size:14px;line-height:1.6}.success-icon{background:var(--ds-accent-soft);color:var(--ds-accent);border:1px solid var(--ds-border);box-shadow:none}
+.success-actions{width:100%;display:grid;gap:10px}.success-actions .whatsapp-enquiry-button{width:100%}.success-actions .ghost-button{min-height:44px}
+/* Financing workspace: controls left, a quiet dark summary right. */
+.calc-dedicated-page .calc-page-hero{margin:30px 0 24px;padding:30px 32px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--ds-radius);box-shadow:var(--ds-shadow);text-align:left}
+.calc-dedicated-page .calc-page-hero h1{max-width:none;margin:14px 0 10px;color:var(--ds-text);font-size:clamp(30px,3.5vw,42px);line-height:1.1;font-weight:700}
+.calc-dedicated-page .calc-page-hero>p{max-width:72ch;margin:0;color:var(--ds-muted);font-size:15px;line-height:1.6}
+.calc-dedicated-page .calc-hero-badge{border:0;padding:5px 8px;background:var(--ds-accent-soft);color:var(--ds-accent);font-size:10px;letter-spacing:.08em;border-radius:6px}
+.calc-hero-nav-actions{display:flex;justify-content:flex-start;flex-wrap:wrap;gap:16px;margin-top:20px}.calc-back-gallery-link{color:var(--ds-text);font-size:13px}.calc-hero-sync-status{border-color:var(--ds-border);background:var(--ds-raised);color:var(--ds-text);font-size:11px}
+.calc-dedicated-page .calc-dedicated-container{max-width:1180px;margin:0 auto 34px;padding:0;display:block}.calc-dedicated-page .standalone-calc-view{width:100%;max-width:none;flex:none}
+.calc-dedicated-page #showroomCalculator{position:static;max-height:none;overflow:visible;box-sizing:border-box;width:100%;padding:30px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--ds-radius);color:var(--ds-text);box-shadow:var(--ds-shadow)}
+#showroomCalculator .calc-aside-header{padding-bottom:22px;border-color:var(--ds-border)}
+#showroomCalculator .calc-aside-title{color:var(--ds-text);font-size:23px;line-height:1.25;font-weight:600}
+#showroomCalculator .calc-aside-desc{color:var(--ds-muted);font-size:13px;line-height:1.6}
+#showroomCalculator .calc-badge{padding:5px 8px;border:0;border-radius:6px;background:var(--ds-accent-soft);color:var(--ds-accent);font-size:10px;font-weight:600;letter-spacing:.08em}
+#showroomCalculator .calc-live-pill{border:1px solid var(--ds-border);background:var(--ds-raised);color:var(--ds-muted);font-size:10px;box-shadow:none}.calc-live-pill .live-dot{background:var(--ds-success);box-shadow:none;animation:none}
+#showroomCalculator .calc-vehicle-picker-card{background:var(--ds-bg);border:1px solid var(--ds-border);border-radius:12px;padding:18px;margin:22px 0}
+#showroomCalculator .calc-picker-label{color:var(--ds-text);font-size:11px;margin-bottom:10px}.calc-picker-tag,.calc-synced-badge{background:var(--ds-accent-soft);color:var(--ds-accent);border-color:var(--ds-border)}
+#showroomCalculator :is(.calc-select,.calc-input){width:100%;background:var(--ds-surface);color:var(--ds-text);border:1px solid var(--ds-border);border-radius:var(--ds-control-radius);font-size:14px;min-height:44px;box-shadow:none}
+#showroomCalculator .calc-synced-car-preview{background:var(--ds-surface);border-color:var(--ds-border);border-radius:10px;padding:12px}.calc-synced-name strong{color:var(--ds-text);font-size:15px}.calc-synced-tour-link,.calc-synced-specs{color:var(--ds-muted);font-size:11px}
+#showroomCalculator .loan-calculator-section{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,.8fr);gap:22px;align-items:start}
+#showroomCalculator .loan-calculator-section>.calc-header{grid-column:1/-1;margin:0}
+#showroomCalculator .calc-header h4{color:var(--ds-text);font-size:18px;line-height:1.3;font-weight:600}
+#showroomCalculator .calc-result-display{grid-column:2;grid-row:2/4;position:sticky;top:24px;min-width:0;padding:24px;background:var(--ds-ink);border:1px solid #364153;border-radius:14px;box-shadow:none;color:#fff;overflow:visible}
+#showroomCalculator .calc-result-content-row{display:flex;flex-direction:column;gap:22px;align-items:stretch}
+#showroomCalculator .calc-result-main{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px}
+#showroomCalculator .calc-monthly-val{font-size:clamp(38px,4vw,58px);font-weight:700;letter-spacing:-.04em;color:#fff;line-height:1.15}
+#showroomCalculator :is(.calc-cur,.calc-per,.calc-card-caption){color:#c4cedd;font-size:12px}
+#showroomCalculator .calc-breakdown{display:grid;gap:8px;width:100%;border-top:1px solid #364153;padding-top:18px;font-size:12px;color:#c4cedd}
+#showroomCalculator .calc-breakdown>div{display:flex;justify-content:space-between;gap:12px}#showroomCalculator .calc-breakdown strong{color:#fff;font-size:13px;font-weight:600}
+#showroomCalculator .calc-form-grid{grid-column:1;grid-row:2;display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0}
+#showroomCalculator .calc-field{padding:16px;border:1px solid var(--ds-border);border-radius:12px;background:var(--ds-bg);min-width:0}
+#showroomCalculator .calc-label-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}#showroomCalculator .calc-label-row label{color:var(--ds-text);font-size:12px;font-weight:600}
+#showroomCalculator .calc-val-pill{background:var(--ds-accent-soft);color:var(--ds-accent);border:0;border-radius:6px;font-size:10px;padding:4px 6px}
+#showroomCalculator :is(.tenure-tab,.calc-preset-chip){min-height:36px;padding:7px 10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid var(--ds-border);border-radius:7px;font-size:11px;font-weight:500;box-shadow:none}
+#showroomCalculator :is(.tenure-tab,.calc-preset-chip):hover{border-color:var(--ds-accent);background:var(--ds-accent-soft)}
+#showroomCalculator :is(.tenure-tab.active,.calc-preset-chip.active){background:var(--ds-accent);border-color:var(--ds-accent);color:#fff;box-shadow:none}
+#showroomCalculator .calc-range{background:var(--ds-border);accent-color:var(--ds-accent);height:5px;box-shadow:none}#showroomCalculator .calc-range::-webkit-slider-thumb{background:var(--ds-accent);border:3px solid var(--ds-surface);box-shadow:0 0 0 1px var(--ds-accent);width:20px;height:20px}#showroomCalculator .calc-range::-moz-range-thumb{background:var(--ds-accent);border:3px solid var(--ds-surface)}
+#showroomCalculator .calc-range-ticks{color:var(--ds-muted);font-size:10px}.calc-presets-row{gap:6px;flex-wrap:wrap}.calc-tenure-tabs{gap:6px}
+#showroomCalculator .calc-scenarios-wrapper{grid-column:1;grid-row:3;margin:0;padding:16px;border:1px solid var(--ds-border);border-radius:12px;background:var(--ds-bg)}
+#showroomCalculator :is(.calc-scenarios-title,.calc-scenario-card,.scenario-monthly,.scenario-name){color:var(--ds-text)}
+#showroomCalculator :is(.calc-scenarios-counter,.calc-save-btn,.calc-clear-btn,.calc-scenario-card){background:var(--ds-surface);border-color:var(--ds-border);color:var(--ds-text);box-shadow:none}
+#showroomCalculator .calc-save-btn{min-height:36px;padding:7px 10px;border-radius:7px;font-size:11px}#showroomCalculator .calc-scenario-card.is-active{background:var(--ds-accent-soft);border-color:var(--ds-accent)}
+#showroomCalculator .calc-amortization-section{grid-column:1/-1;margin-top:0;border-color:var(--ds-border)}
+#showroomCalculator .amortization-toggle-btn{min-height:48px;padding:14px 16px;background:var(--ds-raised);border:1px solid var(--ds-border);border-radius:10px;color:var(--ds-text);box-shadow:none;font-size:13px}
+#showroomCalculator :is(.amortization-schedule-panel,.amortization-controls,.amortization-stats-bar){background:var(--ds-surface);border-color:var(--ds-border);color:var(--ds-text)}
+#showroomCalculator :is(.amortization-table th,.amortization-table td,.amortization-method-select){background:var(--ds-surface);color:var(--ds-text);border-color:var(--ds-border);font-size:12px}
+#showroomCalculator .amortization-table thead th{background:var(--ds-raised);color:var(--ds-muted)}#showroomCalculator .amortization-table tr:nth-child(even) td{background:var(--ds-bg)}
+#showroomCalculator .amortization-table tfoot td{background:var(--ds-accent-soft);color:var(--ds-text)}#showroomCalculator .calc-export-csv-btn{background:var(--ds-surface);color:var(--ds-text);border-color:var(--ds-border);min-height:36px}
+#showroomCalculator .calc-disclaimer{grid-column:1/-1;color:var(--ds-muted);font-size:11px;line-height:1.6;margin:0}
+#showroomCalculator .roadtax-calculator-section{margin-top:26px;padding-top:26px;border-top:1px solid var(--ds-border)}
+#showroomCalculator .roadtax-summary-card{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:0;margin:20px 0;background:var(--ds-bg);border:1px solid var(--ds-border);border-radius:12px;overflow:hidden}
+#showroomCalculator .roadtax-stat{padding:20px;border-color:var(--ds-border)}#showroomCalculator .roadtax-stat small{color:var(--ds-muted);font-size:12px}#showroomCalculator .roadtax-stat strong{color:var(--ds-text);font-size:26px;line-height:1.25;font-weight:600}#showroomCalculator .roadtax-stat.highlight{background:var(--ds-accent-soft)}#showroomCalculator .roadtax-stat.highlight strong{color:var(--ds-accent)}#showroomCalculator .stat-sub{color:var(--ds-muted);font-size:11px}
+#showroomCalculator .roadtax-config-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}#showroomCalculator .roadtax-field label{color:var(--ds-text);font-size:12px;font-weight:600}
+#showroomCalculator .calc-tip-btn{background:#263244;color:#e4eaf3;border:1px solid #4a596e;box-shadow:none;min-height:28px;font-size:10px}
+.calc-tip-popover{background:var(--ds-surface);color:var(--ds-text);border:1px solid var(--ds-border);box-shadow:var(--ds-shadow)}.calc-tip-popover :is(p,strong,li){color:var(--ds-text)}.calc-tip-popover .tip-callout{background:var(--ds-accent-soft);color:var(--ds-muted);border-color:var(--ds-border)}
+.calc-quick-tip-wrap.is-visible .calc-tip-popover{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
+.ds-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.calc-page-hero{max-width:none;box-sizing:border-box}.calc-back-gallery-link:hover{color:var(--ds-accent);background:var(--ds-accent-soft)}
+#showroomCalculator .loan-calculator-section{padding:0;background:transparent;border:0;box-shadow:none}
+#showroomCalculator .loan-calculator-section>*{min-width:0;box-sizing:border-box}
+#showroomCalculator .calc-result-top-bar{flex-wrap:wrap;gap:10px}
+#showroomCalculator :is(.scen-amount,.scen-period){color:var(--ds-text)}
+#showroomCalculator :is(.scen-meta-row,.scen-card-del){color:var(--ds-muted)}
+#showroomCalculator .scen-badge-rate{background:var(--ds-raised);color:var(--ds-text)}
+#showroomCalculator :is(.scen-currency,.scen-switch-prompt){color:var(--ds-accent)}
+#showroomCalculator .calc-amortization-section{background:transparent;border:0;padding:0}
+#showroomCalculator .amort-method-tab{box-shadow:none}
+#showroomCalculator :is(.amortization-panel,.amort-distribution-card,.amort-method-block,.amort-table-wrapper){background:var(--ds-surface);border-color:var(--ds-border);color:var(--ds-text)}
+#showroomCalculator :is(.amort-stat-lbl,.amort-method-note,.amort-ratio-legend,.amortization-toggle-hint){color:var(--ds-muted);font-size:12px}
+#showroomCalculator .amort-stat-val{color:var(--ds-text);font-size:18px}
+#showroomCalculator :is(.amort-method-tab,.amort-year-tab,.amort-export-btn){min-height:36px;background:var(--ds-surface);border-color:var(--ds-border);color:var(--ds-muted);font-size:12px}
+#showroomCalculator :is(.amort-method-tab.active,.amort-year-tab.active){background:var(--ds-accent-soft);border-color:var(--ds-accent);color:var(--ds-accent)}
+#showroomCalculator .amort-table th{background:var(--ds-raised);color:var(--ds-muted);border-color:var(--ds-border);font-size:12px}
+#showroomCalculator .amort-table td{background:var(--ds-surface);color:var(--ds-text);border-color:var(--ds-border);font-size:12px}
+#showroomCalculator .amort-subtotal-row td{background:var(--ds-accent-soft)}
+#showroomCalculator :is(.segment-interest,.amort-legend-dot.is-interest){background:var(--ds-muted)}
+/* Photo tour and shared customer contact bar. */
+.vehicle-tour .hero-copy h1{color:var(--ds-text);font-weight:700}.vehicle-tour .hero-copy h1 span{color:var(--ds-muted)}
+.vehicle-tour :is(.experience-shell,.tour-panel,.viewer-tools,.part-specification,.tour-subnav button,.tabs button){border-color:var(--ds-border);background:var(--ds-surface);color:var(--ds-text);box-shadow:none}
+.vehicle-tour :is(.viewer-tools button,.tabs button,.tour-subnav button){min-height:40px;border:1px solid var(--ds-border);border-radius:8px;background:var(--ds-surface);color:var(--ds-text);font-size:12px}
+.vehicle-tour :is(.tabs button.active,.tour-subnav button.active,.feature-shortcuts button[aria-pressed="true"]){background:var(--ds-accent-soft);border-color:var(--ds-accent);color:var(--ds-accent)}
+.vehicle-tour .tour-panel h2{color:var(--ds-text);font-size:26px}.vehicle-tour :is(.tour-description,.tour-specs,.viewer-help,.sound-status-text){color:var(--ds-muted)}
+.ds-tour-contact{width:min(1320px,calc(100% - 64px));box-sizing:border-box;margin:28px auto;padding:28px;border:1px solid var(--ds-border);border-radius:var(--ds-radius);background:var(--ds-surface)}
+.ds-tour-contact h2{font-size:25px;color:var(--ds-text);letter-spacing:-.03em}.ds-tour-contact p{color:var(--ds-muted);font-size:14px;margin-top:8px}.ds-tour-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}.ds-tour-actions a{padding:10px 16px;min-height:44px;box-sizing:border-box}
+.sales-contact-actions .sales-action{display:grid;justify-content:start;background:var(--ds-surface);border-color:var(--ds-border);box-shadow:none}.sales-contact-actions .sales-action-primary{background:var(--ds-accent);color:#fff}.sales-action-primary:hover{background:var(--ds-accent-hover)}.sales-contact-actions .sales-action-primary strong,.sales-contact-actions .sales-action-primary span{color:#fff}.home .sales-contact{background:var(--ds-surface);border-color:var(--ds-border);box-shadow:var(--ds-shadow)}
+/* Desktop admin uses the same semantic tokens, with denser spacing. */
+body.admin-body{--admin-bg:var(--ds-bg);--admin-surface:var(--ds-surface);--admin-surface-raised:var(--ds-raised);--admin-surface-hover:var(--ds-raised);--admin-surface-active:var(--ds-accent-soft);--admin-border:var(--ds-border);--admin-border-subtle:var(--ds-border);--admin-border-strong:var(--ds-subtle);--admin-text-main:var(--ds-text);--admin-text-muted:var(--ds-muted);--admin-text-subtle:var(--ds-subtle);--admin-accent:var(--ds-accent);--admin-accent-hover:var(--ds-accent-hover);--admin-accent-soft:var(--ds-accent-soft);--admin-accent-glow:transparent;--admin-success:var(--ds-success);--admin-success-soft:color-mix(in srgb,var(--ds-success) 10%,var(--ds-surface));--admin-warning:var(--ds-warning);--admin-danger:var(--ds-danger);--admin-accent-gold:var(--ds-accent);--admin-accent-gold-hover:var(--ds-accent-hover);--admin-accent-blue:var(--ds-accent);--admin-accent-green:var(--ds-success);--admin-accent-red:var(--ds-danger);--admin-radius:var(--ds-control-radius);--admin-radius-lg:var(--ds-radius);color-scheme:inherit;font-size:14px}
+.admin-header{background:var(--ds-surface);border-color:var(--ds-border);padding:20px 32px}.admin-body .brand-badge{background:var(--ds-accent);color:#fff;border-color:var(--ds-accent);border-radius:8px;font-size:10px}.admin-body .brand-title{color:var(--ds-text);font-size:19px;font-weight:600}
+.admin-body .admin-btn-primary{background:var(--ds-accent);color:#fff;border-color:var(--ds-accent);min-height:38px}.admin-body .admin-btn-primary:hover{background:var(--ds-accent-hover);color:#fff}
+.admin-body .admin-btn-secondary{color:var(--ds-text);background:var(--ds-surface)}.admin-body :is(.admin-input,.admin-select,.admin-textarea,.admin-vehicle-select,.dashboard-status){background:var(--ds-surface);border-color:var(--ds-border);color:var(--ds-text);min-height:38px;font-size:13px;box-shadow:none}
+.studio-navigation{background:var(--ds-surface);border-color:var(--ds-border)}.admin-overview{padding-top:30px}.overview-heading h1{color:var(--ds-text);font-size:30px}.metric-card,.dashboard-panel{background:var(--ds-surface);border-color:var(--ds-border);border-radius:var(--ds-radius);box-shadow:var(--ds-shadow)}
+.metric-card{position:relative;padding:22px;overflow:hidden}.metric-card::before{content:'';position:absolute;left:0;top:20px;bottom:20px;width:3px;background:var(--ds-accent);border-radius:0 3px 3px 0}.metric-card strong{color:var(--ds-text);font-size:32px;font-weight:600}.metric-label{color:var(--ds-muted);font-size:12px}
+.dashboard-panel h2{color:var(--ds-text);font-size:17px}.dashboard-table th{background:var(--ds-raised);color:var(--ds-muted)}.dashboard-table td{color:var(--ds-text)}.dashboard-table tbody tr:hover{background:var(--ds-bg)}.chart-bar{fill:var(--ds-accent)}.chart-row:hover .chart-bar,.chart-row:focus .chart-bar{fill:var(--ds-accent-hover)}.chart-bg{fill:var(--ds-raised)}
+.admin-body :is(.inspector-tabs,.admin-canvas-section,.admin-inspector-panel){background:var(--ds-surface);border-color:var(--ds-border)}.admin-body .inspector-tab.active{background:var(--ds-accent-soft);color:var(--ds-accent);border-color:var(--ds-accent)}
+.admin-body .theme-choice-btn.active{border-color:var(--ds-accent);background:var(--ds-accent-soft);box-shadow:none}.admin-body .hero-preview-box{background:var(--ds-raised)}
+.admin-body :is(.hero-preview-body h4,.hero-preview-price,.form-group label){color:var(--ds-text)}
+.admin-body .form-hint{color:var(--ds-muted)}
+.admin-body .hero-preview-box{border-color:var(--ds-border);box-shadow:none}
+.admin-body .theme-choice-dot{box-shadow:none}
+.admin-body [data-theme=apex] .theme-choice-dot{background:#c92236}.admin-body [data-theme=sapphire] .theme-choice-dot{background:#74b4f4}.admin-body [data-theme=gold] .theme-choice-dot{background:#dbbb77}.admin-body [data-theme=platinum] .theme-choice-dot{background:#8794a8}
+#showroomCalculator .amort-method-tabs{background:var(--ds-border);border:0;padding:3px;border-radius:9px}
+#showroomCalculator :is(.amortization-title-text,.amortization-icon){color:var(--ds-text)}
+#showroomCalculator .amortization-badge-count{background:var(--ds-accent-soft);color:var(--ds-accent)}
+.admin-body :is(.admin-modal,.modal-content,.admin-modal-box){background:var(--ds-surface);color:var(--ds-text);border-color:var(--ds-border)}
+@media(max-width:1100px){.site-header nav{gap:10px}.site-header nav>a{font-size:12px}.site-header .brand-copy{max-width:108px}.enquiry-action-box,.dialog-enquiry-actions,.aside-enquiry{grid-template-columns:1fr}.calc-dedicated-page #showroomCalculator{padding:24px}#showroomCalculator .calc-form-grid{grid-template-columns:1fr}#showroomCalculator .calc-result-display{grid-row:2/4}}
+@media(max-width:820px){.home .site-header,.vehicle-tour .top{min-height:70px;padding:12px 0}.site-header nav{background:var(--ds-surface);border-color:var(--ds-border)}.site-header nav>a{font-size:14px}.home .catalog-intro{gap:26px}.ds-tour-contact{width:calc(100% - 32px);padding:22px}.calc-dedicated-page .calc-page-hero{padding:24px;margin-top:24px}#showroomCalculator .loan-calculator-section{grid-template-columns:1fr}#showroomCalculator .calc-result-display{grid-column:1;grid-row:2;position:static}#showroomCalculator .calc-form-grid{grid-column:1;grid-row:3;grid-template-columns:1fr 1fr}#showroomCalculator .calc-scenarios-wrapper{grid-row:4}#showroomCalculator .roadtax-config-row{grid-template-columns:1fr}.calc-hero-nav-actions{gap:12px}.appointment-dialog-box{padding:26px}.vehicle-copy h2{font-size:28px}}
+@media(max-width:540px){.calc-dedicated-page #showroomCalculator{padding:18px}.calc-dedicated-page .calc-page-hero{padding:22px}.calc-dedicated-page .calc-page-hero h1{font-size:31px}#showroomCalculator .calc-form-grid{grid-template-columns:1fr}.calc-aside-header .calc-header-top{flex-wrap:wrap;gap:8px}#showroomCalculator .calc-aside-title{font-size:22px}#showroomCalculator .roadtax-summary-card{grid-template-columns:1fr}#showroomCalculator .roadtax-stat{padding:16px;border-bottom:1px solid var(--ds-border)}#showroomCalculator .calc-monthly-val{font-size:50px}.appointment-form-grid{grid-template-columns:1fr}.app-field:first-child{grid-column:auto}.appointment-dialog-box{padding:24px 20px}.appointment-header h2{font-size:26px}.appointment-dialog{max-height:calc(100dvh - 24px)}.calc-scenarios-header{flex-wrap:wrap;gap:10px}.amortization-toggle-btn .amortization-title-text{font-size:12px}.calc-tip-popover{position:fixed;top:50%;left:16px;right:16px;width:auto;max-width:none;transform:translateY(-50%)!important}.calc-quick-tip-wrap.is-visible .calc-tip-popover{transform:translateY(-50%)!important}.sales-contact-actions{grid-template-columns:1fr}.ds-tour-actions a{width:100%}.card-info{padding:18px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}body *,body *::before,body *::after{animation:none!important;transition:none!important}.car-card:hover,.primary-button:hover{transform:none!important}}

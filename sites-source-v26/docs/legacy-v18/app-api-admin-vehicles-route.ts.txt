@@ -1,0 +1,30 @@
+import { desc, inArray } from "drizzle-orm";
+import { getDb } from "@/db";
+import { vehicleMedia, vehicles } from "@/db/schema";
+import { getStudioUser } from "@/lib/studio-auth";
+import { vehicleInput } from "@/lib/vehicle-input";
+
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  if (!await getStudioUser()) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  const db = getDb();
+  const list = await db.select().from(vehicles).orderBy(desc(vehicles.updatedAt));
+  const media = list.length ? await db.select().from(vehicleMedia).where(inArray(vehicleMedia.vehicleId, list.map((v) => v.id))).orderBy(vehicleMedia.sortOrder) : [];
+  return Response.json({ vehicles: list.map((v) => ({ ...v, media: media.filter((m) => m.vehicleId === v.id).map((m) => ({ ...m, url: `/api/media/${m.objectKey}` })) })) }, { headers: { "Cache-Control": "no-store" } });
+}
+
+export async function POST(request: Request) {
+  if (!await getStudioUser()) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  const parsed = vehicleInput.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) return Response.json({ error: "Check the vehicle details." }, { status: 400 });
+  if (parsed.data.status !== "draft") return Response.json({ error: "Create as a draft, then add a photo and publish." }, { status: 400 });
+  const now = new Date().toISOString();
+  const id = crypto.randomUUID();
+  try {
+    await getDb().insert(vehicles).values({ ...parsed.data, id, createdAt: now, updatedAt: now });
+  } catch {
+    return Response.json({ error: "Stock ID already exists or could not be saved." }, { status: 409 });
+  }
+  return Response.json({ id }, { status: 201 });
+}

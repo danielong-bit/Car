@@ -1,0 +1,32 @@
+import { desc, eq, inArray } from "drizzle-orm";
+import Link from "next/link";
+import { getDb } from "@/db";
+import { vehicleMedia, vehicles } from "@/db/schema";
+
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const db = getDb();
+  const stock = await db.select().from(vehicles).where(eq(vehicles.status, "published")).orderBy(desc(vehicles.updatedAt));
+  const media = stock.length ? await db.select().from(vehicleMedia).where(inArray(vehicleMedia.vehicleId, stock.map((v) => v.id))).orderBy(vehicleMedia.sortOrder) : [];
+  const cover = new Map<string, string>();
+  for (const image of media) if (!cover.has(image.vehicleId)) cover.set(image.vehicleId, `/api/media/${image.objectKey}`);
+
+  return <main className="showroom-page">
+    <header className="showroom-header">
+      <Link className="wordmark" href="/">JAPAN <span>RECON</span><small>CAR GALLERY</small></Link>
+      <nav aria-label="Main navigation"><a href="#stock">Available stock</a><a href="/audi.html">Audi photo tour</a></nav>
+    </header>
+    <section className="showroom-hero">
+      <div className="hero-copy"><p className="eyebrow">JAPAN RECON · MALAYSIA</p><h1>Japan cars, worth a closer look.</h1><p>Browse available vehicles, explore their photos, and review the details at your own pace. Every published listing is managed by our team.</p><a className="hero-button" href="#stock">Explore available stock <span aria-hidden="true">↘</span></a></div>
+      <a className="hero-image" href="/audi.html" aria-label="Open the Audi S5 photo tour"><img src="/assets/audi-s5/main-car-preview.jpg" alt="Grey Audi S5 Avant" decoding="async" fetchPriority="high" /><span>INTERACTIVE PHOTO TOUR <strong>Audi S5 Avant <b aria-hidden="true">↗</b></strong></span></a>
+    </section>
+    <section className="stock-section" id="stock"><div className="stock-heading"><div><p className="eyebrow">CURRENT INVENTORY</p><h2>Available stock</h2></div><span aria-live="polite">{stock.length} {stock.length === 1 ? "vehicle" : "vehicles"}</span></div>
+      {stock.length ? <div className="stock-grid">{stock.map((v) => <Link className="stock-card" key={v.id} href={`/stock/${encodeURIComponent(v.stockId)}`}>
+        <div className="stock-image">{cover.get(v.id) ? <img src={cover.get(v.id)} alt={`${v.make} ${v.model}`} loading="lazy" decoding="async" /> : <span>PHOTO COMING SOON</span>}</div>
+        <div className="stock-card-body"><div className="stock-meta"><span>STOCK {v.stockId}</span><span>{v.year || "Year to confirm"}</span></div><h3>{v.make} {v.model}</h3><p>{v.variant || v.body || "Japan recon vehicle"}</p><div className="stock-bottom"><strong>{v.priceRm == null ? "Price on request" : `RM ${v.priceRm.toLocaleString("en-MY")}`}</strong><span>{v.mileageKm == null ? "Mileage to confirm" : `${v.mileageKm.toLocaleString("en-MY")} km`}</span></div></div>
+      </Link>)}</div> : <div className="empty-stock"><div><strong>No vehicles are listed right now.</strong><p>New cars will appear here after our team confirms their details. You can still inspect the Audi S5 photo tour as an example.</p></div><a href="/audi.html">Explore the Audi photo tour <span aria-hidden="true">→</span></a></div>}
+    </section>
+    <footer className="showroom-footer"><span>JAPAN RECON CAR GALLERY</span><span>Availability and final pricing may change. Please confirm before travelling.</span><Link href="/studio">Staff studio</Link></footer>
+  </main>;
+}

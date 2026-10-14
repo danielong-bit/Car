@@ -1,0 +1,76 @@
+{
+  "vehicleId": "porsche-macan-s",
+  "mainImage": "assets/audi-s5/main-car-16x9.jpg",
+  "vehicleName": "Porsche Macan S",
+  "vehicleSub": "Porsche Japan recon luxury edition · Interactive detail model",
+  "price": "RM 468,000",
+  "hotspots": [
+    {
+      "id": "engine",
+      "label": "Powertrain",
+      "type": "image",
+      "x": "68%",
+      "y": "48%",
+      "imageSrc": "assets/audi-s5/main-car-16x9.jpg",
+      "title": "Porsche Macan S Powertrain",
+      "eyebrow": "ENGINE & HYBRID",
+      "description": "Inspecting Porsche Macan S powerplant and efficiency system.",
+      "specs": [
+        [
+          "Model",
+          "Porsche Macan S"
+        ],
+        [
+          "Power",
+          "Japan Spec"
+        ],
+        [
+          "Condition",
+          "Recon Verified"
+        ]
+      ]
+    },
+    {
+      "id": "interior",
+      "label": "Cabin",
+      "type": "image",
+      "x": "50%",
+      "y": "42%",
+      "imageSrc": "assets/audi-s5/main-car-16x9.jpg",
+      "title": "Porsche Macan S Executive Cockpit",
+      "eyebrow": "LUXURY CABIN",
+      "description": "Premium materials and seating ergonomics.",
+      "specs": [
+        [
+          "Steering",
+          "Right-hand drive"
+        ],
+        [
+          "Cabin",
+          "Japan Spec Grade"
+        ]
+      ]
+    },
+    {
+      "id": "wheel",
+      "label": "Wheels & Brakes",
+      "type": "image",
+      "x": "78%",
+      "y": "74%",
+      "imageSrc": "assets/audi-s5/main-car-16x9.jpg",
+      "title": "Alloy Wheel & Caliper Setup",
+      "eyebrow": "CHASSIS & BRAKES",
+      "description": "Alloy wheels and suspension package.",
+      "specs": [
+        [
+          "Wheels",
+          "Factory Option Alloy"
+        ],
+        [
+          "Brakes",
+          "Performance Calipers"
+        ]
+      ]
+    }
+  ]
+}

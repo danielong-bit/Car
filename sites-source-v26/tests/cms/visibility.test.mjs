@@ -1,0 +1,2 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {publicDocument} from '../../lib/cms/contracts.mjs';
+test('hidden gallery media omitted from public projection',()=>{const d={vehicles:[{id:'test',status:'available',gallery:[{url:'/api/cms/media/private.jpg',visible:false},{url:'/assets/public.jpg',visible:true}]}]};assert.deepEqual(publicDocument(d).vehicles[0].gallery,[{url:'/assets/public.jpg',visible:true}]);});

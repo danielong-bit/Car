@@ -1,0 +1,43 @@
+import { env } from "cloudflare:workers";
+import { eq } from "drizzle-orm";
+import { getDb } from "@/db";
+import { vehicleMedia, vehicles } from "@/db/schema";
+import { getStudioUser } from "@/lib/studio-auth";
+
+export const dynamic = "force-dynamic";
+
+const types = new Map([["image/jpeg", "jpg"], ["image/png", "png"], ["image/webp", "webp"]]);
+const maxBytes = 10 * 1024 * 1024;
+
+function matchesSignature(bytes: Uint8Array, type: string) {
+  if (type === "image/jpeg") return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  if (type === "image/png") return bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+  if (type === "image/webp") return String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" && String.fromCharCode(...bytes.slice(8, 12)) === "WEBP";
+  return false;
+}
+
+export async function POST(request: Request) {
+  if (!await getStudioUser()) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  if (!env.BUCKET) return Response.json({ error: "Image storage is unavailable." }, { status: 503 });
+  const form = await request.formData().catch(() => null);
+  const vehicleId = form?.get("vehicleId");
+  const file = form?.get("file");
+  if (typeof vehicleId !== "string" || !(file instanceof File)) return Response.json({ error: "Choose a vehicle and photo." }, { status: 400 });
+  const extension = types.get(file.type);
+  if (!extension || file.size < 100 || file.size > maxBytes) return Response.json({ error: "Use a JPG, PNG or WebP photo under 10 MB." }, { status: 400 });
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (!matchesSignature(bytes, file.type)) return Response.json({ error: "The selected file is not a valid photo." }, { status: 400 });
+  const db = getDb();
+  const found = await db.select({ id: vehicles.id }).from(vehicles).where(eq(vehicles.id, vehicleId)).limit(1);
+  if (!found.length) return Response.json({ error: "Vehicle not found." }, { status: 404 });
+  const key = `${crypto.randomUUID()}.${extension}`;
+  await env.BUCKET.put(key, bytes, { httpMetadata: { contentType: file.type } });
+  const id = crypto.randomUUID();
+  try {
+    await db.insert(vehicleMedia).values({ id, vehicleId, objectKey: key, fileName: file.name.slice(0, 180), contentType: file.type, sizeBytes: file.size, sortOrder: Date.now(), createdAt: new Date().toISOString() });
+  } catch {
+    await env.BUCKET.delete(key);
+    return Response.json({ error: "Photo could not be saved." }, { status: 500 });
+  }
+  return Response.json({ id, url: `/api/media/${key}` }, { status: 201 });
+}
