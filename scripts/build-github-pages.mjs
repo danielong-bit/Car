@@ -139,6 +139,7 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
 async function dashboardPage() {
   let html = await readFile(path.join(templatesPath, 'admin.html'), 'utf8');
   html = html.replace(/<head(?:\s[^>]*)?>/i, match => `${match}<base href="${basePath}"><script>window.SITE_BASE=${safeInlineJson(basePath)};window.GITHUB_PAGES_STATIC=true;</script>`);
+  html = html.replace('showroom-data.js?v=20261011-unified', 'studio-showroom-data.js?v=pages-local-dashboard');
   html = html.replace(
     '<span>当前浏览器数据 · 演示库存</span>',
     '<span title="Changes are stored only in this browser and are not published automatically.">本浏览器保存 · 暂无登录保护 · 不会自动发布更改 / Local only · no login yet</span>',
@@ -148,21 +149,17 @@ async function dashboardPage() {
 
 async function copyDashboardAssets() {
   const files = [
-    'style.css',
-    'admin.css',
-    'admin-dashboard.css',
-    'design-system.css',
-    'design-system.js',
-    'catalog.js',
-    'showroom-data.js',
-    'admin.js',
-    'admin-dashboard.js',
+    {source: 'admin.css', destination: 'admin.css'},
+    {source: 'admin-dashboard.css', destination: 'admin-dashboard.css'},
+    {source: 'admin.js', destination: 'admin.js'},
+    {source: 'admin-dashboard.js', destination: 'admin-dashboard.js'},
+    {source: 'showroom-data.js', destination: 'studio-showroom-data.js'},
   ];
-  for (const relative of files) {
-    const source = path.join(templatesPath, relative);
-    const destination = path.join(outputDirectory, relative);
+  for (const file of files) {
+    const source = path.join(templatesPath, file.source);
+    const destination = path.join(outputDirectory, file.destination);
     await mkdir(path.dirname(destination), {recursive: true});
-    const extension = path.extname(relative).toLowerCase();
+    const extension = path.extname(file.destination).toLowerCase();
     if (extension === '.css' || extension === '.js') {
       let content = await readFile(source, 'utf8');
       content = extension === '.css' ? rewriteCssPaths(content) : rewriteJavaScriptPaths(content);
