@@ -46,8 +46,8 @@ function rewriteJavaScriptPaths(source) {
     (_match, quote, rest) => `${quote}${prefixRootPath(`/${rest}`)}`,
   );
   result = result.replace(
-    /(\b(?:window\.)?location\.(?:href|assign|replace)\s*(?:=\s*|\(\s*)["'\x60])\/(?!\/)/g,
-    (_match, prefix) => `${prefix}${baseWithoutTrailingSlash}/`,
+    /(\b(?:window\.)?location\.(?:href|assign|replace)\s*(?:=\s*|\(\s*)["'\x60])(\/(?!\/)[^"'\x60]*)/g,
+    (_match, prefix, absolutePath) => `${prefix}${prefixRootPath(absolutePath)}`,
   );
   return result;
 }
@@ -120,6 +120,7 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
   }
 
   html = html.replace(/<script src="\/site-languages\.js\?v=26" defer><\/script>/g, '');
+  html = html.replace(/(src=["'])\/?app\.js\?v=[^"']+(["'])/gi, '$1app.js?v=27$2');
   const canonicalPath = route ? `${basePath}${route.replace(/^\/+|\/+$/g, '')}/` : basePath;
   const canonicalUrl = `https://danielong-bit.github.io${canonicalPath}`;
   const metadata = `<link rel="canonical" href="${canonicalUrl}"><meta property="og:site_name" content="Danny Recon Select"><meta property="og:type" content="website"><meta property="og:url" content="${canonicalUrl}">`;
@@ -130,14 +131,46 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
   html = html.replace(/<head(?:\s[^>]*)?>/i, match => `${match}${runtime}${metadata}`);
   html = html.replace(
     /<\/body>/i,
-    '<script src="cms-public.js?v=pages-static"></script><script src="danny-interactions.js" defer></script><script src="select-home.js?v=25" defer></script><script src="select-polish.js?v=25" defer></script><script src="site-languages.js?v=26" defer></script></body>',
+    '<script src="cms-public.js?v=pages-static"></script><script src="danny-interactions.js" defer></script><script src="select-home.js?v=25" defer></script><script src="select-polish.js?v=25" defer></script><script src="site-languages.js?v=27" defer></script></body>',
   );
   return rewriteMarkupPaths(html);
 }
 
-function managementPage() {
-  return `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="${basePath}"><title>Manage Danny Recon Select</title><link rel="stylesheet" href="design-system.css"><link rel="stylesheet" href="cms.css"><link rel="stylesheet" href="site-languages.css"><script>window.SITE_BASE=${safeInlineJson(basePath)};window.GITHUB_PAGES_STATIC=true;window.CMS_DATA=${safeInlineJson(publicData)};</script><script src="design-system.js" defer></script><script src="site-languages.js" defer></script></head><body><main class="public-cms-wrap"><header class="public-cms-head"><a class="public-brand" href="${basePath}">DANNY RECON SELECT</a><a href="${basePath}#inventory">View inventory</a></header><section class="public-panel"><span class="stories-eyebrow">SITE MANAGEMENT</span><h1 class="public-title">Update the live website through GitHub</h1><p class="public-muted">This website is static so it can run directly on GitHub Pages. Update the public inventory data in the repository; each change rebuilds and republishes this site.</p><div class="public-actions"><a href="https://github.com/danielong-bit/Car-Recond-Japan/edit/main/data/public-site.json" target="_blank" rel="noopener">Edit public site data ↗</a><a class="secondary" href="https://github.com/danielong-bit/Car-Recond-Japan/actions/workflows/deploy-pages.yml" target="_blank" rel="noopener">View publishing status ↗</a></div><h2>What happens to customer requests?</h2><p class="public-muted">Viewing requests open WhatsApp with the vehicle, preferred date and contact details filled in. GitHub Pages does not store bookings or private customer records.</p><p class="public-muted">For safety, this page edits only the public site data. Do not add customer enquiries, passwords or private documents to the public repository.</p></section></main></body></html>`;
+async function dashboardPage() {
+  let html = await readFile(path.join(templatesPath, 'admin.html'), 'utf8');
+  html = html.replace(/<head(?:\s[^>]*)?>/i, match => `${match}<base href="${basePath}"><script>window.SITE_BASE=${safeInlineJson(basePath)};window.GITHUB_PAGES_STATIC=true;</script>`);
+  html = html.replace(
+    '<span>当前浏览器数据 · 演示库存</span>',
+    '<span title="Changes are stored only in this browser and are not published automatically.">本浏览器保存 · 暂无登录保护 · 不会自动发布更改 / Local only · no login yet</span>',
+  );
+  return rewriteMarkupPaths(html);
+}
+
+async function copyDashboardAssets() {
+  const files = [
+    'style.css',
+    'admin.css',
+    'admin-dashboard.css',
+    'design-system.css',
+    'design-system.js',
+    'catalog.js',
+    'showroom-data.js',
+    'admin.js',
+    'admin-dashboard.js',
+  ];
+  for (const relative of files) {
+    const source = path.join(templatesPath, relative);
+    const destination = path.join(outputDirectory, relative);
+    await mkdir(path.dirname(destination), {recursive: true});
+    const extension = path.extname(relative).toLowerCase();
+    if (extension === '.css' || extension === '.js') {
+      let content = await readFile(source, 'utf8');
+      content = extension === '.css' ? rewriteCssPaths(content) : rewriteJavaScriptPaths(content);
+      await writeFile(destination, content);
+    } else {
+      await cp(source, destination);
+    }
+  }
 }
 
 const snapshot = JSON.parse(await readFile(publicDataPath, 'utf8'));
@@ -157,6 +190,7 @@ const publicData = {
 await rm(outputDirectory, {recursive: true, force: true});
 await mkdir(outputDirectory, {recursive: true});
 await copyPublicAssets();
+await copyDashboardAssets();
 
 const pages = [
   {template: 'index.html', file: 'index.html', route: '', title: 'Danny Recon Select'},
@@ -190,10 +224,13 @@ await writeFile(path.join(outputDirectory, 'audi.html'), audiAlias);
 const calculatorAlias = await readFile(path.join(outputDirectory, 'calculator', 'index.html'));
 await writeFile(path.join(outputDirectory, 'calculator.html'), calculatorAlias);
 await mkdir(path.join(outputDirectory, 'studio'), {recursive: true});
-await writeFile(path.join(outputDirectory, 'studio', 'index.html'), rewriteMarkupPaths(managementPage()));
+const dashboard = await dashboardPage();
+await writeFile(path.join(outputDirectory, 'studio', 'index.html'), dashboard);
+await mkdir(path.join(outputDirectory, 'admin'), {recursive: true});
+await writeFile(path.join(outputDirectory, 'admin', 'index.html'), dashboard);
 await writeFile(
   path.join(outputDirectory, '404.html'),
-  `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="${basePath}"><title>Page not found · Danny Recon Select</title><link rel="stylesheet" href="design-system.css"></head><body><main class="public-cms-wrap"><section class="public-panel"><p class="stories-eyebrow">DANNY RECON SELECT</p><h1 class="public-title">That page has moved.</h1><p class="public-muted">Browse the current vehicles or return to the home page.</p><div class="public-actions"><a href="${basePath}#inventory">Browse inventory</a><a class="secondary" href="${basePath}">Home</a></div></section></main></body></html>`,
+  `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="${basePath}"><title>Page not found · Danny Recon Select</title><link rel="stylesheet" href="design-system.css"></head><body><main class="public-cms-wrap"><section class="public-panel"><p class="stories-eyebrow">DANNY RECON SELECT</p><h1 class="public-title">We couldn’t find this page.</h1><p class="public-muted">Browse the current vehicles or return to the home page.</p><div class="public-actions"><a href="${basePath}#inventory">Browse inventory</a><a class="secondary" href="${basePath}">Home</a></div></section></main></body></html>`,
 );
 await writeFile(path.join(outputDirectory, '.nojekyll'), '');
 

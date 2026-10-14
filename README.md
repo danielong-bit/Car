@@ -12,7 +12,7 @@ To build the Pages files locally, use Node.js 22.13 or later and run `npm run bu
 
 ## Update public content
 
-The site reads its published vehicle and profile data from `data/public-site.json`. The `/studio/` page links to the file editor in GitHub. Saving a change to `main` starts a new Pages deployment.
+The site reads its published vehicle and profile data from `data/public-site.json`. `/studio/` and `/admin/` open the showroom dashboard without a login for now. Dashboard edits are saved only in that browser and do not update the public website; export a backup before clearing browser data. To publish changes, edit `data/public-site.json` in GitHub and save to `main` to start a new Pages deployment. Login protection can be added later with a backend.
 
 This file contains only the public site snapshot. Do not put passwords, customer enquiries, or private customer records in the repository.
 
