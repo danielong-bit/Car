@@ -1,13 +1,21 @@
 # Danny Recon Select
 
-Current source for the Danny Recon Select website: https://car-recond-japan.haloultraman3.chatgpt.site/
+Live website: https://danielong-bit.github.io/Car-Recond-Japan/
 
-This repository now contains the current Vinext/React site at its root, including the inventory, vehicle detail experience, calculator, admin routes, design system, and public assets. The site uses the existing Sites runtime and Cloudflare bindings for server features such as authenticated admin access and stored content.
+The customer-facing website is built and hosted by GitHub Pages. It does not need ChatGPT Sites or a server runtime to display the inventory, vehicle pages, Audi photo tour, language selector, or payment calculator.
 
-## Development
+## Publish
 
-Install dependencies with npm install, start local development with npm run dev, and create a production build with npm run build.
+The GitHub Actions workflow builds the static site whenever a change reaches `main` and deploys it to GitHub Pages. In repository Settings → Pages, the publishing source must be set to **GitHub Actions**.
 
-Local use of the authenticated admin and storage features requires the existing runtime configuration. Secrets and local .dev.vars files are not included in this repository.
+To build the Pages files locally, use Node.js 22.13 or later and run `npm run build:pages`. The output is written to `dist-pages/`.
 
-GitHub Pages cannot run the site's server routes or D1/R2-backed features. The published Sites website remains hosted on its existing Sites runtime.
+## Update public content
+
+The site reads its published vehicle and profile data from `data/public-site.json`. The `/studio/` page links to the file editor in GitHub. Saving a change to `main` starts a new Pages deployment.
+
+This file contains only the public site snapshot. Do not put passwords, customer enquiries, or private customer records in the repository.
+
+## Contact and bookings
+
+WhatsApp links open Danny's number with an enquiry already filled in. The showroom form opens WhatsApp with the selected car, requested date, and customer contact details. GitHub Pages does not save bookings or track vehicle views in a server database.

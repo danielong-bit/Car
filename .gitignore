@@ -48,6 +48,7 @@ next-env.d.ts
 !/build/sites-worker.ts
 
 /dist/
+/dist-pages/
 !/out/
 !/out/**
 *.tsbuildinfo
