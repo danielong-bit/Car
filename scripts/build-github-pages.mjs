@@ -121,6 +121,7 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
 
   html = html.replace(/<script src="\/site-languages\.js\?v=26" defer><\/script>/g, '');
   html = html.replace(/(src=["'])\/?app\.js\?v=[^"']+(["'])/gi, '$1app.js?v=27$2');
+  html = html.replace(/(src=["'])\/?showroom-data\.js\?v=[^"']+(["'])/gi, '$1showroom-data.js?v=27$2');
   const canonicalPath = route ? `${basePath}${route.replace(/^\/+|\/+$/g, '')}/` : basePath;
   const canonicalUrl = `https://danielong-bit.github.io${canonicalPath}`;
   const metadata = `<link rel="canonical" href="${canonicalUrl}"><meta property="og:site_name" content="Danny Recon Select"><meta property="og:type" content="website"><meta property="og:url" content="${canonicalUrl}">`;
