@@ -1,0 +1,243 @@
+/* UI UX Pro Max guidance: preserve the metallic brand, improve tap access, focus, and motion. */
+:root {
+  --showroom-gold: #d6ab68;
+  --showroom-gold-light: #e7bb7a;
+  --showroom-border: #ffffff24;
+}
+
+html {
+  scroll-padding-top: 24px;
+}
+
+.showroom-header nav {
+  gap: clamp(8px, 1.5vw, 22px);
+}
+
+.showroom-header nav a,
+.showroom-footer a,
+.studio-header a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 8px;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+.showroom-header nav a:hover,
+.showroom-footer a:hover,
+.studio-header a:hover {
+  color: var(--showroom-gold-light);
+}
+
+.hero-copy h1 {
+  max-width: 10ch;
+  text-wrap: balance;
+}
+
+.hero-copy {
+  animation: showroom-arrive 360ms cubic-bezier(.2, .8, .25, 1) both;
+}
+
+.hero-button {
+  min-height: 48px;
+  gap: clamp(20px, 4vw, 48px);
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.hero-button:hover {
+  background: var(--showroom-gold-light);
+  transform: translateY(-1px);
+}
+
+.hero-image {
+  border: 1px solid var(--showroom-border);
+  animation: showroom-arrive 420ms 70ms cubic-bezier(.2, .8, .25, 1) both;
+}
+
+.hero-image img {
+  transition: transform 280ms cubic-bezier(.2, .8, .25, 1);
+}
+
+.hero-image:hover img,
+.hero-image:focus-visible img {
+  transform: scale(1.025);
+}
+
+.stock-grid {
+  gap: clamp(14px, 2vw, 22px);
+}
+
+.stock-card {
+  overflow: hidden;
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.stock-card:hover {
+  border-color: var(--showroom-gold);
+  transform: translateY(-2px);
+}
+
+.stock-image {
+  height: auto;
+  aspect-ratio: 16 / 10;
+  min-height: 180px;
+}
+
+.empty-stock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  border-left: 3px solid var(--showroom-gold);
+  padding: clamp(24px, 5vw, 50px);
+}
+
+.empty-stock strong {
+  display: block;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.empty-stock p {
+  max-width: 58ch;
+  line-height: 1.65;
+  margin-bottom: 0;
+}
+
+.empty-stock a {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 0 18px;
+  border: 1px solid var(--showroom-gold);
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.empty-stock a:hover {
+  background: var(--showroom-gold);
+  color: #151615;
+}
+
+.detail-gallery img {
+  display: block;
+  border: 1px solid var(--showroom-border);
+}
+
+.studio-button,
+.studio-row-actions button,
+.media-tile button {
+  min-height: 44px;
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.studio-form input,
+.studio-form select {
+  min-height: 44px;
+}
+
+.dropzone {
+  display: flex;
+  min-height: 128px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.showroom-page :focus-visible {
+  outline: 3px solid var(--showroom-gold-light);
+  outline-offset: 4px;
+}
+
+.studio-page :focus-visible {
+  outline: 3px solid #80581f;
+  outline-offset: 3px;
+}
+
+.studio-button:hover:not(:disabled),
+.studio-row-actions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.studio-row-actions button {
+  cursor: pointer;
+}
+
+@keyframes showroom-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 720px) {
+  .showroom-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 670px) {
+  .showroom-header {
+    gap: 10px;
+  }
+
+  .showroom-header nav {
+    gap: 4px 8px;
+  }
+
+  .showroom-header nav a {
+    padding: 0 5px;
+    font-size: 11px;
+    letter-spacing: .04em;
+  }
+
+  .showroom-hero {
+    padding-bottom: 48px;
+  }
+
+  .hero-image {
+    height: clamp(260px, 76vw, 360px);
+  }
+
+  .empty-stock {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .empty-stock a {
+    width: 100%;
+  }
+
+  .studio-intro {
+    align-items: stretch;
+  }
+
+  .studio-intro .studio-button {
+    align-self: flex-start;
+  }
+
+  .studio-row-actions {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

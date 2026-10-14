@@ -25,3 +25,7 @@ Open http://localhost:3000/. The server provides `/audi`, `/admin`, config persi
 ## Verification
 
 `npm test` checks JavaScript syntax and referenced local assets. Browser regression checks in `tests/browser-smoke.cjs` cover searching, comparisons, media cancellation/recovery, gallery navigation and mobile layout. `tests/phone-tour.cjs` checks real touch taps, unobscured media, nearby 60px part controls and returning to the car on five small-screen widths.
+
+## Current hosted Site source
+
+The current full-stack Sites version is preserved in [sites-source-v26](sites-source-v26/README.md). The repository root remains the separate GitHub Pages demo, so this source snapshot does not change that page. The Sites app uses server routes and the existing Sites storage bindings; GitHub Pages alone cannot run those features.

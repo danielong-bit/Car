@@ -1,0 +1,16 @@
+import { chatGPTSignInPath } from "@/app/chatgpt-auth";
+import Link from "next/link";
+import { studioAccess } from "@/lib/studio-auth";
+import StudioClient from "./studio-client";
+
+export const dynamic = "force-dynamic";
+
+export default async function StudioPage() {
+  const { user, allowed } = await studioAccess();
+  return <main className="studio-page">
+    <header className="studio-header"><div><h1>Japan Recon Studio</h1><p>Vehicle inventory · photos · publishing</p></div><Link href="/">View showroom ↗</Link></header>
+    {!user ? <div className="studio-locked"><h2>Staff sign in</h2><p>Sign in with the approved staff account to manage vehicle listings.</p><a className="studio-button" href={chatGPTSignInPath("/studio")} target="_top">Sign in with ChatGPT</a></div>
+      : !allowed ? <div className="studio-locked"><h2>Access restricted</h2><p>This account does not have access to the vehicle studio. Ask the site owner to grant access.</p></div>
+      : <StudioClient />}
+  </main>;
+}

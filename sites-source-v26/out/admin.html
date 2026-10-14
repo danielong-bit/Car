@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>车辆展示后台管理 | Car Showroom Admin Studio</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css?v=20261011-unified">
+  <link rel="stylesheet" href="admin-dashboard.css?v=20261011-unified">
+  <link rel="stylesheet" href="design-system.css?v=select-v26">
+  <script src="design-system.js?v=20261011-unified"></script>
+<link rel="stylesheet" href="/site-languages.css?v=26"><script src="/site-languages.js?v=26" defer></script></head>
+<body class="admin-body" data-studio-view="overview">
+  <!-- Top Navigation Bar -->
+  <header class="admin-header">
+    <div class="admin-brand">
+      <a href="/" class="admin-brand-link">
+        <span class="brand-badge">ADMIN</span>
+        <span class="brand-title">Danny Recon · Admin Studio</span>
+      </a>
+      <span class="brand-sub">DESKTOP STUDIO · 展厅管理</span>
+    </div>
+
+    <div class="admin-nav-actions">
+      <!-- Multi-Vehicle Switcher -->
+      <div class="vehicle-switcher-group" title="切换管理不同的库存车辆">
+        <label for="adminVehicleSelect" class="vehicle-switcher-label">车型选择:</label>
+        <select id="adminVehicleSelect" class="admin-vehicle-select">
+          <option value="audi-s5" selected>Audi S5 Avant (Photo Tour)</option>
+          <option value="alphard-z">Toyota Alphard Z</option>
+          <option value="rx500h">Lexus RX 500h F Sport</option>
+          <option value="gtr-premium">Nissan GT-R Premium</option>
+          <option value="civic-type-r">Honda Civic Type R</option>
+          <option value="crown-crossover">Toyota Crown Crossover RS</option>
+          <option value="lm500h">Lexus LM 500h Executive</option>
+        </select>
+      </div>
+
+      <div class="status-indicator" id="saveStatusIndicator">
+        <span class="status-dot"></span>
+        <span class="status-text" id="statusText">当前浏览器配置</span>
+      </div>
+
+      <!-- History Undo / Redo Actions -->
+      <div class="history-action-group">
+        <button type="button" class="admin-btn admin-btn-secondary btn-icon-only" id="undoBtn" title="撤销操作 (Undo Ctrl+Z)" disabled>
+          <span> 撤销</span>
+        </button>
+        <button type="button" class="admin-btn admin-btn-secondary btn-icon-only" id="redoBtn" title="重做操作 (Redo Ctrl+Y)" disabled>
+          <span> 重做</span>
+        </button>
+      </div>
+
+      <div class="action-btn-group">
+        <button type="button" class="admin-btn admin-btn-secondary" id="duplicateTemplateBtn" title="复制当前车辆的热点模板到其他车辆">
+          <span> 模板复制</span>
+        </button>
+        <button type="button" class="admin-btn admin-btn-secondary" id="resetConfigBtn" title="恢复预设的奥迪S5配置">
+          <span> 恢复默认</span>
+        </button>
+        <button type="button" class="admin-btn admin-btn-secondary" id="exportConfigBtn" title="导出当前配置为 JSON 文件">
+          <span> 导出配置</span>
+        </button>
+        <button type="button" class="admin-btn admin-btn-secondary" id="importConfigBtn" title="导入已有配置 JSON">
+          <span> 导入配置</span>
+        </button>
+        <button type="button" class="admin-btn admin-btn-primary" id="saveConfigBtn" title="保存到此浏览器并关联首页">
+          <span> 保存更改</span>
+        </button>
+      </div>
+
+      <div class="preview-links">
+        <a href="/" target="_blank" class="preview-link-btn" title="在新标签页预览首页展厅">
+          <span>首页展厅 </span>
+        </a>
+        <a href="calculator.html" target="_blank" class="preview-link-btn" id="headerCalcLink" title="在新标签页测试金融计算器">
+          <span>金融计算器 </span>
+        </a>
+        <a href="audi.html" target="_blank" class="preview-link-btn" title="在新标签页预览奥迪S5交互页">
+          <span>奥迪详情页 </span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Desktop Recommendation Notice for screens < 960px (电脑端优先，手机端提示) -->
+  <aside class="admin-desktop-only-banner" id="desktopOnlyBanner" role="note">
+    <div class="desktop-banner-box">
+      <span class="desktop-banner-icon"></span>
+      <div class="desktop-banner-content">
+        <strong>Showroom Studio 专为电脑宽屏设计 (Desktop Only)</strong>
+        <p>请在电脑浏览器中打开此页面，以管理库存、预约、首页互动和车辆媒体。建议屏幕宽度至少 1024px。</p>
+      </div>
+      <a href="/" class="admin-btn admin-btn-primary">返回前台展厅 </a>
+    </div>
+  </aside>
+
+  <nav class="studio-navigation" aria-label="Studio sections">
+    <button type="button" data-studio-view-button="overview" aria-pressed="true">Overview · 总览</button>
+    <button type="button" data-studio-view-button="editor" aria-pressed="false">Vehicle studio · 车辆编辑</button>
+    <span>当前浏览器数据 · 演示库存</span>
+  </nav>
+  <main class="admin-overview" aria-labelledby="overviewTitle">
+    <div class="overview-heading">
+      <div><span class="overview-kicker">SHOWROOM PERFORMANCE</span><h1 id="overviewTitle">展厅总览</h1><p>查看库存价值、预约跟进与客户感兴趣的车型。</p></div>
+      <div class="overview-actions"><label for="dashboardViewRange">浏览排行范围</label><select id="dashboardViewRange" class="dashboard-status"><option value="7">近 7 天</option><option value="30" selected>近 30 天</option><option value="90">近 90 天</option></select><button type="button" id="dashboardRefresh" class="admin-btn admin-btn-secondary">刷新数据</button></div>
+    </div>
+    <div class="metric-grid" aria-label="Showroom summary">
+      <article class="metric-card"><span class="metric-label">Total Inventory Value · 库存总值</span><strong id="metricInventoryValue">—</strong><small id="metricInventoryDetail">按展示售价合计</small></article>
+      <article class="metric-card"><span class="metric-label">Active Appointments · 有效预约</span><strong id="metricAppointments">0</strong><small id="metricAppointmentDetail"></small></article>
+      <article class="metric-card"><span class="metric-label">Model Detail Views · 车型浏览</span><strong id="metricViews">0</strong><small id="metricViewsDetail"></small></article>
+      <article class="metric-card"><span class="metric-label">Top Viewed Model · 热门车型</span><strong id="metricTopModel" style="font-size:22px">—</strong><small id="metricTopDetail"></small></article>
+    </div>
+    <div class="overview-chart-grid">
+      <section class="dashboard-panel" aria-labelledby="inventoryChartTitle"><div class="dashboard-panel-head"><div><h2 id="inventoryChartTitle">Inventory value by model</h2><p>展示售价（RM）· 点击车型进入对应编辑页</p></div><button type="button" data-open-editor-tab="vehicle" class="admin-btn admin-btn-secondary">编辑库存</button></div><div class="chart-surface" id="inventoryValueChart"></div><details class="chart-table"><summary>查看完整库存数据</summary><table class="dashboard-table"><thead><tr><th scope="col">车型</th><th scope="col">展示售价</th></tr></thead><tbody id="inventoryValueTable"></tbody></table></details></section>
+      <section class="dashboard-panel" aria-labelledby="viewsChartTitle"><div class="dashboard-panel-head"><div><h2 id="viewsChartTitle">Top Viewed Models</h2><p id="modelViewsCaption">主动打开车型详情与专用体验页的次数</p></div><a href="./#inventory" target="_blank" rel="noopener" class="admin-btn admin-btn-secondary">打开首页 </a></div><div class="chart-surface" id="modelViewsChart"></div><details class="chart-table"><summary>查看浏览数据</summary><table class="dashboard-table"><thead><tr><th scope="col">车型</th><th scope="col">浏览次数</th></tr></thead><tbody id="modelViewsTable"></tbody></table></details></section>
+    </div>
+    <div class="appointment-grid">
+      <section class="dashboard-panel" aria-labelledby="pipelineChartTitle"><div class="dashboard-panel-head"><div><h2 id="pipelineChartTitle">Appointment pipeline</h2><p>所有已记录请求的跟进状态</p></div></div><div class="chart-surface appointment-chart" id="appointmentStatusChart"></div><details class="chart-table"><summary>查看状态统计</summary><table class="dashboard-table"><thead><tr><th scope="col">状态</th><th scope="col">数量</th></tr></thead><tbody id="appointmentStatusTable"></tbody></table></details></section>
+      <section class="dashboard-panel" aria-labelledby="appointmentsTitle"><div class="dashboard-panel-head"><div><h2 id="appointmentsTitle">Recent appointments · 最近预约</h2><p>显示最近 8 条 · 修改状态即更新总览与预约线索</p></div><button type="button" data-open-editor-tab="leads" class="admin-btn admin-btn-secondary">管理预约</button></div><table class="dashboard-table"><thead><tr><th scope="col">客户</th><th scope="col">车型</th><th scope="col">时间</th><th scope="col">状态</th></tr></thead><tbody id="dashboardAppointments"></tbody></table></section>
+    </div>
+    <div class="dashboard-footnote"><span>数据保存在此浏览器；同一浏览器的首页与后台会实时关联。预约是请求，需人工确认。</span><span id="dashboardUpdatedAt" role="status"></span><button type="button" data-open-editor-tab="homepage" class="admin-btn admin-btn-secondary">管理首页互动 →</button></div>
+  </main>
+  <!-- Main Studio Workspace -->
+  <main class="admin-workspace">
+    <!-- Left Column: Visual 16:9 Canvas & Stage -->
+    <section class="admin-canvas-section">
+      <div class="canvas-toolbar">
+        <div class="toolbar-modes">
+          <button type="button" class="mode-btn active" id="modeEditBtn" data-mode="edit">
+            <span class="mode-icon"></span>
+            <span>定位编辑模式 (Edit Hotspots)</span>
+          </button>
+          <button type="button" class="mode-btn" id="modeTestBtn" data-mode="test">
+            <span class="mode-icon"></span>
+            <span>交互测试模式 (Test Viewer)</span>
+          </button>
+        </div>
+
+        <div class="canvas-quick-actions">
+          <label class="quick-upload-label" title="上传新的主车身图片">
+            <span> 更换主车图</span>
+            <input type="file" id="quickMainImageUpload" accept="image/*" class="sr-only">
+          </label>
+          <span class="canvas-coords-badge" id="canvasCoordsBadge">X: 50% · Y: 50%</span>
+        </div>
+      </div>
+
+      <!-- 16:9 Interactive Stage Container -->
+      <div class="admin-stage-container">
+        <div class="admin-stage-wrapper" id="adminStage">
+          <!-- Main Car Overview Image -->
+          <img id="adminMainImage" class="admin-main-img" src="assets/audi-s5/main-car-16x9.jpg" alt="Vehicle Overview" width="1280" height="720">
+
+          <!-- Test Video Player (active during test mode) -->
+          <video id="adminTestVideo" class="admin-test-video" playsinline muted preload="auto"></video>
+
+          <!-- Test Detail Image (active during test mode) -->
+          <img id="adminTestDetailImage" class="admin-test-detail-img" alt="Detail Preview">
+
+          <!-- Hotspots Layer -->
+          <div class="admin-hotspots-layer" id="adminHotspotsLayer"></div>
+          <div class="admin-hotspots-layer" id="adminTestSubHotspotsLayer" style="display: none; z-index: 12;"></div>
+
+          <!-- Crosshair Guide (Edit Mode only) -->
+          <div class="canvas-crosshair" id="canvasCrosshair">
+            <div class="crosshair-x"></div>
+            <div class="crosshair-y"></div>
+            <span class="crosshair-tip" id="crosshairTip">点击添加热点</span>
+          </div>
+
+          <!-- Back button for Test Mode -->
+          <button type="button" class="admin-test-back-btn" id="adminTestBackBtn">
+            <span>← 返回整车总览 (Back to Vehicle)</span>
+          </button>
+
+          <!-- Floating Feature Card for Sub-Hotspots in Test Mode -->
+          <div class="admin-test-subcard" id="testSubhotspotCard" style="display: none;">
+            <div class="test-subcard-head">
+              <span class="test-subcard-eyebrow" id="testCardEyebrow">SUB-HOTSPOT DETAIL</span>
+              <button type="button" class="test-subcard-close" id="testCardCloseBtn">✕</button>
+            </div>
+            <h4 class="test-subcard-title" id="testCardTitle">Part Name</h4>
+            <p class="test-subcard-desc" id="testCardDesc">Description of this sub-part...</p>
+            <div class="test-subcard-specs" id="testCardSpecs"></div>
+          </div>
+
+          <!-- Watermark / Aspect Badge -->
+          <div class="stage-aspect-badge">16:9 ASPECT RATIO</div>
+        </div>
+      </div>
+
+      <!-- Hint bar beneath canvas -->
+      <div class="canvas-hint-bar">
+        <div class="hint-item">
+          <strong> 快速定位：</strong> 在「定位编辑模式」下，直接点击车身任何位置即可添加或选中热点，也可鼠标按住拖拽微调位置。
+        </div>
+        <div class="hint-item">
+          <strong> 实时预览：</strong> 切换至「交互测试模式」可模拟买家点击，实时查看正向/倒放视频播放与图文详情返回效果。
+        </div>
+      </div>
+
+      <!-- Stage Breadcrumb & Context Banner for Sub-Hotspot Editing -->
+      <div class="stage-context-bar" id="stageContextBar" style="display: none;">
+        <div class="context-info">
+          <span class="context-badge">子热点编辑模式 SUB-HOTSPOTS</span>
+          <span class="context-text" id="contextParentLabel">正在编辑部件内部的子热点</span>
+        </div>
+        <button type="button" class="admin-btn admin-btn-secondary" id="exitSubHotspotViewBtn">
+          <span>← 返回整车总览 (Back to Main Car)</span>
+        </button>
+      </div>
+
+      <!-- Hotspot Thumbnails Strip -->
+      <div class="hotspots-strip-container">
+        <div class="strip-header">
+          <span>当前热点列表 HOTSPOTS (<span id="hotspotCountBadge">0</span>)</span>
+          <div class="strip-header-actions">
+            <button type="button" class="btn-text-action text-danger" id="cleanTestHotspotsBtn" title="清理所有未命名或多余的测试热点"> 清理测试点</button>
+            <button type="button" class="btn-text-action" id="stripAddBtn">+ 新建热点</button>
+          </div>
+        </div>
+        <div class="hotspots-strip" id="hotspotsStrip"></div>
+      </div>
+    </section>
+
+    <!-- Right Column: Inspector & Media Settings Panel -->
+    <aside class="admin-inspector-panel">
+      <!-- Inspector Tabs -->
+      <div class="inspector-tabs" id="inspectorTabsBar">
+        <button type="button" class="inspector-tab active" data-tab="hotspot" id="tabHotspotBtn" title="热点坐标、媒体与规格编辑">
+          <span> 热点属性</span>
+        </button>
+        <button type="button" class="inspector-tab" data-tab="vehicle" id="tabVehicleBtn" title="整车参数与经销商成本利润测算">
+          <span> 库存&成本</span>
+        </button>
+        <button type="button" class="inspector-tab" data-tab="leads" id="tabLeadsBtn" title="客户线索跟进与销售顾问分配">
+          <span> 预约线索 <span class="tab-badge" id="leadsTabBadge">0</span></span>
+        </button>
+        <button type="button" class="inspector-tab" data-tab="homepage" id="tabHomepageBtn" title="展厅首页交互联动 & 轮播管理">
+          <span> 首页交互联动</span>
+        </button>
+        <button type="button" class="inspector-tab" data-tab="history" id="tabHistoryBtn" title="操作记录、撤销重做与版本历史">
+          <span> 操作历史</span>
+        </button>
+        <button type="button" class="inspector-tab" data-tab="tools" id="tabToolsBtn" title="CSV批量导入与自动水印生成器">
+          <span> 导入&水印</span>
+        </button>
+        <button type="button" class="inspector-tab" data-tab="json" id="tabJsonBtn" title="查看或编辑原始 JSON">
+          <span> JSON</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: Hotspot Properties -->
+      <div class="inspector-content" id="panelHotspot">
+        <div class="panel-section-title">
+          <div>
+            <h3 id="inspectorHotspotTitle">编辑热点</h3>
+            <p id="inspectorHotspotSubtitle">调整坐标、视频/图片媒体、文案与规格</p>
+          </div>
+          <div class="inspector-actions">
+            <button type="button" class="btn-icon-danger" id="deleteHotspotBtn" title="删除此热点"> 删除</button>
+          </div>
+        </div>
+
+        <form id="hotspotForm" class="inspector-form" onsubmit="return false;">
+          <!-- Hotspot Label & ID -->
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label for="hotspotLabelInput">热点名称 (Label / 按钮文字)</label>
+              <input type="text" id="hotspotLabelInput" class="admin-input" placeholder="例如: Engine / 发动机舱" required>
+            </div>
+            <div class="form-group">
+              <label for="hotspotIdInput">唯一标识 (ID)</label>
+              <input type="text" id="hotspotIdInput" class="admin-input" placeholder="例如: engine, interior, wheel" required>
+            </div>
+          </div>
+
+          <!-- Interaction Type -->
+          <div class="form-group">
+            <label>交互类型 (Interaction Type)</label>
+            <div class="radio-segmented">
+              <label class="segmented-option">
+                <input type="radio" name="hotspotType" value="video" id="typeVideoRadio" checked>
+                <span class="segmented-card">
+                  <strong> 动态视频 (Video)</strong>
+                  <small>播放 16:9 MP4 镜头推进与倒放退出</small>
+                </span>
+              </label>
+              <label class="segmented-option">
+                <input type="radio" name="hotspotType" value="image" id="typeImageRadio">
+                <span class="segmented-card">
+                  <strong> 高清静态特写 (Image)</strong>
+                  <small>切换 16:9 细节大图并附带返回按钮</small>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Coordinates X and Y -->
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label for="coordXInput">水平坐标 X (%)</label>
+              <div class="input-with-unit">
+                <input type="number" id="coordXInput" class="admin-input" min="0" max="100" step="0.5" value="50">
+                <span class="unit-text">%</span>
+              </div>
+              <input type="range" id="coordXRange" min="0" max="100" step="0.5" value="50" class="admin-range">
+            </div>
+            <div class="form-group">
+              <label for="coordYInput">垂直坐标 Y (%)</label>
+              <div class="input-with-unit">
+                <input type="number" id="coordYInput" class="admin-input" min="0" max="100" step="0.5" value="50">
+                <span class="unit-text">%</span>
+              </div>
+              <input type="range" id="coordYRange" min="0" max="100" step="0.5" value="50" class="admin-range">
+            </div>
+          </div>
+
+          <!-- Video Fields (shown when type === 'video') -->
+          <div class="media-fields-group" id="videoFieldsGroup">
+            <div class="form-group">
+              <div class="label-with-action">
+                <label for="forwardVideoInput">正向进入视频 (Forward Video MP4)</label>
+                <label class="btn-file-upload">
+                  <span> 本地上传 MP4</span>
+                  <input type="file" id="forwardVideoUpload" accept="video/mp4,video/*" class="sr-only">
+                </label>
+              </div>
+              <input type="text" id="forwardVideoInput" class="admin-input" placeholder="例如: assets/videos/engine_forward.mp4">
+              <div class="media-preview-box" id="forwardVideoPreviewBox">
+                <video id="forwardVideoPreview" controls muted preload="none"></video>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="label-with-action">
+                <label for="reverseVideoInput">倒放退出视频 (Reverse Video MP4)</label>
+                <label class="btn-file-upload">
+                  <span> 本地上传 MP4</span>
+                  <input type="file" id="reverseVideoUpload" accept="video/mp4,video/*" class="sr-only">
+                </label>
+              </div>
+              <input type="text" id="reverseVideoInput" class="admin-input" placeholder="例如: assets/videos/engine_reverse_web.mp4">
+              <div class="media-preview-box" id="reverseVideoPreviewBox">
+                <video id="reverseVideoPreview" controls muted preload="none"></video>
+              </div>
+            </div>
+          </div>
+
+          <!-- Image Fields (shown when type === 'image') -->
+          <div class="media-fields-group" id="imageFieldsGroup" style="display: none;">
+            <div class="form-group">
+              <div class="label-with-action">
+                <label for="detailImageInput">细节特写大图 (16:9 Detail Image)</label>
+                <label class="btn-file-upload">
+                  <span> 本地上传图片</span>
+                  <input type="file" id="detailImageUpload" accept="image/*" class="sr-only">
+                </label>
+              </div>
+              <input type="text" id="detailImageInput" class="admin-input" placeholder="例如: assets/audi-s5/wheel_16x9.jpg">
+              <div class="media-preview-box" id="detailImagePreviewBox">
+                <img id="detailImagePreview" alt="Detail preview">
+              </div>
+            </div>
+          </div>
+
+          <!-- Text and Copywriting -->
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label for="hotspotEyebrowInput">分类眉标 (Eyebrow)</label>
+              <input type="text" id="hotspotEyebrowInput" class="admin-input" placeholder="例如: POWERTRAIN, CABIN">
+            </div>
+            <div class="form-group">
+              <label for="hotspotTitleInput">详情大标题 (Title)</label>
+              <input type="text" id="hotspotTitleInput" class="admin-input" placeholder="例如: V6 TFSI Engine Bay">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="hotspotDescInput">介绍文案 (Description)</label>
+            <textarea id="hotspotDescInput" class="admin-textarea" rows="3" placeholder="介绍此部件的设计、工艺或特色说明..."></textarea>
+          </div>
+
+          <!-- Specifications Table Key-Value Editor -->
+          <div class="form-group">
+            <div class="label-with-action">
+              <label>核心规格参数 (Specifications Key-Value)</label>
+              <button type="button" class="btn-text-action" id="addSpecRowBtn">+ 添加规格项</button>
+            </div>
+            <div class="specs-editor-list" id="specsEditorList"></div>
+          </div>
+
+          <!-- Sub-Hotspots Section (Hotspot inside Hotspot) -->
+          <div class="form-group sub-hotspot-group">
+            <div class="label-with-action">
+              <label> 热点内的子热点 (Sub-Hotspots inside this view)</label>
+              <button type="button" class="btn-text-action" id="openSubHotspotModeBtn">
+                 切换到该画面可视化标记
+              </button>
+            </div>
+            <p class="form-hint">进入此部件详情画面后，可在画面内部展示更细微的部件标记（如方向盘、液晶屏、座椅缝线、排气阀门等）：</p>
+            <div class="sub-hotspots-manager-list" id="subHotspotsManagerList"></div>
+            <button type="button" class="admin-btn admin-btn-secondary" id="addSubHotspotBtn" style="margin-top: 6px;">
+              + 为当前热点添加一个子热点
+            </button>
+          </div>
+
+          <div class="form-submit-row">
+            <button type="button" class="admin-btn admin-btn-primary" id="updateHotspotBtn">
+              <span>✓ 应用热点更新</span>
+            </button>
+            <button type="button" class="admin-btn admin-btn-secondary" id="duplicateHotspotBtn">
+              <span> 复制为新热点</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tab 2: Vehicle Stock Settings & Dealer Margin Calculator -->
+      <div class="inspector-content" id="panelVehicle" style="display: none;">
+        <div class="panel-section-title">
+          <div>
+            <h3>整车库存与成本利润</h3>
+            <p>管理库存信息、主视角大图及日本进口落地成本与利润测算</p>
+          </div>
+        </div>
+
+        <div class="inspector-form">
+          <!-- Main Image Upload -->
+          <div class="form-group">
+            <div class="label-with-action">
+              <label for="mainImageUrlInput">主车身图片地址 (Main 16:9 Car Image)</label>
+              <label class="btn-file-upload">
+                <span> 从本地上传新主图</span>
+                <input type="file" id="mainImageFileUpload" accept="image/*" class="sr-only">
+              </label>
+            </div>
+            <div class="drag-drop-zone" id="mainImageDropZone" title="直接拖拽主车图到此处">
+              <input type="text" id="mainImageUrlInput" class="admin-input" value="assets/audi-s5/main-car-16x9.jpg">
+              <div class="drop-hint">或直接将 16:9 高清整车照片拖拽至此</div>
+            </div>
+            <div class="media-preview-box large">
+              <img id="mainImagePreview" src="assets/audi-s5/main-car-16x9.jpg" alt="Main car preview">
+            </div>
+          </div>
+
+          <!-- Stock Details -->
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label for="vehicleNameInput">车型名称 (Vehicle Name)</label>
+              <input type="text" id="vehicleNameInput" class="admin-input" value="Audi S5 Avant">
+            </div>
+            <div class="form-group">
+              <label for="vehiclePriceInput">展示价格 (Selling Price)</label>
+              <input type="text" id="vehiclePriceInput" class="admin-input" value="RM 438,000">
+            </div>
+          </div>
+
+          <div class="form-row form-row-3">
+            <div class="form-group">
+              <label for="vehicleYearInput">年份 (Year)</label>
+              <input type="text" id="vehicleYearInput" class="admin-input" value="2021">
+            </div>
+            <div class="form-group">
+              <label for="vehicleMileageInput">里程 (Mileage)</label>
+              <input type="text" id="vehicleMileageInput" class="admin-input" value="18,500 km">
+            </div>
+            <div class="form-group">
+              <label for="vehicleEngineInput">引擎排量 (Engine)</label>
+              <input type="text" id="vehicleEngineInput" class="admin-input" value="3.0L V6 Turbo">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="vehicleSubInput">副标题介绍 (Subtitle / Tagline)</label>
+            <input type="text" id="vehicleSubInput" class="admin-input" value="Actual photographed example · interactive detail page">
+          </div>
+
+          <!-- Stock Cost & Dealer Profit Margin Calculator -->
+          <div class="cost-calculator-card">
+            <div class="cost-calc-header">
+              <div>
+                <h4 class="cost-calc-title"> 车辆落地成本与经销商利润测算 (Cost & Margin Tracker)</h4>
+                <p class="cost-calc-sub">内部核算：日本拍卖 FOB 采购价 + 海运 + 关税 + AP准证 + 目标利润</p>
+              </div>
+              <span class="badge-internal">内部成本控制</span>
+            </div>
+
+            <div class="form-row form-row-2">
+              <div class="form-group">
+                <label for="fobJpyInput">日本拍卖 FOB 购入价 (¥ JPY)</label>
+                <div class="input-with-unit">
+                  <input type="number" id="fobJpyInput" class="admin-input" value="6800000" step="50000">
+                  <span class="unit-text">JPY</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="exchangeRateInput">汇率 (100 JPY 兑 RM)</label>
+                <div class="input-with-unit">
+                  <input type="number" id="exchangeRateInput" class="admin-input" value="3.12" step="0.01">
+                  <span class="unit-text">MYR</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row form-row-2">
+              <div class="form-group">
+                <label for="oceanFreightInput">海运及海运保险 (RM)</label>
+                <input type="number" id="oceanFreightInput" class="admin-input" value="4500" step="100">
+              </div>
+              <div class="form-group">
+                <label for="customsDutyInput">进口关税与消费税估算 (RM)</label>
+                <input type="number" id="customsDutyInput" class="admin-input" value="128000" step="1000">
+              </div>
+            </div>
+
+            <div class="form-row form-row-3">
+              <div class="form-group">
+                <label for="apFeeInput">Open AP 批文分配费 (RM)</label>
+                <input type="number" id="apFeeInput" class="admin-input" value="28000" step="500">
+              </div>
+              <div class="form-group">
+                <label for="portPuspakomInput">港口清关与验车 (RM)</label>
+                <input type="number" id="portPuspakomInput" class="admin-input" value="2500" step="100">
+              </div>
+              <div class="form-group">
+                <label for="reconDetailingInput">整备与美容预算 (RM)</label>
+                <input type="number" id="reconDetailingInput" class="admin-input" value="3500" step="200">
+              </div>
+            </div>
+
+            <div class="form-row form-row-2">
+              <div class="form-group">
+                <label for="targetMarginPctInput">期望净利润率 (%)</label>
+                <div class="input-with-unit">
+                  <input type="number" id="targetMarginPctInput" class="admin-input" value="12.5" step="0.5">
+                  <span class="unit-text">%</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>目标利润额 (RM)</label>
+                <div class="calc-readonly-val" id="targetMarginAmountVal">RM 47,337</div>
+              </div>
+            </div>
+
+            <!-- Cost Summary Result Grid -->
+            <div class="cost-summary-grid">
+              <div class="cost-metric-box">
+                <span class="metric-label">车身本金 (MYR Equivalent)</span>
+                <strong class="metric-val" id="fobMyrVal">RM 212,160</strong>
+              </div>
+              <div class="cost-metric-box">
+                <span class="metric-label">综合到港落地总成本 (Landed Cost)</span>
+                <strong class="metric-val highlight-gold" id="totalLandedCostVal">RM 378,660</strong>
+              </div>
+              <div class="cost-metric-box">
+                <span class="metric-label">建议零售指导价 (Target Price)</span>
+                <strong class="metric-val highlight-green" id="recommendedPriceVal">RM 432,800</strong>
+              </div>
+            </div>
+
+            <div class="calc-actions-row">
+              <button type="button" class="admin-btn admin-btn-secondary" id="applyRecommendedPriceBtn">
+                <span> 一键应用推荐价格至展厅展示价</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Presets -->
+          <div class="form-group">
+            <label>快速预设热点模板 (Quick Hotspot Presets)</label>
+            <p class="form-hint">一键在当前车辆中添加常用视角热点：</p>
+            <div class="preset-buttons-grid">
+              <button type="button" class="preset-btn" data-preset="engine"> 发动机舱 (Engine)</button>
+              <button type="button" class="preset-btn" data-preset="interior"> 驾驶座舱 (Interior)</button>
+              <button type="button" class="preset-btn" data-preset="boot"> 后备箱 (Tailgate)</button>
+              <button type="button" class="preset-btn" data-preset="wheel"> 轮毂刹车 (Wheel)</button>
+              <button type="button" class="preset-btn" data-preset="dashboard"> 液晶仪表 (Dashboard)</button>
+              <button type="button" class="preset-btn" data-preset="audio"> B&O音响 (Audio)</button>
+            </div>
+          </div>
+
+          <div class="form-submit-row">
+            <button type="button" class="admin-btn admin-btn-primary" id="saveVehicleSettingsBtn">
+              <span>✓ 应用并保存整车及成本设置</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Sales Consultant Assignment & Customer Leads Management -->
+      <div class="inspector-content" id="panelLeads" style="display: none;">
+        <div class="panel-section-title">
+          <div>
+            <h3>销售顾问分配与线索管理</h3>
+            <p>处理预约看车、试驾申请及 WhatsApp 一键销售分配跟进</p>
+          </div>
+          <div class="inspector-actions">
+            <button type="button" class="admin-btn admin-btn-secondary" id="addLeadModalBtn">+ 新增进店线索</button>
+          </div>
+        </div>
+
+        <!-- Leads Metric Header -->
+        <div class="leads-stats-row">
+          <div class="lead-stat-pill active" data-filter="all">
+            <span>全部线索</span>
+            <strong id="statLeadsTotal">3</strong>
+          </div>
+          <div class="lead-stat-pill" data-filter="new">
+            <span> 待联系</span>
+            <strong id="statLeadsNew">1</strong>
+          </div>
+          <div class="lead-stat-pill" data-filter="confirmed">
+            <span> 已预约</span>
+            <strong id="statLeadsConfirmed">1</strong>
+          </div>
+          <div class="lead-stat-pill" data-filter="contacted">
+            <span> 跟进中</span>
+            <strong id="statLeadsContacted">1</strong>
+          </div>
+        </div>
+
+        <!-- Leads List View -->
+        <div class="leads-container" id="leadsContainer">
+          <div class="leads-loading">正在加载销售线索...</div>
+        </div>
+      </div>
+
+      <!-- Tab: Homepage Interactions & Live Sync -->
+      <div class="inspector-content" id="panelHomepage" style="display: none;">
+        <div class="panel-section-title">
+          <div>
+            <h3>展厅首页交互联动 & 轮播管理</h3>
+            <p>控制首页 Showcase 轮播展示、主推车型、全局视觉主题与计算器即时联动</p>
+          </div>
+          <div class="inspector-actions">
+            <button type="button" class="admin-btn admin-btn-primary" id="syncToHomepageBtn">
+              <span> 立即同步至首页</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 1. Hero Showcase Carousel Controller -->
+        <div class="homepage-sync-card">
+          <div class="sync-card-header">
+            <h4> 首页主推轮播卡片配置 (Hero Showcase Slider)</h4>
+            <span class="badge-internal">首页焦点</span>
+          </div>
+          <p class="form-hint">首页顶部 16:9 展厅轮播大图，可设定首发主推车、高光标签与快捷入口动作。</p>
+
+          <div class="form-group">
+            <label for="featuredHeroSelect">选择首页首选主推车型 (Hero Slide #1)</label>
+            <select id="featuredHeroSelect" class="admin-select">
+              <option value="audi-s5">Audi S5 Avant (349 HP · V6 Turbo · Daytona Grey)</option>
+              <option value="alphard-z">Toyota Alphard Z (205 HP · Hybrid · Executive)</option>
+              <option value="gtr-premium">Nissan GT-R Premium (565 HP · Twin-Turbo · Supercar)</option>
+              <option value="rx500h">Lexus RX 500h F Sport (371 HP · Turbo Hybrid · Luxury SUV)</option>
+              <option value="civic-type-r">Honda Civic Type R (315 HP · 6MT · Track Beast)</option>
+              <option value="crown-crossover">Toyota Crown Crossover RS (349 HP · Hybrid · Crossover)</option>
+              <option value="lm500h">Lexus LM 500h Executive (366 HP · Ultra Luxury 4-Seater)</option>
+            </select>
+          </div>
+
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label for="heroSlideTagInput">高光特点标签 (Highlight Chip)</label>
+              <input type="text" id="heroSlideTagInput" class="admin-input" value="TOP RECON SELECTION · 3D INTERACTIVE TOUR">
+            </div>
+            <div class="form-group">
+              <label for="heroSlideActionSelect">快捷操作按钮行为 (Primary Action)</label>
+              <select id="heroSlideActionSelect" class="admin-select">
+                <option value="inspect">打开全景实车详情 (Inspect Details)</option>
+                <option value="calc">打开金融贷款测算 (Simulate Loan)</option>
+                <option value="audi">打开奥迪专用体验页 (Audi 3D Tour)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Hero Slide Live Preview Card -->
+          <div class="hero-preview-box">
+            <div class="hero-preview-badge" id="previewHeroTag">TOP RECON SELECTION · 3D INTERACTIVE TOUR</div>
+            <div class="hero-preview-body">
+              <div>
+                <small id="previewHeroBrand">Audi</small>
+                <h4 id="previewHeroTitle">S5 Avant (2025)</h4>
+              </div>
+              <div class="hero-preview-price" id="previewHeroPrice">RM 438,000</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Showroom Design Theme Controller -->
+        <div class="homepage-sync-card">
+          <div class="sync-card-header">
+            <h4> 全局展厅视觉主题联动 (Global Theme Sync)</h4>
+            <span class="badge-internal">即时生效</span>
+          </div>
+          <p class="form-hint">切换前台全站（首页、计算器、详情页）默认视觉风格：</p>
+
+          <div class="theme-picker-grid">
+            <button type="button" class="theme-choice-btn active" data-theme="apex">
+              <span class="theme-choice-dot dot-apex"></span>
+              <strong>Tokyo Apex Red</strong>
+              <small>赛道红 · 现代科技动感</small>
+            </button>
+            <button type="button" class="theme-choice-btn" data-theme="sapphire">
+              <span class="theme-choice-dot dot-midnight"></span>
+              <strong>Sapphire Stealth</strong>
+              <small>深海蓝 · 典雅深邃行政</small>
+            </button>
+            <button type="button" class="theme-choice-btn" data-theme="gold">
+              <span class="theme-choice-dot dot-emerald"></span>
+              <strong>Kyoto Prestige</strong>
+              <small>京都金 · 精致暖色调</small>
+            </button>
+            <button type="button" class="theme-choice-btn" data-theme="platinum">
+              <span class="theme-choice-dot dot-bronze"></span>
+              <strong>Platinum Pearl</strong>
+              <small>铂金灰 · 简洁明亮</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Dedicated Calculator Linkage & Monthly Simulation -->
+        <div class="homepage-sync-card">
+          <div class="sync-card-header">
+            <h4> 独立金融计算器联动 (Dedicated Calculator Linkage)</h4>
+            <span class="badge-internal">前台计算</span>
+          </div>
+          <p class="form-hint">当前选中车辆在独立金融计算器中的预估月供与JPJ路税：</p>
+
+          <div class="calc-sync-stats">
+            <div class="calc-stat-item">
+              <span>当前车辆售价</span>
+              <strong id="calcSyncPrice">RM 438,000</strong>
+            </div>
+            <div class="calc-stat-item">
+              <span>预估月供 (10%首付 / 7年 / 2.5%)</span>
+              <strong class="highlight-crimson" id="calcSyncMonthly">RM 4,944 / mo</strong>
+            </div>
+            <div class="calc-stat-item">
+              <span>预估全包落地启动资金</span>
+              <strong id="calcSyncOutlay">RM 58,160</strong>
+            </div>
+          </div>
+
+          <div class="calc-sync-actions">
+            <a href="calculator.html?vehicle=audi-s5" target="_blank" class="admin-btn admin-btn-secondary" id="openDedicatedCalcBtn">
+              <span>在独立计算器中打开此车 </span>
+            </a>
+            <a href="/" target="_blank" class="admin-btn admin-btn-secondary">
+              <span>在前台展厅库中查看 </span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Activity Log & Version History -->
+      <div class="inspector-content" id="panelHistory" style="display: none;">
+        <div class="panel-section-title">
+          <div>
+            <h3>操作记录与版本历史 (Undo / Redo)</h3>
+            <p>追踪热点坐标移动、规格修改及一键回退恢复点</p>
+          </div>
+          <div class="inspector-actions">
+            <button type="button" class="admin-btn admin-btn-secondary" id="createSnapshotBtn"> 创建快照</button>
+          </div>
+        </div>
+
+        <!-- History Controller Status -->
+        <div class="history-status-card">
+          <div class="history-status-info">
+            <span class="status-indicator-badge">● 实时监听中</span>
+            <span class="history-step-count" id="historyStepCountText">当前第 1 个状态 / 共 1 步历史</span>
+          </div>
+          <div class="history-quick-controls">
+            <button type="button" class="admin-btn admin-btn-secondary" id="panelUndoBtn" disabled> 撤销 (Ctrl+Z)</button>
+            <button type="button" class="admin-btn admin-btn-secondary" id="panelRedoBtn" disabled> 重做 (Ctrl+Y)</button>
+          </div>
+        </div>
+
+        <!-- Timeline Log List -->
+        <div class="history-timeline" id="historyTimeline">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Tab 5: Bulk Import & Automatic Watermark Generator -->
+      <div class="inspector-content" id="panelTools" style="display: none;">
+        <div class="panel-section-title">
+          <div>
+            <h3>批量导入与自动水印工具</h3>
+            <p>CSV车辆库存批量导入，以及实拍车辆照片自动叠加专属防伪水印</p>
+          </div>
+        </div>
+
+        <div class="tools-accordion">
+          <!-- Section 1: Watermark Generator -->
+          <div class="tool-card">
+            <div class="tool-card-header">
+              <h4> 自动水印生成器 (Automatic Watermark Generator)</h4>
+              <span class="tool-badge">实拍防伪</span>
+            </div>
+            <p class="tool-card-desc">自动为上传的高清车辆照片添加专属 Japanese Recon 认证水印防盗图：</p>
+
+            <div class="form-group">
+              <label for="watermarkImageUpload">选择待加水印车辆照片</label>
+              <input type="file" id="watermarkImageUpload" accept="image/*" class="admin-input-file">
+            </div>
+
+            <div class="form-row form-row-2">
+              <div class="form-group">
+                <label for="watermarkTextInput">水印文字 (Watermark Text)</label>
+                <input type="text" id="watermarkTextInput" class="admin-input" value="JAPAN RECON CAR GALLERY · VERIFIED STOCK">
+              </div>
+              <div class="form-group">
+                <label for="watermarkPositionSelect">水印位置 (Position)</label>
+                <select id="watermarkPositionSelect" class="admin-select">
+                  <option value="bottom-right" selected>右下角 (Bottom Right)</option>
+                  <option value="bottom-left">左下角 (Bottom Left)</option>
+                  <option value="center">居中防伪水印 (Center Diagonal)</option>
+                  <option value="top-right">右上角 (Top Right)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row form-row-2">
+              <div class="form-group">
+                <label for="watermarkOpacityRange">水印透明度 (Opacity)</label>
+                <input type="range" id="watermarkOpacityRange" min="10" max="95" value="70" class="admin-range">
+              </div>
+              <div class="form-group">
+                <label for="watermarkScaleRange">水印尺寸大小 (Scale)</label>
+                <input type="range" id="watermarkScaleRange" min="15" max="50" value="28" class="admin-range">
+              </div>
+            </div>
+
+            <div class="watermark-canvas-container">
+              <canvas id="watermarkCanvas" class="watermark-canvas" width="640" height="360"></canvas>
+            </div>
+
+            <div class="form-submit-row">
+              <button type="button" class="admin-btn admin-btn-secondary" id="downloadWatermarkedBtn">
+                <span> 下载加水印高清大图</span>
+              </button>
+              <button type="button" class="admin-btn admin-btn-primary" id="applyWatermarkToCurrentCarBtn">
+                <span>✓ 将加水印图片设为当前车辆主图</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Section 2: Bulk CSV Import -->
+          <div class="tool-card">
+            <div class="tool-card-header">
+              <h4> CSV / Excel 批量车辆导入 (Bulk Vehicle Import)</h4>
+              <span class="tool-badge">DMS同步</span>
+            </div>
+            <p class="tool-card-desc">从汽车经销商库存管理系统 (DMS) 导出的 CSV 文件一键导入完整库存列表：</p>
+
+            <div class="csv-actions-bar">
+              <button type="button" class="admin-btn admin-btn-secondary" id="downloadSampleCsvBtn">
+                <span> 下载标准 CSV 导入模板</span>
+              </button>
+            </div>
+
+            <div class="drag-drop-zone" id="csvFileDropZone">
+              <input type="file" id="csvFileInput" accept=".csv,text/csv" class="sr-only">
+              <label for="csvFileInput" class="csv-drop-label">
+                <span class="drop-icon"></span>
+                <span>点击选择或直接将 <code>.csv</code> 拖拽至此处</span>
+              </label>
+            </div>
+
+            <!-- CSV Preview Table Container -->
+            <div class="csv-preview-box" id="csvPreviewBox" style="display: none;">
+              <div class="csv-preview-header">
+                <span id="csvParsedCountText">解析完成: 0 辆车</span>
+                <span class="text-success">格式校验通过</span>
+              </div>
+              <div class="csv-table-scroll">
+                <table class="csv-table" id="csvPreviewTable">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>品牌</th>
+                      <th>车型</th>
+                      <th>年份</th>
+                      <th>价格</th>
+                      <th>里程</th>
+                      <th>排量</th>
+                    </tr>
+                  </thead>
+                  <tbody id="csvPreviewTbody"></tbody>
+                </table>
+              </div>
+              <div class="csv-submit-row">
+                <button type="button" class="admin-btn admin-btn-primary" id="executeCsvImportBtn">
+                  <span> 确认导入至车库</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 6: JSON Config & Export -->
+      <div class="inspector-content" id="panelJson" style="display: none;">
+        <div class="panel-section-title">
+          <div>
+            <h3>JSON 配置代码</h3>
+            <p>直接查看、编辑或复制整套 16:9 展示配置</p>
+          </div>
+          <div class="inspector-actions">
+            <button type="button" class="admin-btn admin-btn-secondary" id="copyJsonBtn"> 复制 JSON</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <textarea id="jsonConfigTextarea" class="admin-code-area" spellcheck="false" rows="18"></textarea>
+        </div>
+
+        <div class="form-submit-row">
+          <button type="button" class="admin-btn admin-btn-primary" id="applyJsonBtn">
+            <span>✓ 从 JSON 应用配置</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div class="admin-toast-container" id="toastContainer"></div>
+
+  <!-- Duplicate Template Modal -->
+  <dialog class="admin-dialog" id="duplicateTemplateDialog">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <h3> 复制热点模板到其他车辆 (Hotspot Template Duplication)</h3>
+        <button type="button" class="dialog-close-btn" id="closeDuplicateTemplateDialogBtn">✕</button>
+      </div>
+      <div class="dialog-body">
+        <p>将当前车辆已调校好的热点坐标、视角类别与规格结构秒级复制到目标车辆，节省重复设置时间：</p>
+        
+        <div class="form-group">
+          <label for="dupSourceVehicle">源车辆模板 (Source Vehicle)</label>
+          <input type="text" id="dupSourceVehicle" class="admin-input" readonly value="Audi S5 Avant (当前)">
+        </div>
+
+        <div class="form-group">
+          <label for="dupTargetVehicleSelect">目标接收车辆 (Target Vehicle)</label>
+          <select id="dupTargetVehicleSelect" class="admin-select">
+            <option value="alphard-z">Toyota Alphard Z</option>
+            <option value="rx500h">Lexus RX 500h F Sport</option>
+            <option value="gtr-premium">Nissan GT-R Premium</option>
+            <option value="civic-type-r">Honda Civic Type R</option>
+            <option value="crown-crossover">Toyota Crown Crossover RS</option>
+            <option value="lm500h">Lexus LM 500h Executive</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>合并模式 (Duplication Mode)</label>
+          <div class="radio-segmented">
+            <label class="segmented-option">
+              <input type="radio" name="dupModeRadio" value="replace" checked>
+              <span class="segmented-card">
+                <strong> 完全覆盖 (Replace)</strong>
+                <small>清空目标车辆原有热点，完整应用源车辆热点布局</small>
+              </span>
+            </label>
+            <label class="segmented-option">
+              <input type="radio" name="dupModeRadio" value="append">
+              <span class="segmented-card">
+                <strong> 追加保留 (Merge / Append)</strong>
+                <small>保留目标车辆已有热点，仅追加新热点</small>
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="admin-btn admin-btn-secondary" id="cancelDuplicateTemplateBtn">取消</button>
+        <button type="button" class="admin-btn admin-btn-primary" id="confirmDuplicateTemplateBtn">确认复制模板</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Add Walk-in Lead Modal -->
+  <dialog class="admin-dialog" id="addLeadDialog">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <h3> 手动录入客户线索 (Add Walk-in Lead)</h3>
+        <button type="button" class="dialog-close-btn" id="closeAddLeadDialogBtn">✕</button>
+      </div>
+      <div class="dialog-body">
+        <form id="addLeadForm" class="inspector-form" onsubmit="return false;">
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label for="leadFormName">客户姓名 *</label>
+              <input type="text" id="leadFormName" class="admin-input" placeholder="例如: Mr. Raymond Wong" required>
+            </div>
+            <div class="form-group">
+              <label for="leadFormPhone">联系电话 / WhatsApp *</label>
+              <input type="tel" id="leadFormPhone" class="admin-input" placeholder="+6012-XXXXXXX" required>
+            </div>
+          </div>
+
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label for="leadFormVehicle">意向车型</label>
+              <input type="text" id="leadFormVehicle" class="admin-input" value="Audi S5 Avant">
+            </div>
+            <div class="form-group">
+              <label for="leadFormBranch">展厅分行</label>
+              <select id="leadFormBranch" class="admin-select">
+                <option value="Glenmarie 3S Flagship">Glenmarie 3S Flagship</option>
+                <option value="Petaling Jaya Showroom">Petaling Jaya Showroom</option>
+                <option value="Damansara City Centre">Damansara City Centre</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label for="leadFormType">意向类型</label>
+              <select id="leadFormType" class="admin-select">
+                <option value="展厅看车预约">展厅看车预约 (Showroom Viewing)</option>
+                <option value="深度试驾申请">深度试驾申请 (Test Drive)</option>
+                <option value="贷款与成本咨询">贷款与成本咨询 (Loan Pre-check)</option>
+                <option value="二手置换评估">二手置换评估 (Trade-in Valuation)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="leadFormConsultant">指派销售顾问</label>
+              <select id="leadFormConsultant" class="admin-select">
+                <option value="kenji">Kenji Tanaka (Senior Recon Specialist)</option>
+                <option value="sarah">Sarah Lim (European Performance)</option>
+                <option value="david">David Wong (JDM & Luxury MPV)</option>
+                <option value="farhan">Farhan Razak (AP & Financing)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="leadFormNotes">跟进备注与客户需求</label>
+            <textarea id="leadFormNotes" class="admin-textarea" rows="3" placeholder="例如: 客户对车辆全车配置及日本拍卖评分非常关注，预算在 42-45 万..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="admin-btn admin-btn-secondary" id="cancelAddLeadBtn">取消</button>
+        <button type="button" class="admin-btn admin-btn-primary" id="confirmAddLeadBtn">保存并分配线索</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Import Modal -->
+  <dialog class="admin-dialog" id="importDialog">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <h3>导入配置 JSON</h3>
+        <button type="button" class="dialog-close-btn" id="closeImportDialogBtn">✕</button>
+      </div>
+      <div class="dialog-body">
+        <p>将导出的配置 JSON 文本粘贴在下方，或者选择本地 <code>.json</code> 文件：</p>
+        <input type="file" id="importJsonFileInput" accept=".json,application/json" class="admin-input-file">
+        <textarea id="importJsonTextarea" class="admin-code-area" rows="8" placeholder="粘贴 JSON 内容..."></textarea>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="admin-btn admin-btn-secondary" id="cancelImportBtn">取消</button>
+        <button type="button" class="admin-btn admin-btn-primary" id="confirmImportBtn">确认导入</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Confirm Modal (In-page modal to safely replace window.confirm in iframes) -->
+  <dialog class="admin-dialog" id="confirmDialog">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <h3 id="confirmDialogTitle">确认操作</h3>
+        <button type="button" class="dialog-close-btn" id="closeConfirmDialogBtn">✕</button>
+      </div>
+      <div class="dialog-body">
+        <p id="confirmDialogMessage">您确定要执行此操作吗？</p>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="admin-btn admin-btn-secondary" id="cancelConfirmDialogBtn">取消</button>
+        <button type="button" class="admin-btn admin-btn-danger" id="okConfirmDialogBtn">确认删除</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="catalog.js?v=20261011-unified"></script>
+  <script src="showroom-data.js?v=20261011-unified"></script>
+  <script src="assets/vendor/d3.min.js"></script>
+  <script src="admin.js?v=20261011-unified"></script>
+  <script src="admin-dashboard.js?v=20261011-unified"></script>
+</body>
+</html>

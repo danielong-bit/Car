@@ -1,0 +1,20 @@
+import { and, eq } from "drizzle-orm";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getDb } from "@/db";
+import { vehicleMedia, vehicles } from "@/db/schema";
+
+export const dynamic = "force-dynamic";
+
+export default async function StockDetail({ params }: { params: Promise<{ stockId: string }> }) {
+  const { stockId } = await params;
+  const db = getDb();
+  const found = await db.select().from(vehicles).where(and(eq(vehicles.stockId, stockId), eq(vehicles.status, "published"))).limit(1);
+  if (!found.length) notFound();
+  const vehicle = found[0];
+  const media = await db.select().from(vehicleMedia).where(eq(vehicleMedia.vehicleId, vehicle.id)).orderBy(vehicleMedia.sortOrder);
+  return <main className="showroom-page">
+    <header className="showroom-header"><Link className="wordmark" href="/">JAPAN <span>RECON</span><small>CAR GALLERY</small></Link><nav aria-label="Main navigation"><Link href="/#stock">← All vehicles</Link></nav></header>
+    <section className="detail-shell"><p className="eyebrow">AVAILABLE STOCK · {vehicle.stockId}</p><h1>{vehicle.make} {vehicle.model}</h1><p className="detail-variant">{vehicle.variant || vehicle.body}</p><div className="detail-gallery">{media.map((item, index) => <img key={item.id} src={`/api/media/${item.objectKey}`} alt={`${vehicle.make} ${vehicle.model} photo ${index + 1}`} loading={index ? "lazy" : "eager"} decoding="async" />)}</div><div className="detail-content"><div><h2>Vehicle details</h2><p>{vehicle.description || "Contact our team for further details about this vehicle."}</p></div><dl><div><dt>Asking price</dt><dd>RM {vehicle.priceRm?.toLocaleString("en-MY")}</dd></div><div><dt>Year</dt><dd>{vehicle.year}</dd></div><div><dt>Mileage</dt><dd>{vehicle.mileageKm?.toLocaleString("en-MY")} km</dd></div>{vehicle.body && <div><dt>Body</dt><dd>{vehicle.body}</dd></div>}{vehicle.color && <div><dt>Colour</dt><dd>{vehicle.color}</dd></div>}<div><dt>Stock ID</dt><dd>{vehicle.stockId}</dd></div></dl></div><p className="detail-note">Availability and final pricing may change. Please confirm before travelling.</p></section>
+  </main>;
+}

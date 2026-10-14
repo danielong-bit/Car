@@ -1,0 +1,23 @@
+import { env } from "cloudflare:workers";
+import { eq } from "drizzle-orm";
+import { getDb } from "@/db";
+import { vehicleMedia, vehicles } from "@/db/schema";
+import { getStudioUser } from "@/lib/studio-auth";
+
+export const dynamic = "force-dynamic";
+
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!await getStudioUser()) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  const { id } = await params;
+  const db = getDb();
+  const media = await db.select().from(vehicleMedia).where(eq(vehicleMedia.id, id)).limit(1);
+  if (!media.length) return Response.json({ error: "Photo not found." }, { status: 404 });
+  const vehicle = await db.select({ status: vehicles.status }).from(vehicles).where(eq(vehicles.id, media[0].vehicleId)).limit(1);
+  if (vehicle[0]?.status === "published") {
+    const photos = await db.select({ id: vehicleMedia.id }).from(vehicleMedia).where(eq(vehicleMedia.vehicleId, media[0].vehicleId));
+    if (photos.length < 2) return Response.json({ error: "Add a replacement photo or move the vehicle to draft first." }, { status: 400 });
+  }
+  await db.delete(vehicleMedia).where(eq(vehicleMedia.id, id));
+  await env.BUCKET?.delete(media[0].objectKey);
+  return Response.json({ ok: true });
+}

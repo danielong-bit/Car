@@ -1,0 +1,50 @@
+[
+  {
+    "id": "lead-101",
+    "customerName": "Dato' Adrian Tan",
+    "phone": "+6012-3988219",
+    "vehicleId": "audi-s5",
+    "vehicleName": "Audi S5 Avant (2021)",
+    "price": "RM 438,000",
+    "branch": "Glenmarie 3S Flagship",
+    "preferredDate": "Tomorrow 2:30 PM",
+    "inquiryType": "Showroom Viewing & Sound Test",
+    "status": "confirmed",
+    "assignedConsultantId": "kenji",
+    "assignedConsultantName": "Kenji Tanaka",
+    "notes": "Customer interested in B&O 3D audio demonstration and V6 TFSI exhaust note. High intent cash / fast loan buyer.",
+    "createdAt": "2026-10-07T14:43:29.148Z"
+  },
+  {
+    "id": "lead-102",
+    "customerName": "Kevin Chong",
+    "phone": "+6017-8821940",
+    "vehicleId": "alphard-z",
+    "vehicleName": "Toyota Alphard Z (2023)",
+    "price": "RM 329,000",
+    "branch": "Petaling Jaya Showroom",
+    "preferredDate": "This Saturday 11:00 AM",
+    "inquiryType": "Family Test Drive & Trade-in",
+    "status": "new",
+    "assignedConsultantId": "sarah",
+    "assignedConsultantName": "Sarah Lim",
+    "notes": "Trade-in inquiry for 2018 Vellfire 2.5. Requests loan repayment calculation with 15% down payment.",
+    "createdAt": "2026-10-07T11:43:29.148Z"
+  },
+  {
+    "id": "lead-103",
+    "customerName": "Farid Kamaruddin",
+    "phone": "+6019-2219483",
+    "vehicleId": "gtr-premium",
+    "vehicleName": "Nissan GT-R Premium (2022)",
+    "price": "RM 598,000",
+    "branch": "Glenmarie 3S Flagship",
+    "preferredDate": "Friday 4:00 PM",
+    "inquiryType": "Recon Inspection & AP Verification",
+    "status": "contacted",
+    "assignedConsultantId": "david",
+    "assignedConsultantName": "David Wong",
+    "notes": "Customer asked for auction inspection sheet grade 4.5+ verification and Brembo caliper condition check.",
+    "createdAt": "2026-10-06T22:43:29.148Z"
+  }
+]
