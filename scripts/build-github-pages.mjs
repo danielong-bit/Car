@@ -10,9 +10,13 @@ if (!outputDirectory.startsWith(projectRoot + path.sep)) {
 
 const repositoryName = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'Car-Recond-Japan';
 const requestedBase = process.env.PAGES_BASE_PATH || `/${repositoryName}/`;
-const basePath = `/${requestedBase.split('/').filter(Boolean).join('/')}/`;
+const segments=requestedBase.split('/').filter(Boolean);
+const basePath = segments.length ? `/${segments.join('/')}/` : '/';
 const baseWithoutTrailingSlash = basePath.slice(0, -1);
-const publicDataPath = path.join(projectRoot, 'data', 'public-site.json');
+import {publicDocument} from '../lib/cms/contracts.mjs';
+import {normalizeDocument} from '../public/inventory-domain.mjs';
+import {prepareExhibition} from './prepare-exhibition.mjs';
+const publicDataPath = path.resolve(projectRoot, process.env.PAGES_SNAPSHOT_PATH || 'data/public-site.json');
 const publicAssetsPath = path.join(projectRoot, 'public');
 const templatesPath = path.join(projectRoot, 'out');
 const excludedPublicFiles = new Set([
@@ -66,7 +70,8 @@ function normalizePublicPaths(value) {
   }
   if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) return value;
   if (value.startsWith('/api/')) {
-    throw new Error(`Static Pages cannot serve a backend media path: ${value}`);
+    if(process.env.CMS_API_BASE)return process.env.CMS_API_BASE.replace(/\/$/,'')+value;
+    throw new Error(`This photo needs a permanent public URL before static export: ${value}`);
   }
   return prefixRootPath(value);
 }
@@ -85,14 +90,17 @@ async function walk(directory, relative = '') {
 
 async function copyPublicAssets() {
   for (const {absolute, relative} of await walk(publicAssetsPath)) {
-    if (excludedPublicFiles.has(relative)) continue;
+    if (excludedPublicFiles.has(relative) || /^(?:admin|cms-studio|cms-import|cms-charts|audi|app|catalog|showroom-data|select-home|select-polish)(?:[.-]|$)/.test(relative) || /audi-s5-(hq|v2)\/.*\.(txt|b64)$/.test(relative)) continue;
     const destination = path.join(outputDirectory, relative);
     await mkdir(path.dirname(destination), {recursive: true});
     const extension = path.extname(relative).toLowerCase();
     if (['.css', '.js', '.mjs', '.html', '.svg', '.xml', '.webmanifest'].includes(extension)) {
       let content = await readFile(absolute, 'utf8');
       if (extension === '.css') content = rewriteCssPaths(content);
-      else if (extension === '.js' || extension === '.mjs') content = rewriteJavaScriptPaths(content);
+      // Native modules resolve against SITE_BASE themselves. Rewriting their path
+      // comparisons would corrupt both photo URLs and canonical upload ZIP keys.
+      else if (extension === '.js') content = rewriteJavaScriptPaths(content);
+      else if (extension === '.mjs') { /* Keep module asset keys canonical. */ }
       else content = rewriteMarkupPaths(content);
       await writeFile(destination, content);
     } else {
@@ -107,79 +115,32 @@ function safeInlineJson(value) {
 
 async function renderTemplate(templateName, {route = '', title} = {}) {
   let html = await readFile(path.join(templatesPath, templateName), 'utf8');
-  if (title) html = html.replace(/<title>[^<]*<\/title>/i, `<title>${title}</title>`);
+  if (title) html = html.replace(/<title>[^<]*<\/title>/i, `<title>${String(title).replaceAll('&','&amp;').replaceAll('<','&lt;')}</title>`);
 
-  if (/class="home(?: |")/.test(html)) {
-    const slide = html.match(/<article class="showcase-slide[^]*?<\/article>/)?.[0];
-    html = html.replace(/<article class="showcase-slide[^]*?<\/article>/, '');
-    if (slide) html = html.replace(/(<body\b[^>]*>)/i, `$1<template id="cmsShowcaseTemplate">${slide}</template>`);
-    html = html.replace(
-      /<section class="customer-stories" id="customer-stories"[^]*?<\/section>/,
-      '<section class="customer-stories" id="customer-stories"><p>Customer moments are shared after permission is recorded.</p></section>',
-    );
-  }
-
-  html = html.replace(/<script src="\/site-languages\.js\?v=26" defer><\/script>/g, '');
-  html = html.replace(/(src=["'])\/?app\.js\?v=[^"']+(["'])/gi, '$1app.js?v=27$2');
-  html = html.replace(/(src=["'])\/?showroom-data\.js\?v=[^"']+(["'])/gi, '$1showroom-data.js?v=27$2');
   const canonicalPath = route ? `${basePath}${route.replace(/^\/+|\/+$/g, '')}/` : basePath;
   const canonicalUrl = `https://danielong-bit.github.io${canonicalPath}`;
   const metadata = `<link rel="canonical" href="${canonicalUrl}"><meta property="og:site_name" content="Danny Recon Select"><meta property="og:type" content="website"><meta property="og:url" content="${canonicalUrl}">`;
-  const runtime = `<base href="${basePath}"><link rel="stylesheet" href="danny-interactions.css"><link rel="stylesheet" href="cms.css"><script>window.SITE_BASE=${safeInlineJson(basePath)};window.GITHUB_PAGES_STATIC=true;window.CMS_DATA=${safeInlineJson(publicData)};</script>`;
+  const runtime = `<base href="${basePath}"><script>window.SITE_BASE=${safeInlineJson(basePath)};window.GITHUB_PAGES_STATIC=true;window.CMS_DATA=${safeInlineJson(publicData)};</script>`;
   if (!/<head(?:\s[^>]*)?>/i.test(html) || !/<\/body>/i.test(html)) {
     throw new Error(`Template ${templateName} is missing its document head or body.`);
   }
   html = html.replace(/<head(?:\s[^>]*)?>/i, match => `${match}${runtime}${metadata}`);
-  html = html.replace(
-    /<\/body>/i,
-    '<script src="cms-public.js?v=pages-static"></script><script src="danny-interactions.js" defer></script><script src="select-home.js?v=25" defer></script><script src="select-polish.js?v=25" defer></script><script src="site-languages.js?v=27" defer></script></body>',
-  );
   return rewriteMarkupPaths(html);
 }
 
 async function dashboardPage() {
-  let html = await readFile(path.join(templatesPath, 'admin.html'), 'utf8');
-  html = html.replace(/<head(?:\s[^>]*)?>/i, match => `${match}<base href="${basePath}"><script>window.SITE_BASE=${safeInlineJson(basePath)};window.GITHUB_PAGES_STATIC=true;</script>`);
-  html = html.replace('showroom-data.js?v=20261011-unified', 'studio-showroom-data.js?v=pages-local-dashboard');
-  html = html.replace(
-    '<span>当前浏览器数据 · 演示库存</span>',
-    '<span title="Changes are stored only in this browser and are not published automatically.">本浏览器保存 · 暂无登录保护 · 不会自动发布更改 / Local only · no login yet</span>',
-  );
-  return rewriteMarkupPaths(html);
-}
-
-async function copyDashboardAssets() {
-  const files = [
-    {source: 'admin.css', destination: 'admin.css'},
-    {source: 'admin-dashboard.css', destination: 'admin-dashboard.css'},
-    {source: 'admin.js', destination: 'admin.js'},
-    {source: 'admin-dashboard.js', destination: 'admin-dashboard.js'},
-    {source: 'showroom-data.js', destination: 'studio-showroom-data.js'},
-  ];
-  for (const file of files) {
-    const source = path.join(templatesPath, file.source);
-    const destination = path.join(outputDirectory, file.destination);
-    await mkdir(path.dirname(destination), {recursive: true});
-    const extension = path.extname(file.destination).toLowerCase();
-    if (extension === '.css' || extension === '.js') {
-      let content = await readFile(source, 'utf8');
-      content = extension === '.css' ? rewriteCssPaths(content) : rewriteJavaScriptPaths(content);
-      await writeFile(destination, content);
-    } else {
-      await cp(source, destination);
-    }
-  }
+  return renderTemplate('workbench.html', {route:'studio',title:'Inventory workbench · Danny Recon Select'});
 }
 
 const snapshot = JSON.parse(await readFile(publicDataPath, 'utf8'));
-if (!snapshot.document || !Array.isArray(snapshot.document.vehicles) || snapshot.document.vehicles.length === 0) {
+if (!snapshot.document || !Array.isArray(snapshot.document.vehicles)) {
   throw new Error('data/public-site.json must contain the currently published public vehicle list.');
 }
 if (!/^\d{8,15}$/.test(snapshot.document.profile?.phone || '')) {
   throw new Error('The public site snapshot is missing a valid WhatsApp number.');
 }
 const publicData = {
-  ...normalizePublicPaths(snapshot.document),
+  ...normalizePublicPaths(publicDocument({...normalizeDocument(snapshot.document),stories:(snapshot.document.stories||[]).map(s=>({...s,published:s.published??true,consent:s.consent??'approved'}))})),
   staticSite: true,
   preview: false,
   revision: snapshot.revision || 0,
@@ -187,9 +148,8 @@ const publicData = {
 
 await rm(outputDirectory, {recursive: true, force: true});
 await mkdir(outputDirectory, {recursive: true});
+await prepareExhibition();
 await copyPublicAssets();
-await copyDashboardAssets();
-
 const pages = [
   {template: 'index.html', file: 'index.html', route: '', title: 'Danny Recon Select'},
   {template: 'cms-calculator-v26.html', file: 'calculator/index.html', route: 'calculator', title: 'Car payment calculator · Danny Recon Select'},
@@ -226,6 +186,7 @@ const dashboard = await dashboardPage();
 await writeFile(path.join(outputDirectory, 'studio', 'index.html'), dashboard);
 await mkdir(path.join(outputDirectory, 'admin'), {recursive: true});
 await writeFile(path.join(outputDirectory, 'admin', 'index.html'), dashboard);
+await writeFile(path.join(outputDirectory,'admin.html'),dashboard);
 await writeFile(
   path.join(outputDirectory, '404.html'),
   `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="${basePath}"><title>Page not found · Danny Recon Select</title><link rel="stylesheet" href="design-system.css"></head><body><main class="public-cms-wrap"><section class="public-panel"><p class="stories-eyebrow">DANNY RECON SELECT</p><h1 class="public-title">We couldn’t find this page.</h1><p class="public-muted">Browse the current vehicles or return to the home page.</p><div class="public-actions"><a href="${basePath}#inventory">Browse inventory</a><a class="secondary" href="${basePath}">Home</a></div></section></main></body></html>`,
