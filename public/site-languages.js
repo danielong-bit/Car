@@ -1,5 +1,6 @@
 (() => {
   const rows=[
+    ['Photo category','照片分类','Kategori foto'],['Exterior','外观','Luaran'],['Interior','内饰','Dalaman'],['Details','细节','Butiran'],['Show example grade & report (replace later)','显示示例等级与报告（之后可替换）','Tunjuk contoh gred & laporan (ganti kemudian)'],['Examples display 4.5 / B and a labelled demonstration report. Enter a real grade or upload a report to replace the example.','示例展示 4.5 / B 与注明示例的报告；填写真实等级或上传报告后，会替换示例。','Contoh menunjukkan 4.5 / B dan laporan demonstrasi berlabel. Masukkan gred sebenar atau muat naik laporan untuk menggantikan contoh.'],
     ['Original auction report','原始拍卖报告','Laporan lelong asal'],['Upload report','上传报告','Muat naik laporan'],['Replace report','替换报告','Ganti laporan'],['Remove report','移除报告','Buang laporan'],['Upload a report image or PDF (up to 10 MB). It stays with this car.','上传报告图片或 PDF（最大 10 MB），会随这辆车保存。','Muat naik imej laporan atau PDF (sehingga 10 MB). Disimpan bersama kereta ini.'],
     ['Example rate. Use your bank’s effective annual rate (EIR).','示例利率，请使用银行的有效年利率（EIR）。','Kadar contoh. Gunakan kadar efektif tahunan (EIR) bank anda.'],['Example rate. Use your bank’s flat annual rate.','示例利率，请使用银行的旧式固定原额年利率。','Kadar contoh. Gunakan kadar rata tahunan bank anda.'],
     ['View breakdown ↓','查看明细 ↓','Lihat pecahan ↓'],

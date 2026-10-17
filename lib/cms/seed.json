@@ -235,7 +235,8 @@
         "title": "Audi S5 Avant — with Danny",
         "url": "https://www.tiktok.com/@dannyongg/video/7692969185961446676",
         "facebook": "https://www.facebook.com/reel/1834658307548568"
-      }
+      },
+      "conditionExample": true
     },
     {
       "id": "alphard-z",
@@ -383,7 +384,8 @@
       "galleryUrls": [
         "/assets/alphard-z-example-v26.png"
       ],
-      "coverImageUrl": "/assets/alphard-z-example-v26.png"
+      "coverImageUrl": "/assets/alphard-z-example-v26.png",
+      "conditionExample": true
     },
     {
       "id": "rx500h",
@@ -531,7 +533,8 @@
       "galleryUrls": [
         "/assets/rx500h-example-v26.png"
       ],
-      "coverImageUrl": "/assets/rx500h-example-v26.png"
+      "coverImageUrl": "/assets/rx500h-example-v26.png",
+      "conditionExample": true
     },
     {
       "id": "gtr-premium",
@@ -679,7 +682,8 @@
       "galleryUrls": [
         "/assets/gtr-premium-example-v26.png"
       ],
-      "coverImageUrl": "/assets/gtr-premium-example-v26.png"
+      "coverImageUrl": "/assets/gtr-premium-example-v26.png",
+      "conditionExample": true
     },
     {
       "id": "civic-type-r",
@@ -827,7 +831,8 @@
       "galleryUrls": [
         "/assets/civic-type-r-example-v26.png"
       ],
-      "coverImageUrl": "/assets/civic-type-r-example-v26.png"
+      "coverImageUrl": "/assets/civic-type-r-example-v26.png",
+      "conditionExample": true
     },
     {
       "id": "crown-crossover",
@@ -975,7 +980,8 @@
       "galleryUrls": [
         "/assets/crown-crossover-example-v26.png"
       ],
-      "coverImageUrl": "/assets/crown-crossover-example-v26.png"
+      "coverImageUrl": "/assets/crown-crossover-example-v26.png",
+      "conditionExample": true
     },
     {
       "id": "lm500h",
@@ -1123,7 +1129,8 @@
       "galleryUrls": [
         "/assets/lm500h-example-v26.png"
       ],
-      "coverImageUrl": "/assets/lm500h-example-v26.png"
+      "coverImageUrl": "/assets/lm500h-example-v26.png",
+      "conditionExample": true
     }
   ],
   "stories": [

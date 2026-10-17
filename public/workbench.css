@@ -9,3 +9,5 @@
 
 .wb-topbar .danny-language{margin:0}.wb-topbar .danny-language>span{display:none}.wb-topbar .danny-language select{width:95px;font-size:12px}.wb-topbar{position:relative}
 @media(max-width:767px){.wb-topbar .danny-language{position:absolute;top:0;right:0}.wb-topbar h1{padding-right:110px}.wb-topbar .danny-language select{width:90px}.wb-topbar .eyebrow{padding-right:100px}}
+
+.photo-category-field{display:grid;gap:5px;margin:8px;font-size:12px}.photo-category-field select{min-height:44px;width:100%;font-size:12px}
