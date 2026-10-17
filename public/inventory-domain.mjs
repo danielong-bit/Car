@@ -16,9 +16,9 @@ export function normalizeVehicle(input={}){
  const make=String(v.make??v.brand??'').trim(),year=number(v.manufactureYear??v.year),color=v.exteriorColor??v.color??'';
  const status=String(v.status||'draft').toLowerCase()==='published'?'available':String(v.status||'draft').toLowerCase();
  if(v.coverImageUrl&&gallery.some(m=>m.url===v.coverImageUrl)){const i=gallery.findIndex(m=>m.url===v.coverImageUrl);gallery.unshift(...gallery.splice(i,1));}
- return {...v,id:v.id||'',stockId:String(v.stockId||'').trim(),make,brand:make,model:String(v.model||'').trim(),variant:v.variant||'',chassisCode:v.chassisCode||'',manufactureYear:year,year,registrationYear:number(v.registrationYear),conditionType:v.conditionType||'Recon',priceRm:price,price,mileageKm:mileage,mileage:mileage==null?'':mileage.toLocaleString('en-MY')+' km',engineCc:number(v.engineCc),transmission:v.transmission||'Auto',fuelType:v.fuelType||'',exteriorColor:color,color,interiorColor:v.interiorColor||'',auctionGrade:grade.auctionGrade,interiorGrade:v.interiorGrade||grade.interiorGrade,auctionReport:v.auctionReport?{url:String(v.auctionReport.url||''),name:String(v.auctionReport.name||'Auction report')}:null,auctionHouse:v.auctionHouse||'',gradeVerified:Boolean(v.gradeVerified),conditionNotes:v.conditionNotes||'',status,isFeatured:Boolean(v.isFeatured??v.featured),featured:Boolean(v.isFeatured??v.featured),badgeLabel:v.badgeLabel||'',location:v.location||'',warrantyInfo:v.warrantyInfo||'',features:Array.isArray(v.features)?v.features:[],legacyFeatures:!Array.isArray(v.features)?v.features:v.legacyFeatures,description:v.description||'',gallery,galleryUrls:gallery.filter(m=>!m.video&&m.visible!==false).map(m=>m.url),coverImageUrl:gallery.find(m=>!m.video&&m.visible!==false)?.url||'',tour:{...(v.tour||{}),hotspots:[]}};
+ return {...v,id:v.id||'',stockId:String(v.stockId||'').trim(),make,brand:make,model:String(v.model||'').trim(),variant:v.variant||'',chassisCode:v.chassisCode||'',manufactureYear:year,year,registrationYear:number(v.registrationYear),conditionType:v.conditionType||'Recon',priceRm:price,price,mileageKm:mileage,mileage:mileage==null?'':mileage.toLocaleString('en-MY')+' km',engineCc:number(v.engineCc),transmission:v.transmission||'Auto',fuelType:v.fuelType||'',exteriorColor:color,color,interiorColor:v.interiorColor||'',auctionGrade:grade.auctionGrade,interiorGrade:v.interiorGrade||grade.interiorGrade,conditionExample:v.conditionExample===true,auctionReport:v.auctionReport?{url:String(v.auctionReport.url||''),name:String(v.auctionReport.name||'Auction report')}:null,auctionHouse:v.auctionHouse||'',gradeVerified:Boolean(v.gradeVerified),conditionNotes:v.conditionNotes||'',status,isFeatured:Boolean(v.isFeatured??v.featured),featured:Boolean(v.isFeatured??v.featured),badgeLabel:v.badgeLabel||'',location:v.location||'',warrantyInfo:v.warrantyInfo||'',features:Array.isArray(v.features)?v.features:[],legacyFeatures:!Array.isArray(v.features)?v.features:v.legacyFeatures,description:v.description||'',gallery,galleryUrls:gallery.filter(m=>!m.video&&m.visible!==false).map(m=>m.url),coverImageUrl:gallery.find(m=>!m.video&&m.visible!==false)?.url||'',tour:{...(v.tour||{}),hotspots:[]}};
 }
-export function normalizeDocument(d){return {...d,vehicles:(d.vehicles||[]).map(normalizeVehicle),homepage:{...d.homepage,showSoldVehicles:d.homepage?.showSoldVehicles??true},profile:{...d.profile},finance:{rate:6,tenure:7,downPayment:10,...d.finance}};}
+export function normalizeDocument(d){return {...d,vehicles:(d.vehicles||[]).map(normalizeVehicle),homepage:{...d.homepage,showSoldVehicles:d.homepage?.showSoldVehicles??true},profile:{...d.profile},finance:financeSettings(d.finance)};}
 export function vehicleIssues(v){
  const e=[];
  if(!/^[A-Za-z0-9_-]{1,80}$/.test(v.stockId||''))e.push('Stock ID: use letters, numbers, - or _.');
@@ -33,6 +33,7 @@ export function vehicleIssues(v){
  return e;
 }
 export function estimate(v,finance={}){
+ finance=financeSettings(finance);
  if(v.monthlyEstimateRm!=null)return v.monthlyEstimateRm;
  if(v.priceRm==null)return null;
  const years=Number(finance.tenure)||7,months=years*12,principal=v.priceRm*(1-(finance.downPayment??10)/100),annualRate=finance.rate??6,rate=Math.pow(1+annualRate/100,1/12)-1;
@@ -40,3 +41,8 @@ export function estimate(v,finance={}){
 }
 
 export function validReportUrl(url){return typeof url==='string'&&!url.includes('..')&&/^(?:\/(?:[a-zA-Z0-9_-]+\/)*assets\/[a-zA-Z0-9_./%-]+|https:\/\/[a-zA-Z0-9.-]+\/[a-zA-Z0-9_./%-]+)\.(?:pdf|webp|png|jpe?g)(?:\?[a-zA-Z0-9_=&%+.-]*)?$/i.test(url);}
+
+export function financeSettings(finance={}){
+ const rate=Number(finance.rate??6),down=Number(finance.downPayment??10),tenure=Number(finance.tenure??7);
+ return {...finance,rate:Number.isFinite(rate)&&rate>=0&&rate<=30?rate:6,downPayment:Number.isFinite(down)?Math.round(Math.min(100,Math.max(0,down))/5)*5:10,tenure:[5,7,9].includes(tenure)?tenure:7,method:finance.method==='flat'?'flat':'reducing'};
+}

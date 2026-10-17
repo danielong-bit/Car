@@ -211,7 +211,8 @@
           "/assets/audi-s5/seats_16x9.jpg",
           "/assets/audi-s5/audio_16x9.jpg",
           "/assets/audi-s5/climate_16x9.jpg"
-        ]
+        ],
+        "conditionExample": true
       },
       {
         "id": "alphard-z",
@@ -334,7 +335,8 @@
         "coverImageUrl": "/assets/alphard-z-example-v26.png",
         "galleryUrls": [
           "/assets/alphard-z-example-v26.png"
-        ]
+        ],
+        "conditionExample": true
       },
       {
         "id": "rx500h",
@@ -457,7 +459,8 @@
         "coverImageUrl": "/assets/rx500h-example-v26.png",
         "galleryUrls": [
           "/assets/rx500h-example-v26.png"
-        ]
+        ],
+        "conditionExample": true
       },
       {
         "id": "gtr-premium",
@@ -580,7 +583,8 @@
         "coverImageUrl": "/assets/gtr-premium-example-v26.png",
         "galleryUrls": [
           "/assets/gtr-premium-example-v26.png"
-        ]
+        ],
+        "conditionExample": true
       },
       {
         "id": "civic-type-r",
@@ -703,7 +707,8 @@
         "coverImageUrl": "/assets/civic-type-r-example-v26.png",
         "galleryUrls": [
           "/assets/civic-type-r-example-v26.png"
-        ]
+        ],
+        "conditionExample": true
       },
       {
         "id": "crown-crossover",
@@ -826,7 +831,8 @@
         "coverImageUrl": "/assets/crown-crossover-example-v26.png",
         "galleryUrls": [
           "/assets/crown-crossover-example-v26.png"
-        ]
+        ],
+        "conditionExample": true
       },
       {
         "id": "lm500h",
@@ -949,7 +955,8 @@
         "coverImageUrl": "/assets/lm500h-example-v26.png",
         "galleryUrls": [
           "/assets/lm500h-example-v26.png"
-        ]
+        ],
+        "conditionExample": true
       }
     ],
     "stories": [

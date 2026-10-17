@@ -62,11 +62,17 @@ The small ZIP writer and its MIT license are included, so GitHub Pages can build
   and per-car grades/report panels. The former `/calculator/` and `/calculator.html`
   URLs redirect to the selected vehicle's calculator; there is no separate calculator UI.
 
-The inline calculator exposes car selection, price, down payment and annual rate,
-using sliders and editable numbers. Only the estimated monthly payment is displayed.
-The term comes from Website & profile settings (7 years initially) and is shown next
-to the result. The rate uses the saved finance method (EIR by default). Insurance,
+The inline calculator uses the current car's stored price and the owner's fixed
+example rate. Customers adjust deposit in 5% steps (with cash amount and presets)
+and choose 5, 7 or 9 years. Only the estimated monthly payment is displayed.
+Defaults come from Website & profile settings (7 years initially).
+The rate uses the saved finance method (EIR by default). Insurance,
 road tax, other costs, charts and repayment breakdowns are omitted from this UI.
+
+Car galleries support categories, previous/next buttons, keyboard arrows, touch
+swipes and enlargement. The workbench edits each photo's category. Sample stock
+shows explicitly labelled example 4.5/B grades and a demonstration report; entering
+real grades or uploading a report turns example mode off.
 
 `npm run build:pages` writes `dist-pages/` at `/Car-Recond-Japan/`.
 `npm run build:preview` writes `dist-preview/` at `/`.

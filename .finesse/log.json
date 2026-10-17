@@ -26,5 +26,12 @@
     "scope": "Inline choose-car / price / deposit / rate estimator with one monthly result; auction PDF or image uploads; homepage guide removal and Xiaohongshu asset fix. Service and tint catalogue deferred by owner.",
     "assets": "Existing car photography and Xiaohongshu SVG. Supplied XPEL images and 3M PDF retained as unpublished reference.",
     "motion": "Native sliders and restrained focus/press feedback"
+  },
+  {
+    "date": "2026-10-17",
+    "project": "Danny Recon Select",
+    "direction": "Approved compact car-detail refinement in established navy/blue/Outfit",
+    "scope": "Locked car price and owner example rate; deposit 5% steps; tenure 5/7/9; category gallery and section navigation; explicit example 4.5/B report replaceable in workbench",
+    "motion": "Native touch swipe, arrows and restrained transitions"
   }
 ]

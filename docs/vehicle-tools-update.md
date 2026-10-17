@@ -30,3 +30,17 @@ Validation: Pages/root builds, framework build, 25 tests, source lint (0 errors;
 91 existing legacy warnings), mobile width/keyboard controls, car switching, zero
 interest, invalid input, report PDF attachment, legacy calculator forwarding and
 loaded social icons. The local upload test was discarded rather than saved to stock.
+
+## Approved detail refinement
+
+The current car's published price and owner-configured example rate are locked.
+Deposit moves in 5% steps, displays its RM amount, and has 10/20/30% presets.
+Customers choose 5/7/9 years (default 7). No editable car/price/rate fields remain.
+Desktop title and price share the right column; mobile title precedes the gallery.
+A sticky section menu links photos, specifications, condition, payment and video.
+Gallery categories, arrows, keyboard navigation, swipe and enlargement share state.
+Example mode explicitly shows 4.5/B and a labelled demonstration SVG report. Real
+records remain untouched; entering real grades or uploading a report disables the
+example. Workbench photo categories and example mode are editable per car.
+Validation for this refinement: 28 inventory tests, static root and Pages builds,
+targeted lint, browser gallery/payment and responsive checks.
