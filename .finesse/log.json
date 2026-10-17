@@ -40,5 +40,12 @@
     "direction": "Service consultation in existing navy/blue/Outfit",
     "scope": "Example workshop profile without phone; maintenance/repair/tint enquiry; vehicle mileage autofill; preserve language-switch draft",
     "assets": "Code-native service-bay SVG illustration, explicitly not a workshop photograph"
+  },
+  {
+    "date": "2026-10-17",
+    "project": "Danny Recon Select",
+    "direction": "Owner-corrected tint-only catalogue",
+    "scope": "Only XPEL and 3M supplied packages, brand and body-category prices, source poster enlargement and Danny quotation links. Removes all workshop, maintenance and repair content.",
+    "assets": "Six original XPEL posters as confirmed by owner; 3M tint page2 rendered from suppliedPDF"
   }
 ]

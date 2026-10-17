@@ -152,7 +152,7 @@ await prepareExhibition();
 await copyPublicAssets();
 const pages = [
   {template: 'index.html', file: 'index.html', route: '', title: 'Danny Recon Select'},
-  {template: 'services.html', file: 'services/index.html', route: 'services', title: 'Service & maintenance · Danny Recon Select'},
+  {template: 'services.html', file: 'services/index.html', route: 'services', title: 'XPEL & 3M Tinted · Danny Recon Select'},
   {template: 'calculator-redirect.html', file: 'calculator/index.html', route: 'calculator', title: 'Car payment calculator · Danny Recon Select'},
   {template: 'audi.html', file: 'audi/index.html', route: 'audi', title: 'Audi S5 Avant · Danny Recon Select'},
 ];

@@ -88,13 +88,12 @@ Danny's specific Audi S5 Avant explanation stays inside its vehicle page. Public
 cards preserve example-photo labels through their provenance note; no fabricated
 customer quotes, grades or verified-condition claims are added.
 
-## Service consultation section
+## Window tint packages
 
-Standalone `/services/` page, reached through the homepage Car care navigation. The homepage contains no service form. `public/service-care.mjs` and
-`public/service-care.css` provide a clearly marked example workshop profile, native
-multi-service choices, car/mileage autofill and optional notes. Switching languages
-preserves the draft. The action opens a WhatsApp draft to Danny; it does not send
-messages, save customer details or create bookings. No workshop phone or fabricated
-precise address/map is published. The service-bay image is an SVG illustration.
-XPEL/3M appear only as consultation options; packages/prices remain deferred.
-Replace the example partner content in `public/service-care.mjs` when supplied.
+Standalone `/services/` contains only XPEL/3M window tint packages, reached via the
+Tinted navigation link. No workshop profile, maintenance, repairs or mileage form.
+Six supplied XPEL posters are preserved as-is. The 3M tint price sheet is rendered
+from page 2 of the supplied PDF; unrelated PDF offerings are not published.
+`public/tint-packages.mjs` holds exact source prices by vehicle category.
+Customers switch brand/category, enlarge source artwork, and open a car-category
+and package-specific WhatsApp draft to Danny. Final arrangements remain with Danny.
