@@ -90,7 +90,7 @@ customer quotes, grades or verified-condition claims are added.
 
 ## Service consultation section
 
-Homepage `#service-care` follows recent deliveries. `public/service-care.mjs` and
+Standalone `/services/` page, reached through the homepage Car care navigation. The homepage contains no service form. `public/service-care.mjs` and
 `public/service-care.css` provide a clearly marked example workshop profile, native
 multi-service choices, car/mileage autofill and optional notes. Switching languages
 preserves the draft. The action opens a WhatsApp draft to Danny; it does not send
