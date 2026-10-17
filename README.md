@@ -87,3 +87,14 @@ customer enquiries or appointments. Danny confirms availability and viewing time
 Danny's specific Audi S5 Avant explanation stays inside its vehicle page. Public
 cards preserve example-photo labels through their provenance note; no fabricated
 customer quotes, grades or verified-condition claims are added.
+
+## Service consultation section
+
+Homepage `#service-care` follows recent deliveries. `public/service-care.mjs` and
+`public/service-care.css` provide a clearly marked example workshop profile, native
+multi-service choices, car/mileage autofill and optional notes. Switching languages
+preserves the draft. The action opens a WhatsApp draft to Danny; it does not send
+messages, save customer details or create bookings. No workshop phone or fabricated
+precise address/map is published. The service-bay image is an SVG illustration.
+XPEL/3M appear only as consultation options; packages/prices remain deferred.
+Replace the example partner content in `public/service-care.mjs` when supplied.
