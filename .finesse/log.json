@@ -14,5 +14,17 @@
     },
     "motion": "Small hover/press feedback; reduced-motion supported",
     "scope": "Manual exhibition stock, browser persistence and GitHub ZIP export; no cloud, Excel or login"
+  },
+  {
+    "date": "2026-10-17",
+    "project": "Danny Recon Select",
+    "registers": [
+      "commerce",
+      "product"
+    ],
+    "direction": "Keep the established navy, blue and Outfit system; compact car-specific payment and condition panels",
+    "scope": "Inline choose-car / price / deposit / rate estimator with one monthly result; auction PDF or image uploads; homepage guide removal and Xiaohongshu asset fix. Service and tint catalogue deferred by owner.",
+    "assets": "Existing car photography and Xiaohongshu SVG. Supplied XPEL images and 3M PDF retained as unpublished reference.",
+    "motion": "Native sliders and restrained focus/press feedback"
   }
 ]

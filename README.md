@@ -26,6 +26,9 @@ photos, select a cover and reorder with the arrow buttons. Photos are resized to
 Edit Auto/Manual and Available, Booked, Sold or Unavailable directly. Draft and
 Archived vehicles are hidden from the public listing. Sold visibility is optional.
 Prices may be empty, displaying Enquire. Auction grades are optional, never invented.
+In Auction sheet & detailed specs, attach an original report as JPG, PNG, WebP or
+PDF (maximum 10 MB). Reports are saved locally with the car and included in the
+GitHub update ZIP. Report images keep their original resolution and bytes. Missing grades and reports are labelled as not provided.
 
 **Save vehicle saves only in this browser.** It survives refreshes but cannot update
 another visitor's browser or GitHub by itself. Preview showroom opens an explicitly
@@ -36,7 +39,7 @@ Clearing browser data removes local edits/photos, so export your changes regular
 
 1. Click **Export GitHub update** in the workbench.
 2. Extract the ZIP. It contains `data/public-site.json`,
-   `data/inventory-workbench.json`, and any new `public/assets/uploads/` photos.
+   `data/inventory-workbench.json`, and any new `public/assets/uploads/` photos/reports.
 3. Upload those folders to this repository, preserving their paths, and commit.
 4. The existing GitHub Pages workflow rebuilds and publishes when `main` changes.
 
@@ -55,7 +58,15 @@ The small ZIP writer and its MIT license are included, so GitHub Pages can build
 - `public/showroom.mjs`: public filters, cards, galleries, video and comparison.
 - `out/`: maintained HTML templates; the Audi page is now a normal gallery.
 - `scripts/build-github-pages.mjs`: base-path-safe Pages builder.
-- `public/cms-calculator-v26.js`: retained slider/chart payment calculator and JPJ estimate.
+- `public/vehicle-tools.mjs` and `public/vehicle-tools.css`: inline payment calculator
+  and per-car grades/report panels. The former `/calculator/` and `/calculator.html`
+  URLs redirect to the selected vehicle's calculator; there is no separate calculator UI.
+
+The inline calculator exposes car selection, price, down payment and annual rate,
+using sliders and editable numbers. Only the estimated monthly payment is displayed.
+The term comes from Website & profile settings (7 years initially) and is shown next
+to the result. The rate uses the saved finance method (EIR by default). Insurance,
+road tax, other costs, charts and repayment breakdowns are omitted from this UI.
 
 `npm run build:pages` writes `dist-pages/` at `/Car-Recond-Japan/`.
 `npm run build:preview` writes `dist-preview/` at `/`.
