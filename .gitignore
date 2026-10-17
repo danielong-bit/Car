@@ -59,3 +59,11 @@ next-env.d.ts
 /.codex/
 /outputs/
 /work/
+
+/dist-preview/
+/.local-studio/
+
+/public/inventory-workbench.json
+*-workbench.log
+
+/.test-pages/

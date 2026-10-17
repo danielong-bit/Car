@@ -1,21 +1,72 @@
 # Danny Recon Select
 
-Live website: https://danielong-bit.github.io/Car-Recond-Japan/
+Public website: https://danielong-bit.github.io/Car-Recond-Japan/
 
-The customer-facing website is built and hosted by GitHub Pages. It does not need ChatGPT Sites or a server runtime to display the inventory, vehicle pages, Audi photo tour, language selector, or payment calculator.
+This is a GitHub Pages exhibition website. The owner explicitly chose manual
+inventory editing with **no cloud database, Excel workflow or login**.
 
-## Publish
+## Preview locally
 
-The GitHub Actions workflow builds the static site whenever a change reaches `main` and deploys it to GitHub Pages. In repository Settings → Pages, the publishing source must be set to **GitHub Actions**.
+Use Node.js 22.13+:
 
-To build the Pages files locally, use Node.js 22.13 or later and run `npm run build:pages`. The output is written to `dist-pages/`.
+```sh
+npm ci --ignore-scripts
+npm run build:preview
+npm run preview:local
+```
 
-## Update public content
+Open http://127.0.0.1:4173/ and http://127.0.0.1:4173/studio/.
+`/admin/` and `/admin.html` also open the same workbench.
 
-The site reads its published vehicle and profile data from `data/public-site.json`. `/studio/` and `/admin/` open the showroom dashboard without a login for now. Dashboard edits are saved only in that browser and do not update the public website; export a backup before clearing browser data. To publish changes, edit `data/public-site.json` in GitHub and save to `main` to start a new Pages deployment. Login protection can be added later with a backend.
+## Manage stock
 
-This file contains only the public site snapshot. Do not put passwords, customer enquiries, or private customer records in the repository.
+Open Inventory workbench from the website footer. Add a car, upload JPG/PNG/WebP
+photos, select a cover and reorder with the arrow buttons. Photos are resized to
+1920px at WebP quality 0.82 and stored as blobs in this browser, without base64.
+Edit Auto/Manual and Available, Booked, Sold or Unavailable directly. Draft and
+Archived vehicles are hidden from the public listing. Sold visibility is optional.
+Prices may be empty, displaying Enquire. Auction grades are optional, never invented.
 
-## Contact and bookings
+**Save vehicle saves only in this browser.** It survives refreshes but cannot update
+another visitor's browser or GitHub by itself. Preview showroom opens an explicitly
+labelled local preview. Ordinary site visitors continue seeing the published snapshot.
+Clearing browser data removes local edits/photos, so export your changes regularly.
 
-WhatsApp links open Danny's number with an enquiry already filled in. The showroom form opens WhatsApp with the selected car, requested date, and customer contact details. GitHub Pages does not save bookings or track vehicle views in a server database.
+## Put manual changes on GitHub
+
+1. Click **Export GitHub update** in the workbench.
+2. Extract the ZIP. It contains `data/public-site.json`,
+   `data/inventory-workbench.json`, and any new `public/assets/uploads/` photos.
+3. Upload those folders to this repository, preserving their paths, and commit.
+4. The existing GitHub Pages workflow rebuilds and publishes when `main` changes.
+
+The ZIP is also a photo backup. Restore its `inventory-workbench.json` in Website &
+profile; uploaded photos must be in the matching website folder, or retained in the
+same browser. Do not put passwords, customer contact records or other private data
+in this public repository or workbench. There is no server-side editing endpoint.
+The small ZIP writer and its MIT license are included, so GitHub Pages can build without installing the full framework dependencies.
+
+## Source and build
+
+- `data/public-site.json`: published public snapshot.
+- `data/inventory-workbench.json`: editable exhibition stock (including hidden statuses).
+- `public/inventory-domain.mjs`: compatible old/new vehicle model and price estimate.
+- `public/workbench.mjs` and `public/browser-stock.mjs`: manual browser workbench/storage.
+- `public/showroom.mjs`: public filters, cards, galleries, video and comparison.
+- `out/`: maintained HTML templates; the Audi page is now a normal gallery.
+- `scripts/build-github-pages.mjs`: base-path-safe Pages builder.
+- `public/cms-calculator-v26.js`: retained slider/chart payment calculator and JPJ estimate.
+
+`npm run build:pages` writes `dist-pages/` at `/Car-Recond-Japan/`.
+`npm run build:preview` writes `dist-preview/` at `/`.
+`npm run lint`, `npm run build`, and `npm run test:inventory` run the required checks.
+Generated output and third-party bundles are excluded from source lint.
+
+## Customer enquiries
+
+WhatsApp is prefilled with stock ID, car details, price and a link. Book a showroom
+viewing opens WhatsApp with the customer-entered details; this site does not retain
+customer enquiries or appointments. Danny confirms availability and viewing times.
+Danny's specific Audi S5 Avant explanation stays inside its vehicle page. Public
+cards preserve example-photo labels through their provenance note; no fabricated
+customer quotes, grades or verified-condition claims are added.

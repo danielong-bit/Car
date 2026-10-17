@@ -1,2 +1,3 @@
-import {documentFor} from '@/lib/cms/service';
-export async function GET(request:Request,{params}:{params:Promise<{stockId:string}>}){const {stockId}=await params;const d=await documentFor();const v=d.document.vehicles.find((v:any)=>v.stockId===stockId&&['available','reserved','sold'].includes(v.status));return v?Response.redirect(new URL('/vehicle/'+v.id,request.url),302):new Response('Vehicle not found',{status:404});}
+import html from '@/out/cms-vehicle.html?raw';
+import {showroomPage} from '@/lib/cms/page';
+export function GET(request:Request){return showroomPage(request,html);}

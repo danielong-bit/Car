@@ -1,0 +1,18 @@
+[
+  {
+    "date": "2026-10-17",
+    "project": "Danny Recon Select",
+    "registers": [
+      "commerce",
+      "product"
+    ],
+    "direction": "Navy personal showroom, neutral stock list, blue actions",
+    "assets": "Existing Danny cutout, showroom background, actual and labelled example car photography",
+    "density": {
+      "showroom": 6,
+      "workbench": 8
+    },
+    "motion": "Small hover/press feedback; reduced-motion supported",
+    "scope": "Manual exhibition stock, browser persistence and GitHub ZIP export; no cloud, Excel or login"
+  }
+]
