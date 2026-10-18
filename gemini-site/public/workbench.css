@@ -124,3 +124,18 @@
 .wb-feature-chip.is-active{background:rgba(110,231,183,.16)!important;border-color:var(--mint,#6ee7b7)!important;color:var(--mint,#6ee7b7)!important;font-weight:650}
 .field-stack{display:flex;flex-direction:column}
 @media(max-width:860px){.wb-fill-guide-grid{grid-template-columns:1fr}}
+/* Homepage brand display controls */
+.wb-brand-settings{border:1px solid var(--line);border-radius:12px;padding:20px;margin:20px 0;background:var(--page)}
+.wb-brand-settings-heading h3{font-size:17px;line-height:1.4;margin:0 0 7px}
+.wb-brand-settings-heading p,.wb-brand-hint{font-size:13px;line-height:1.65;color:var(--muted);margin:8px 0 16px}
+.wb-brand-settings>.field{max-width:100%;margin-top:16px}
+.wb-brand-settings select{width:100%;max-width:100%;font-size:13px}
+.wb-brand-settings fieldset{min-width:0;border:0;padding:0;margin:18px 0}
+.wb-brand-settings fieldset[hidden]{display:none}
+.wb-brand-settings legend{font-size:13px;color:var(--muted);padding:0;margin-bottom:12px}
+.wb-brand-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.wb-brand-options>label{display:flex;align-items:center;gap:12px;min-height:64px;border:1px solid var(--line);border-radius:9px;padding:12px;cursor:pointer;background:var(--surface)}
+.wb-brand-options>label:has(input:checked){border-color:var(--mint);background:color-mix(in srgb,var(--mint) 7%,var(--surface))}
+.wb-brand-options input{width:20px;height:20px;flex:0 0 auto;accent-color:var(--mint)}
+.wb-brand-options strong{display:block;font-size:14px;font-weight:550}
+.wb-brand-options small{display:block;color:var(--muted);font-size:12px;margin-top:3px}

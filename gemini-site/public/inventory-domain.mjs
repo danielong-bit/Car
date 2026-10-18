@@ -1,3 +1,4 @@
+import {normalizeBrandFilters} from './inventory-brand-filters.mjs';
 import {tintPackages as defaultTintPackages} from './tint-packages.mjs';
 export const STATUSES=['draft','available','reserved','sold','unavailable','archived'];
 export const GRADES=['','S','6','5','4.5','4','3.5','R','RA'];
@@ -86,6 +87,7 @@ export function normalizeTintPackage(p={},index=0){
 export function normalizeDocument(d={}){
  const homepage={
   ...d.homepage,
+  ...normalizeBrandFilters(d.homepage),
   title:d.homepage?.title==='JAPAN RECON'?'JAPAN RECOND':(d.homepage?.title||'JAPAN RECOND'),
   showSoldVehicles:d.homepage?.showSoldVehicles??true,
   hideAvailableBadge:d.homepage?.hideAvailableBadge??true,
