@@ -1,0 +1,8 @@
+{
+  "name": "Japan Recon Car Gallery — Interactive Demo",
+  "description": "Interactive Japanese Recon Car Gallery & Showroom prototype featuring real vehicle details, spec explorer, and digital showroom experience.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

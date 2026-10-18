@@ -1,0 +1,5 @@
+(()=>{
+const doc=window.CMS_DATA||{vehicles:window.JRCG_BASE_VEHICLES||[]};
+const catalog=()=>structuredClone([...doc.vehicles].sort((a,b)=>{const ids=doc.homepage?.featured||[];const ai=ids.indexOf(a.id),bi=ids.indexOf(b.id);return (ai<0?999:ai)-(bi<0?999:bi);}).filter(v=>doc.preview||['available','reserved'].includes(v.status)).map(v=>({...v,price:'RM '+Number(v.price||0).toLocaleString('en-MY'),image:v.gallery?.find(m=>m.visible!==false&&!m.video)?.url||v.image,preview:undefined,actualPage:v.id==='audi-s5'?'/audi.html':undefined,specs:v.specs||{},features:v.features||{},year:Number(v.year)||0})));
+const seen=new Set();window.JRCG={catalog,price:v=>Number(String(v||'').replace(/[^\d.]/g,''))||0,read:(k,f)=>k==='jrcg_hero_slider'?{featuredId:doc.homepage?.featured?.[0],tag:'FEATURED',action:'inspect'}:f,notify:()=>{},trackView:id=>{if(!doc.preview&&!seen.has(id)){seen.add(id);fetch('/api/cms/view',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vehicleId:id})}).catch(()=>{});}},addAppointment:()=>null,appointments:()=>[],views:()=>[],isActive:()=>false,getTheme:()=>doc.homepage?.theme||'platinum'};
+})();

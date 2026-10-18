@@ -1,0 +1,367 @@
+import {galleryMarkup,bindGallery} from './vehicle-gallery.mjs';
+import {renderServiceCare} from './service-care.mjs';
+import {calculatorMarkup,bindVehicleCalculator,conditionMarkup,bindAuctionReport,conditionValues,translator} from './vehicle-tools.mjs';
+import {normalizeDocument,deriveSpecialBadges,estimate,label} from './inventory-domain.mjs';
+import {readLocal,deleteLocal,photoUrl} from './browser-stock.mjs';
+import {icon} from './stock-icons.mjs';
+const $=s=>document.querySelector(s),base=window.SITE_BASE||'/',esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const words={Home:['首页','Utama'],Services:['车主服务','Perkhidmatan'],Tinted:['隔热膜配套','Filem tingkap'],Chat:['联系','Chat'],Powertrain:['动力系统','Rangkaian kuasa'],'Exterior & chassis':['外观与底盘','Luaran & casis'],'Interior & equipment':['内饰与配备','Dalaman & kelengkapan'],'Vehicle status':['车辆状态','Status kereta'],Observed:['细节记录','Pemerhatian'],Chassis:['底盘编号','Casis'],Wagon:['旅行车','Wagon'],Coupe:['双门跑车','Coupe'],Sedan:['轿车','Sedan'],SUV:['SUV','SUV'],MPV:['MPV','MPV'],Hatchback:['掀背车','Hatchback'],Convertible:['敞篷跑车','Convertible'],Example:['示例','Contoh'],
+ 'Inventory':['车辆库存','Inventori'],'Calculator':['月供计算器','Kalkulator'],'Deliveries':['交车时刻','Serahan'],'Deliveries.':['交车时刻。','Serahan.'],'Recent deliveries':['交车时刻','Serahan terkini'],'About Danny':['关于 Danny','Tentang Danny'],'JAPANESE RECOND CARS IN MALAYSIA':['马来西亚日本进口 RECOND 车','KERETA RECOND JEPUN DI MALAYSIA'],'JAPANESE RECON CARS IN MALAYSIA':['马来西亚日本进口 RECOND 车','KERETA RECOND JEPUN DI MALAYSIA'],'Your next car, personally guided.':['下一辆车，让 Danny 陪你选。','Kereta seterusnya, dibimbing sendiri.'],'Carefully selected. Honestly advised. Explore the details with Danny.':['用心选车，诚恳建议。和 Danny 一起看清车辆细节。','Dipilih teliti. Nasihat jujur. Terokai butiran bersama Danny.'],'Browse inventory':['浏览车辆 →','Lihat inventori →'],'FIND YOUR NEXT CHAPTER':['找到下一段旅程','CARI PERJALANAN SETERUSNYA'],'Explore the collection.':['看看心仪的车。','Terokai koleksi.'],'The details you need. A conversation when you are ready.':['先了解车辆，准备好了再聊。','Butiran yang anda perlukan. Berbual apabila bersedia.'],'Plan your monthly payment':['计算你的月供 ↗','Rancang ansuran bulanan ↗'],'Featured only':['只看精选','Pilihan sahaja'],'KNOW WHAT YOU ARE BUYING':['看清车辆，安心选择','KENALI KERETA ANDA'],'A grade is a starting point.':['从等级开始，了解更多。','Gred ialah titik permulaan.'],'Ask Danny to review the original auction report with you. Independent pre-purchase inspections are welcome.':['欢迎向 Danny 查看原始拍卖报告，也欢迎安排独立购车前检测。','Semak laporan lelong asal bersama Danny. Pemeriksaan bebas sebelum membeli dialu-alukan.'],'Ask about an auction report':['了解拍卖报告 ↗','Tanya laporan lelong ↗'],'Excellent':['极佳','Cemerlang'],'Very good':['非常好','Sangat baik'],'Good':['良好','Baik'],'Fair':['一般','Sederhana'],'Repaired':['有修复记录','Dibaiki'],'Interior grades describe cabin condition. Ask for the report, photos and condition notes.':['内饰等级用于描述车厢状况，请结合报告、照片与车况记录。','Gred dalaman menerangkan keadaan kabin. Minta laporan, foto dan nota keadaan.'],'COLLECTION DAYS WITH DANNY':['和 DANNY 的交车时刻','HARI SERAHAN BERSAMA DANNY'],'Recent deliveries.':['交车时刻。','Serahan terkini.'],'Real moments from the showroom, shared with permission.':['经许可分享的展厅与交车时刻。','Detik showroom dikongsi dengan izin.'],'YOUR DIRECT CONTACT':['直接联系 DANNY','HUBUNGI DANNY TERUS'],'A car. A conversation. Danny.':['聊聊你的下一辆车。','Kereta. Perbualan. Danny.'],'TRANSPARENT RECOND ASSURANCE':['透明 RECOND 购车保障','JAMINAN KERETA RECOND TELUS'],'Before you decide':['决定之前','Sebelum anda memilih'],'Discuss the original auction report, import documents, registration, warranty and any inspection with Danny for the specific car.':['向 Danny 了解这辆车的原始拍卖报告、进口文件、注册、保修与独立验车安排。','Bincang laporan lelong asal, dokumen import, pendaftaran, waranti dan pemeriksaan kereta bersama Danny.'],'Talk through the details':['咨询详情 ↗','Bincang butiran ↗'],'Inventory workbench':['库存工作台 ↗','Meja inventori ↗'],'Back to inventory':['返回车辆列表','Kembali ke inventori'],'Search model, stock #, colour...':['搜索车型、库存编号、颜色…','Cari model, ID stok, warna…'],'Search stock ID, make or model':['搜索车型、库存编号、颜色…','Cari model, ID stok, warna…'],'Make':['品牌','Jenama'],'All makes':['全部品牌','Semua jenama'],'Status':['状态','Status'],'All stock':['全部车辆','Semua stok'],'Available':['可售','Tersedia'],'Booked':['已预订','Ditempah'],'Sold':['已售','Terjual'],'Location':['展厅地点','Lokasi'],'All locations':['全部地点','Semua lokasi'],'Transmission':['变速箱','Transmisi'],'All':['全部','Semua'],'Auto':['自动','Auto'],'Manual':['手动','Manual'],'Body':['车身','Badan'],'All body types':['全部车身类型','Semua jenis badan'],'Sort':['排序','Susun'],'Newest year':['年份由新到旧','Tahun terkini'],'Price: low → high':['价格：由低到高','Harga: rendah → tinggi'],'Price: high → low':['价格：由高到低','Harga: tinggi → rendah'],'Price: low to high':['价格：由低到高','Harga: rendah → tinggi'],'Price: high to low':['价格：由高到低','Harga: tinggi → rendah'],'Lowest mileage':['里程由低到高','Perbatuan terendah'],'Cards':['卡片','Kad'],'Compact':['精简','Ringkas'],'AVAILABLE':['可售','TERSEDIA'],'BOOKED':['已预订','DITEMPAH'],'SOLD':['已售','TERJUAL'],'LOW KM':['低里程','KM RENDAH'],'View':['查看','Lihat'],'Reset':['重置','Tetap semula'],'Compare':['加入比较','Bandingkan'],'Selected':['已加入','Dipilih'],'View details':['查看详情','Lihat butiran'],'Enquire':['询问详情','Tanya'],'Enquire about similar stock':['询问同类车辆','Tanya stok serupa'],'vehicles':['辆车','kereta'],'Units available':['辆可售车辆','Unit tersedia'],'No matching cars.':['没有符合条件的车辆。','Tiada kereta sepadan.'],'Try another filter or reset to see the collection.':['试试其他筛选，或重置查看全部车辆。','Cuba penapis lain atau tetapkan semula.'],'Compare your shortlist':['比较心仪车辆','Bandingkan senarai anda'],'Clear':['清除','Kosongkan'],'selected':['已选择','dipilih'],'Choose up to 3 cars to compare.':['最多可比较 3 辆车。','Pilih sehingga 3 kereta.'],'Cash price':['车价','Harga tunai'],'Monthly estimate':['月供估算','Anggaran bulanan'],'Year':['年份','Tahun'],'Mileage':['里程','Perbatuan'],'Auction / interior grade':['拍卖 / 内饰等级','Gred lelong / dalaman'],'Engine':['引擎','Enjin'],'Colour':['颜色','Warna'],'Features':['配置','Ciri'],'Not provided':['尚未提供','Belum diberikan'],'Condition notes':['车况记录','Nota keadaan'],'Photo gallery':['车辆图库','Galeri foto'],'View full photo':['查看大图','Lihat foto penuh'],'Plan my payment':['计算月供','Rancang ansuran'],'Book a showroom viewing':['预约到店看车','Tempah lawatan showroom'],'Your name':['你的姓名','Nama anda'],'Phone / WhatsApp':['电话 / WhatsApp','Telefon / WhatsApp'],'Preferred date':['希望日期','Tarikh pilihan'],'Your question (optional)':['想了解什么（选填）','Soalan anda (pilihan)'],'Continue in WhatsApp':['前往 WhatsApp','Teruskan di WhatsApp'],'Vehicle information':['车辆资料','Maklumat kereta'],'CAR EXPLAINED BY DANNY':['DANNY 亲自讲车','KERETA DIJELASKAN DANNY'],'See the car. Hear the story.':['看车辆，也听 Danny 介绍。','Lihat kereta. Dengar ceritanya.'],'Watch on TikTok':['在 TikTok 观看 ↗','Tonton di TikTok ↗'],'Facebook version':['在 Facebook 观看 ↗','Versi Facebook ↗'],'Play walkthrough':['播放讲车视频','Mainkan video'],'Video':['视频','Video'],'Watch video':['观看交车视频','Tonton video'],'Lowest':['最低价','Terendah'],'Newest':['最新年份','Terkini'],'Lowest km':['最低里程','KM terendah'],'Personal Sourcing':['专属寻车服务','Carian Kereta Peribadi'],'Looking for a specific JDM or European spec?':['正在寻找特定日本或欧系车型？','Mencari spesifikasi JDM atau Eropah tertentu?'],'Tell Danny your preferred model, grade and budget for direct auction or showroom sourcing.':['告诉 Danny 你心仪的车型、拍卖等级与预算，安排专属寻车与验车。','Beritahu Danny model, gred dan bajet pilihan anda untuk carian terus.'],'Ask Danny to source a car':['向 Danny 咨询寻车 ↗','Minta Danny cari kereta ↗'],'Original report review':['原始报告核对','Semakan laporan asal'],'Ask to review the original auction report and arrange a pre-purchase inspection with Danny.':['请向 Danny 查看原始拍卖报告，并咨询独立验车。','Semak laporan lelong asal dan atur pemeriksaan bersama Danny.'],'Showroom area':['展厅地区','Kawasan showroom'],'Open GPS':['打开地图','Buka GPS'],'Copy location':['复制地点','Salin lokasi'],'Copied':['已复制','Disalin'],'Call Danny':['致电 Danny','Telefon Danny'],'Email Danny':['发邮件给 Danny','E-mel Danny'],'More cars with Danny':['关注 Danny，看更多车','Lagi kereta bersama Danny'],'Past delivery':['过往交车','Serahan lalu'],'Ask about similar cars':['询问同类车 ↗','Tanya kereta serupa ↗'],'Explore other cars':['看看其他车辆','Terokai kereta lain'],'Vehicle not found':['找不到这辆车','Kereta tidak ditemui'],'The car may no longer be listed. Browse current stock or contact Danny.':['这辆车可能已下架，请浏览现有车辆或联系 Danny。','Kereta ini mungkin tiada lagi. Lihat stok atau hubungi Danny.']};
+let lang='en';try{lang=localStorage.getItem('danny-language')||localStorage.getItem('danny-site-language')||'en';}catch{}if(!['en','zh','ms'].includes(lang))lang='en';
+let viewMode='cards';try{viewMode=localStorage.getItem('danny-view-mode')||'cards';}catch{}if(!['cards','compact'].includes(viewMode))viewMode='cards';
+const t=s=>lang==='en'?s:words[s]?.[lang==='zh'?0:1]||s,tr=(en,zh,ms)=>lang==='zh'?zh:lang==='ms'?ms:en;
+const money=n=>n==null?t('Enquire'):'RM '+Number(n).toLocaleString('en-MY'),statusName=s=>t(s==='reserved'?'Booked':label(s));
+let d=normalizeDocument(window.CMS_DATA||{vehicles:[]}),compare=[],filters={search:'',make:'',status:'',transmission:'',body:'',sort:'price-up',featured:false},toastTimer;
+const localPreview=new URLSearchParams(location.search).get('local-preview')==='1';
+const url=(route='')=>base+route.replace(/^\//,''),details=v=>localPreview?url('audi/?vehicle='+encodeURIComponent(v.id)+'&local-preview=1'):url('vehicle/'+encodeURIComponent(v.id)+'/'),wa=message=>'https://wa.me/'+(d.profile.phone||'60125686528')+'?text='+encodeURIComponent(message);
+const enquiry=v=>wa(`Hi Danny, ${v.status==='reserved'||v.status==='sold'?'please share similar available stock to':'I am interested in'} ${v.year||''} ${v.make} ${v.model} ${v.variant}, Stock #${v.stockId}, ${money(v.priceRm)}. Please share the details.\n${location.origin}${details(v)}`);
+let lazyObserver,revealObserver;
+function staticImgSrc(u){
+ const p=String(u||'');
+ if(!p||p.startsWith('/assets/uploads/'))return '';
+ if(base!=='/'&&p.startsWith(base))return p;
+ return p.startsWith('/assets/')?base+p.slice(1):p;
+}
+async function resolveImg(img){if(!img.dataset.source||img.dataset.hydrated===img.dataset.source)return;img.dataset.hydrated=img.dataset.source;img.src=await photoUrl(img.dataset.source,base);}
+async function hydrateImages(){
+ const imgs=[...document.querySelectorAll('img[data-source]')];
+ imgs.forEach(img=>{if(!img.hasAttribute('loading'))img.setAttribute('loading','lazy');if(!img.hasAttribute('decoding'))img.setAttribute('decoding','async');});
+ if(!('IntersectionObserver' in window)){await Promise.all(imgs.map(resolveImg));return;}
+ if(!lazyObserver)lazyObserver=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){lazyObserver.unobserve(entry.target);resolveImg(entry.target);}});},{rootMargin:'600px 0px'});
+ imgs.forEach(img=>{const rect=img.getBoundingClientRect();if(rect.top<window.innerHeight+600||img.getAttribute('loading')==='eager')resolveImg(img);else lazyObserver.observe(img);});
+}
+function observeScrollReveal(){
+ const targets=[...document.querySelectorAll('.reveal-on-scroll:not(.is-visible)')];
+ if(!targets.length)return;
+ if(!('IntersectionObserver' in window)||window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  targets.forEach(el=>el.classList.add('is-visible'));
+  return;
+ }
+ if(!revealObserver){
+  revealObserver=new IntersectionObserver(entries=>{
+   entries.forEach(entry=>{
+    if(entry.isIntersecting){
+     entry.target.classList.add('is-visible');
+     revealObserver.unobserve(entry.target);
+    }
+   });
+  },{rootMargin:'0px 0px -36px 0px',threshold:0.06});
+ }
+ targets.forEach(el=>{
+  const rect=el.getBoundingClientRect();
+  if(rect.top<window.innerHeight*0.92)el.classList.add('is-visible');
+  else revealObserver.observe(el);
+ });
+}
+function translate(){document.documentElement.lang=lang==='zh'?'zh-Hans':lang;document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));const s=$('#languageSelect');if(s)s.value=lang;}
+function toast(s){$('#publicToast').hidden=false;$('#publicToast').textContent=s;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#publicToast').hidden=true,4500);}
+function modal(id){const dialog=$(id);if(!dialog)return;dialog.showModal();dialog.querySelector('[data-close]').onclick=()=>dialog.close();dialog.onclick=e=>{if(e.target===dialog)dialog.close();};}
+function openPhoto(source,title,navigation){
+ const dialog=$('#photoModal');if(!dialog)return;
+ dialog.dataset.gallery=String(Boolean(navigation));
+ const stage=$('.lightbox-stage'),vid=$('#lightboxVideo');
+ if(stage)stage.hidden=false;
+ if(vid){vid.hidden=true;vid.innerHTML='';}
+ $('#lightboxPhoto').src=source;$('#lightboxPhoto').alt=title;$('#photoTitle').textContent=title;
+ const tr=translator(lang);$('#lightboxPrevious').setAttribute('aria-label',tr('Previous photo','上一张照片','Foto sebelumnya'));$('#lightboxNext').setAttribute('aria-label',tr('Next photo','下一张照片','Foto seterusnya'));dialog.querySelector('[data-close]').setAttribute('aria-label',tr('Close photo','关闭照片','Tutup foto'));$('#lightboxCount').setAttribute('aria-live','polite');
+ for(const id of ['lightboxPrevious','lightboxNext','lightboxCount'])$('#'+id).hidden=!navigation;
+ if(navigation){$('#lightboxPrevious').onclick=navigation.previous;$('#lightboxNext').onclick=navigation.next;$('#lightboxPrevious').disabled=$('#lightboxNext').disabled=navigation.disabled;$('#lightboxCount').textContent=navigation.count;}
+ dialog.onclose=()=>{if(vid)vid.innerHTML='';};
+ modal('#photoModal');
+}
+async function openStoryMedia(s){
+ if(!s.videoUrl){openPhoto(await photoUrl(s.image,base),s.title);return;}
+ const dialog=$('#photoModal'),vid=$('#lightboxVideo'),stage=$('.lightbox-stage');
+ if(!dialog||!vid){window.open(s.videoUrl,'_blank','noopener');return;}
+ dialog.dataset.gallery='false';
+ if(stage)stage.hidden=true;
+ for(const id of ['lightboxPrevious','lightboxNext','lightboxCount']){const el=$('#'+id);if(el)el.hidden=true;}
+ $('#photoTitle').textContent=s.title;
+ const ttId=s.videoUrl.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/)?.[1];
+ const isMp4=/\.(mp4|webm|mov)(\?.*)?$/i.test(s.videoUrl);
+ if(ttId){
+  vid.innerHTML=`<div class="story-video-frame"><iframe title="${esc(s.title)}" src="https://www.tiktok.com/player/v1/${ttId}?autoplay=1&description=1" allow="encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe></div><div class="story-video-actions"><a class="button small quiet" href="${esc(s.videoUrl)}" target="_blank" rel="noopener">${t('Watch on TikTok')}</a></div>`;
+ }else if(isMp4){
+  vid.innerHTML=`<div class="story-video-frame"><video src="${esc(s.videoUrl)}" controls autoplay playsinline></video></div>`;
+ }else{
+  const poster=await photoUrl(s.image,base);
+  vid.innerHTML=`<div class="story-video-external"><img src="${esc(poster)}" alt="${esc(s.title)}"><a class="button" href="${esc(s.videoUrl)}" target="_blank" rel="noopener">${icon('play')}<span>${t('Watch video')} ↗</span></a></div>`;
+ }
+ vid.hidden=false;
+ dialog.onclose=()=>{vid.innerHTML='';vid.hidden=true;if(stage)stage.hidden=false;};
+ modal('#photoModal');
+}
+function specBadgeClass(tag){
+ const u=String(tag).toUpperCase();
+ if(u==='RS'||u==='TYPE R'||u==='GR'||u==='AMG')return 'spec-badge badge-rs';
+ if(u==='RF'||u==='F SPORT'||u==='S-SPORT'||u==='S-LINE'||u==='M SPORT')return 'spec-badge badge-rf';
+ if(u==='LOW KM')return 'spec-badge badge-lowkm';
+ return 'spec-badge badge-custom';
+}
+function badgeClusterMarkup(v,{inline=false}={}){
+ const pills=[];
+ if(v.status==='sold')pills.push(`<span class="badge sold">${esc(t('SOLD'))}</span>`);
+ else if(v.status==='reserved')pills.push(`<span class="badge reserved">${esc(t('BOOKED'))}</span>`);
+ else if(d.homepage?.hideAvailableBadge===false)pills.push(`<span class="badge available">${esc(t('AVAILABLE'))}</span>`);
+ const specials=deriveSpecialBadges(v,d.homepage);
+ for(const tag of specials){
+  const display=tag==='LOW KM'?t('LOW KM'):tag;
+  pills.push(`<span class="${specBadgeClass(tag)}">${esc(display)}</span>`);
+ }
+ if(!pills.length&&v.status==='available'&&inline){
+  pills.push(`<span class="spec-badge badge-lowkm">${esc(t('AVAILABLE'))}</span>`);
+ }
+ return pills.length?`<div class="${inline?'detail-badge-cluster':'card-badge-cluster'}">${pills.join('')}</div>`:'';
+}
+function photoMarkup(v,eager=false){
+ const transTag=v.transmission?`<span class="chip-tag trans-chip">${esc(t(v.transmission).toUpperCase())}</span>`:'';
+ const bodyTag=v.body?`<span class="chip-tag body-chip">${esc(t(v.body).toUpperCase())}</span>`:'';
+ const srcAttr=staticImgSrc(v.coverImageUrl);
+ return `<div class="stock-photo"><a href="${details(v)}">${v.coverImageUrl?`<img ${srcAttr?`src="${esc(srcAttr)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="${eager?'eager':'lazy'}" ${eager?'fetchpriority="high" ':''}decoding="async" width="640" height="400">`:`<div class="photo-placeholder">${icon('photo')}<span>${lang==='zh'?'车辆照片待上传':lang==='ms'?'Foto akan ditambah':'Photos to be added'}</span></div>`}</a><div class="card-top-chips">${bodyTag}${transTag}</div>${badgeClusterMarkup(v)}<span class="photo-count-tag">${icon('photo')} ${v.gallery.filter(m=>m.visible!==false).length}</span></div>`;
+}
+function card(v,idx=0){
+ const monthly=estimate(v,d.finance),grade=(v.conditionExample?t('Example')+' ':'')+[conditionValues(v).auctionGrade,conditionValues(v).interiorGrade].filter(Boolean).join('/');
+ const isSold=v.status==='sold',delay=Math.min(idx%4,3)*45;
+ return `<article class="stock-card reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}">${photoMarkup(v,idx<4)}<div class="stock-info"><div class="card-heading-row"><a href="${details(v)}"><h3>${esc(v.make)} ${esc(v.model)}${v.variant?' '+esc(v.variant):''}</h3></a></div><code>Stock #${esc(v.stockId)}</code><div class="spec-row"><span><strong>${v.year||'—'}</strong></span><span><strong>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</strong></span><span title="${esc(t('Auction / interior grade'))}">${icon('check')}${esc(grade||'—')}</span></div><div class="stock-price ${isSold?'is-sold':''}">${isSold?t('SOLD'):money(v.priceRm)}</div><p class="monthly-price">${monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p><p class="stock-location">${icon('pin')}${esc(v.location||'Shah Alam')}</p><div class="stock-card-footer"><label class="compare-check"><input type="checkbox" data-compare="${esc(v.id)}" ${compare.includes(v.id)?'checked':''}><span>${t('Compare')}</span></label><div class="footer-links"><a class="view-link" href="${details(v)}">${t('View')} →</a></div></div></div></article>`;
+}
+function compactRow(v,idx=0){
+ const monthly=estimate(v,d.finance),grade=(v.conditionExample?t('Example')+' ':'')+[conditionValues(v).auctionGrade,conditionValues(v).interiorGrade].filter(Boolean).join('/');
+ const isSold=v.status==='sold',srcAttr=staticImgSrc(v.coverImageUrl),delay=Math.min(idx%6,5)*35;
+ return `<article class="compact-row reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}"><a class="compact-thumb" href="${details(v)}">${v.coverImageUrl?`<img ${srcAttr?`src="${esc(srcAttr)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="${idx<4?'eager':'lazy'}" decoding="async" width="160" height="100">`:`<div class="photo-placeholder">${icon('photo')}</div>`}${badgeClusterMarkup(v)}</a><div class="compact-main"><div class="compact-title-line"><a href="${details(v)}"><h3>${v.year||''} ${esc(v.make)} ${esc(v.model)}${v.variant?' '+esc(v.variant):''}</h3></a><code>Stock #${esc(v.stockId)}</code></div><div class="compact-meta"><span>${esc(t(v.transmission||'Auto'))}</span><span>·</span><span>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</span>${grade?`<span>·</span><span>${esc(grade)}</span>`:''}<span>·</span><span>${esc(v.location||'Shah Alam')}</span></div></div><div class="compact-pricing"><div class="stock-price ${isSold?'is-sold':''}">${isSold?t('SOLD'):money(v.priceRm)}</div><p class="monthly-price">${monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p></div><div class="compact-actions"><label class="compare-check"><input type="checkbox" data-compare="${esc(v.id)}" ${compare.includes(v.id)?'checked':''}><span>${t('Compare')}</span></label><a class="view-link" href="${details(v)}">${t('View')} →</a></div></article>`;
+}
+function selectControl(name,key,options){return `<label class="compact-field"><span class="sr-only">${t(name)}</span><select data-filter="${key}" aria-label="${t(name)}">${options.map(([v,title])=>`<option value="${esc(v)}" ${filters[key]===v?'selected':''}>${esc(t(title))}</option>`).join('')}</select></label>`;}
+function renderViewToggle(){
+ const host=$('#viewToggle');if(!host)return;
+ host.innerHTML=`<button type="button" data-view="cards" aria-pressed="${viewMode==='cards'}">${icon('grid')}<span>${t('Cards')}</span></button><button type="button" data-view="compact" aria-pressed="${viewMode==='compact'}">${icon('list')}<span>${t('Compact')}</span></button>`;
+ host.querySelectorAll('[data-view]').forEach(btn=>btn.onclick=()=>{
+  viewMode=btn.dataset.view;
+  try{localStorage.setItem('danny-view-mode',viewMode);}catch{}
+  renderViewToggle();renderCards();
+ });
+}
+function controls(){
+ const makes=[...new Set(d.vehicles.map(v=>v.make).filter(Boolean))].sort();
+ const bodies=[...new Set(d.vehicles.map(v=>v.body).filter(Boolean))].sort();
+ const statuses=[['','All stock'],['available','Available'],['reserved','Booked'],...(d.homepage.showSoldVehicles?[['sold','Sold']]:[])];
+ $('#inventoryControls').innerHTML=`<div class="inventory-controls"><div class="controls-top-row"><label class="search-field">${icon('search')}<input id="publicSearch" type="search" value="${esc(filters.search)}" placeholder="${t('Search model, stock #, colour...')}" aria-label="${t('Search model, stock #, colour...')}"></label>${selectControl('Make','make',[['','All makes'],...makes.map(v=>[v,v])])}${selectControl('Sort','sort',[['price-up','Price: low → high'],['price-down','Price: high → low']])}</div><div class="filter-pills" role="toolbar" aria-label="${t('Filter')}"><div class="pill-group">${statuses.map(([s,title])=>`<button type="button" data-public-status="${s}" aria-pressed="${filters.status===s}">${t(title)} <span>${d.vehicles.filter(v=>!s||v.status===s).length}</span></button>`).join('')}</div><span class="pill-divider" aria-hidden="true"></span><div class="pill-group">${[['Manual','Manual'],['Auto','Auto']].map(([val,labelKey])=>`<button type="button" data-public-trans="${val}" aria-pressed="${filters.transmission===val}">${t(labelKey)}</button>`).join('')}</div>${bodies.length?`<span class="pill-divider" aria-hidden="true"></span><div class="pill-group">${bodies.map(b=>`<button type="button" data-public-body="${esc(b)}" aria-pressed="${filters.body===b}">${esc(t(b))}</button>`).join('')}</div>`:''}<button type="button" id="resetPublic" class="pill-reset">${t('Reset')} ↺</button></div></div>`;
+ $('#publicSearch').oninput=e=>{filters.search=e.target.value;renderCards();};
+ document.querySelectorAll('[data-filter]').forEach(select=>select.onchange=()=>{filters[select.dataset.filter]=select.value;renderCards();});
+ document.querySelectorAll('[data-public-status]').forEach(b=>b.onclick=()=>{filters.status=b.dataset.publicStatus;controls();renderCards();});
+ document.querySelectorAll('[data-public-trans]').forEach(b=>b.onclick=()=>{filters.transmission=filters.transmission===b.dataset.publicTrans?'':b.dataset.publicTrans;controls();renderCards();});
+ document.querySelectorAll('[data-public-body]').forEach(b=>b.onclick=()=>{filters.body=filters.body===b.dataset.publicBody?'':b.dataset.publicBody;controls();renderCards();});
+ $('#resetPublic').onclick=()=>{filters={search:'',make:'',status:'',transmission:'',body:'',sort:'price-up',featured:false};$('#featuredFilter').checked=false;controls();renderCards();};
+ $('#featuredFilter').onchange=e=>{filters.featured=e.target.checked;renderCards();};
+ renderViewToggle();
+}
+function renderCards(){
+ const cars=d.vehicles.filter(v=>(!filters.status||v.status===filters.status)&&(!filters.make||v.make===filters.make)&&(!filters.body||v.body===filters.body)&&(!filters.transmission||v.transmission===filters.transmission)&&(!filters.featured||v.isFeatured)&&[v.stockId,v.make,v.model,v.variant,v.exteriorColor,v.body,...(v.specialBadges||[])].join(' ').toLowerCase().includes(filters.search.toLowerCase()));
+ cars.sort((a,b)=>filters.sort==='price-down'?(b.priceRm??-1)-(a.priceRm??-1):(a.priceRm??Infinity)-(b.priceRm??Infinity));
+ const availCount=cars.filter(v=>v.status==='available').length;
+ const bookedCount=cars.filter(v=>v.status==='reserved').length;
+ const soldCount=cars.filter(v=>v.status==='sold').length;
+ const parts=[`${availCount} ${t('AVAILABLE')}`];
+ if(bookedCount)parts.push(`${bookedCount} ${t('BOOKED')}`);
+ if(soldCount||d.homepage.showSoldVehicles)parts.push(`${soldCount} ${t('SOLD')}`);
+ $('#resultCount').textContent=parts.join('  ·  ');
+ const grid=$('#inventoryGrid');
+ grid.classList.toggle('compact-view',viewMode==='compact');
+ grid.innerHTML=cars.length?cars.map(viewMode==='compact'?compactRow:card).join(''):`<div class="empty-state"><h3>${t('No matching cars.')}</h3><p>${t('Try another filter or reset to see the collection.')}</p><button class="button quiet" id="emptyReset">${t('Reset')}</button></div>`;
+ if($('#emptyReset'))$('#emptyReset').onclick=()=>$('#resetPublic').click();
+ bindCompare();hydrateImages();observeScrollReveal();
+}
+function isMobileViewport(){return window.matchMedia('(max-width: 768px)').matches;}
+function bindCompare(){
+ document.querySelectorAll('[data-compare]').forEach(el=>{
+  const handler=()=>{
+   if(isMobileViewport()){el.checked=false;return;}
+   const id=el.dataset.compare;
+   if(compare.includes(id))compare=compare.filter(x=>x!==id);
+   else{if(compare.length>=3){if(el.type==='checkbox')el.checked=false;return toast(t('Choose up to 3 cars to compare.'));}compare.push(id);}
+   renderCards();comparisonBar();
+  };
+  if(el.type==='checkbox')el.onchange=handler;else el.onclick=handler;
+ });
+}
+function comparisonBar(){
+ const bar=$('#compareBar'),cmpModal=$('#compareModal');
+ if(!bar)return;
+ if(isMobileViewport()){
+  bar.hidden=true;
+  if(cmpModal?.open)cmpModal.close();
+  return;
+ }
+ bar.hidden=!compare.length;
+ bar.innerHTML=`<span>${compare.length} / 3 ${t('selected')}</span><button class="text-button" id="clearCompare">${t('Clear')}</button><button class="button" id="showCompare" ${compare.length<2?'disabled':''}>${t('Compare')} ${icon('arrow')}</button>`;
+ $('#clearCompare').onclick=()=>{compare=[];renderCards();comparisonBar();};
+ $('#showCompare').onclick=()=>{
+  if(isMobileViewport())return;
+  const cars=compare.map(id=>d.vehicles.find(v=>v.id===id)).filter(Boolean);
+  const prices=cars.map(v=>v.priceRm).filter(n=>n!=null&&n>0),minPrice=prices.length>1?Math.min(...prices):null;
+  const years=cars.map(v=>Number(v.year)).filter(n=>n>0),maxYear=years.length>1?Math.max(...years):null;
+  const kms=cars.map(v=>v.mileageKm).filter(n=>n!=null&&n>=0),minKm=kms.length>1?Math.min(...kms):null;
+  const badge=text=>`<span class="compare-win">${esc(t(text))}</span>`;
+  const rows=[
+   ['Cash price',v=>`${esc(money(v.priceRm))}${minPrice!=null&&v.priceRm===minPrice?' '+badge('Lowest'):''}`],
+   ['Monthly estimate',v=>esc(estimate(v,d.finance)==null?'—':money(estimate(v,d.finance))+'/mo')],
+   ['Year',v=>`${esc(v.year||t('Not provided'))}${maxYear!=null&&Number(v.year)===maxYear?' '+badge('Newest'):''}`],
+   ['Mileage',v=>`${esc(v.mileage||t('Not provided'))}${minKm!=null&&v.mileageKm===minKm?' '+badge('Lowest km'):''}`],
+   ['Auction / interior grade',v=>esc((v.conditionExample?t('Example')+' ':'')+[conditionValues(v).auctionGrade,conditionValues(v).interiorGrade].filter(Boolean).join('/')||t('Not provided'))],
+   ['Engine',v=>esc((v.engineCc?v.engineCc+' cc':v.engine)||t('Not provided'))],
+   ['Transmission',v=>esc(t(v.transmission)||t('Not provided'))],
+   ['Colour',v=>esc(v.exteriorColor||t('Not provided'))],
+   ['Features',v=>esc(v.features.join(', ')||t('Not provided'))]
+  ];
+  $('#compareTable').innerHTML=`<div class="compare-table-wrap"><table class="compare-table"><thead><tr><th></th>${cars.map(v=>`<td><img data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="lazy" decoding="async"><strong>${esc(v.year||'')+' '+esc(v.make+' '+v.model)}</strong><br><code>Stock #${esc(v.stockId)}</code><div class="compare-head-actions"><a class="button small" href="${details(v)}">${t('View details')}</a><a class="button quiet small" href="${esc(enquiry(v))}" target="_blank" rel="noopener">${icon('wa')}<span>${t('Chat')}</span></a></div></td>`).join('')}</tr></thead><tbody>${rows.map(([name,renderCell])=>`<tr><th scope="row">${t(name)}</th>${cars.map(v=>`<td>${renderCell(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  hydrateImages();modal('#compareModal');
+ };
+}
+window.addEventListener('resize',()=>{if(isMobileViewport()){const bar=$('#compareBar'),cmpModal=$('#compareModal');if(bar)bar.hidden=true;if(cmpModal?.open)cmpModal.close();}},{passive:true});
+function syncFooter(){
+ const host=$('#footerContactLinks');
+ if(!host)return;
+ const p=d.profile||{};
+ const rawPhone=String(p.phone||'60125686528').replace(/\D/g,'');
+ const displayPhone=rawPhone.startsWith('60')?'0'+rawPhone.slice(2,4)+'-'+rawPhone.slice(4,7)+' '+rawPhone.slice(7):rawPhone;
+ const parts=[`<span>WhatsApp <a href="${esc(wa('Hi Danny, I would like to enquire about your recond cars.'))}" target="_blank" rel="noopener">${esc(displayPhone)}</a></span>`];
+ if(p.tiktok)parts.push(`<a href="${esc(p.tiktok)}" target="_blank" rel="noopener">TikTok</a>`);
+ if(p.rednote)parts.push(`<a href="${esc(p.rednote)}" target="_blank" rel="noopener">小红书</a>`);
+ if(p.facebook)parts.push(`<a href="${esc(p.facebook)}" target="_blank" rel="noopener">Facebook</a>`);
+ host.innerHTML=parts.join('<span aria-hidden="true">·</span>');
+}
+function renderHome(){
+ $('#heroStock').innerHTML=`<span class="status-dot"></span>${d.vehicles.filter(v=>v.status==='available').length} ${t('Units available')} · Bukit Jelutong & Glenmarie, Shah Alam`;
+ controls();renderCards();comparisonBar();
+ $('#stockProvenance').textContent=d.vehicles.some(v=>v.sample)?({en:'Some listings and cover images are examples. Confirm current stock, specifications and price with Danny. Monthly figures use the calculator’s example settings.',zh:'部分车辆与封面图片为示例。实际库存、配置和价格请向 Danny 确认。月供使用计算器的示例设置。',ms:'Sesetengah senarai dan foto ialah contoh. Sahkan stok, spesifikasi dan harga dengan Danny. Anggaran bulanan menggunakan tetapan contoh kalkulator.'}[lang]):({en:'Monthly figures use example calculator settings. Confirm vehicle details and pricing with Danny.',zh:'月供使用示例设置，车辆资料和价格请向 Danny 确认。',ms:'Anggaran bulanan menggunakan tetapan contoh. Sahkan butiran dan harga dengan Danny.'}[lang]);
+ const stories=(d.stories||[]).filter(s=>s.published!==false&&(s.consent==='approved'||d.staticSite));
+ const sourcingCard=`<article class="delivery-card delivery-sourcing reveal-on-scroll"><div class="sourcing-inner"><p class="eyebrow">${t('Personal Sourcing')}</p><h3>${t('Looking for a specific JDM or European spec?')}</h3><p>${t('Tell Danny your preferred model, grade and budget for direct auction or showroom sourcing.')}</p><a class="button small" href="${esc(wa('Hi Danny, I would like to enquire about personal car sourcing for a specific model and spec.'))}" target="_blank" rel="noopener">${t('Ask Danny to source a car')}</a></div></article>`;
+ $('#deliveryRail').innerHTML=(stories.map((s,idx)=>{
+  const isVid=Boolean(s.videoUrl||s.mediaType==='video'),sSrc=staticImgSrc(s.image);
+  return `<article class="delivery-card reveal-on-scroll ${isVid?'is-video':''}" style="--reveal-delay:${idx*55}ms"><button type="button" data-story="${esc(s.id)}" aria-label="${esc(s.title)}"><img ${sSrc?`src="${esc(sSrc)}" `:''}data-source="${esc(s.image)}" alt="${esc(s.title)}" loading="lazy" decoding="async"><span class="delivery-media-tag">${isVid?`${icon('play')} ${t('Video')}`:`${icon('photo')} ${tr('Photo','照片','Foto')}`}</span></button><div><h3>${esc(s.title)}</h3><p>${esc(s.caption||t('Past delivery'))}${s.date?' · '+esc(s.date):''}</p><a href="${esc(wa('Hi Danny, please share available cars similar to '+s.title))}" target="_blank" rel="noopener">${t('Ask about similar cars')}</a></div></article>`;
+ }).join('')+sourcingCard);
+ document.querySelectorAll('[data-story]').forEach(b=>b.onclick=()=>{const s=stories.find(s=>s.id===b.dataset.story);if(s)openStoryMedia(s);});
+ for(const [id,step] of [['deliveryPrev',-1],['deliveryNext',1]]){const btn=$('#'+id);if(btn){btn.hidden=stories.length<=2;btn.onclick=()=>$('#deliveryRail').scrollBy({left:step*$('#deliveryRail').clientWidth*.8,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});}}
+ const p=d.profile;$('#profileIntro').textContent=lang==='en'?p.intro:lang==='zh'?'直接和 Danny 聊聊心仪的 RECOND 车、车辆资料与看车安排。':'Hubungi Danny tentang kereta recond pilihan, butiran dan lawatan showroom.';if(p.portrait){const pSrc=staticImgSrc(p.portrait);if(pSrc)$('#profilePhoto').src=pSrc;$('#profilePhoto').dataset.source=p.portrait;}
+ $('#contactBlocks').innerHTML=`<div class="contact-block"><small>WHATSAPP / PHONE</small><a href="${wa('Hi Danny, I would like to find out more about your recond cars.')}" target="_blank" rel="noopener">${icon('wa')}+60 12-568 6528</a><div class="actions"><a href="tel:+${esc(p.phone||'60125686528')}">${t('Call Danny')} ↗</a><a href="mailto:${esc(p.email)}">${t('Email Danny')} ↗</a></div></div><div class="contact-block"><small>YOUR RECOND ADVISOR</small><a href="${wa('Hi Danny, could we arrange a showroom visit?')}" target="_blank" rel="noopener">${esc(p.name||'Danny')} · Shah Alam ${icon('arrow')}</a><div class="actions"><a href="${wa('Hi Danny, could we arrange a showroom visit?')}">${t('Book a showroom viewing')} ↗</a></div></div><div class="contact-block location-block"><small>${t('Showroom area').toUpperCase()}</small><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.location||'Bukit Jelutong Glenmarie Shah Alam')}" target="_blank" rel="noopener">${icon('pin')}${esc(p.location)}</a><div class="actions"><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.location||'Bukit Jelutong Glenmarie Shah Alam')}" target="_blank" rel="noopener">${t('Open GPS')} ↗</a><button id="copyLocation">${t('Copy location')}</button></div></div>`;$('#copyLocation').onclick=async()=>{try{await navigator.clipboard.writeText(p.location);toast(t('Copied'));}catch{toast(p.location);}};
+ $('#socialLinks').innerHTML=[['TikTok',p.tiktok,'tiktok'],['小红书',p.rednote,'xiaohongshu'],['Facebook',p.facebook||'https://www.facebook.com/reel/1834658307548568','facebook']].filter(([,url])=>url).map(([name,link,file])=>`<a href="${esc(link)}" target="_blank" rel="noopener"><img src="${url('assets/icons/'+file+'.svg')}" alt="" loading="lazy" decoding="async">${name} ↗</a>`).join('');
+ hydrateImages();observeScrollReveal();translate();
+}
+let detailObserver;
+async function renderDetail(){
+ detailObserver?.disconnect();
+ const parts=location.pathname.split('/').filter(Boolean),id=new URLSearchParams(location.search).get('vehicle')||decodeURIComponent(parts.at(-1)||''),v=d.vehicles.find(v=>v.id===id||v.stockId===id||((id==='audi'||id==='audi.html')&&v.id==='audi-s5')),tr=translator(lang);
+ if(!v){$('#vehicleContent').innerHTML=`<div class="empty-state"><h1>${t('Vehicle not found')}</h1><p>${t('The car may no longer be listed. Browse current stock or contact Danny.')}</p><a class="button" href="${url('#inventory')}">${t('Back to inventory')}</a></div>`;translate();return;}
+ const title=[v.year,v.make,v.model,v.variant].filter(Boolean).join(' '),photos=v.gallery.filter(m=>m.visible!==false&&!m.video),condition=conditionValues(v),grade=[condition.auctionGrade,condition.interiorGrade].filter(Boolean).join('/'),anchor=location.pathname+location.search;
+ const monthly=estimate(v,d.finance);
+ const videoId=v.presenter?.url?.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/)?.[1];
+ const ask=topic=>wa(`Hi Danny, I have a question about ${title}.\nStock #${v.stockId} · ${money(v.priceRm)}\nQuestion: ${topic}\n${location.origin+details(v)}`);
+ document.title=title+' · Danny Recond Select';
+ const sections=[['vehicleGallery',tr('Photos','照片','Foto')],['vehicleSpecifications',tr('Equipment & specs','设备与配置','Peralatan & spesifikasi')],['vehicleCondition',tr('Grade & condition','等级与车况','Gred & keadaan')],['vehicleCalculator',tr('Loan calculator','月供计算器','Kalkulator pinjaman')],...(videoId?[['presenterSlot',tr('Danny’s walkthrough','Danny 讲解','Penerangan Danny')]]:[])];
+ const otherCars=d.vehicles.filter(x=>x.id!==v.id&&x.status==='available').sort((a,b)=>{
+  if(v.priceRm!=null&&a.priceRm!=null&&b.priceRm!=null)return Math.abs(a.priceRm-v.priceRm)-Math.abs(b.priceRm-v.priceRm);
+  return 0;
+ }).slice(0,3);
+ const condEyebrow=v.conditionType==='Recond'?'JAPAN RECOND':String(v.conditionType||'JAPAN RECOND').toUpperCase();
+ const locEyebrow=String(v.location||'Glenmarie, Shah Alam').toUpperCase();
+ const shareLabel=tr('Share car','分享车辆','Kongsi kereta');
+ const shareBtnMarkup=`<button type="button" class="share-car-btn" id="shareCarButton" aria-label="${esc(shareLabel)}">${icon('share')}<span>${esc(shareLabel)}</span></button>`;
+ const priceRowMarkup=v.status==='sold'
+  ? `<div class="purchase-price-row is-sold-row"><div class="purchase-price-head"><p class="stock-price is-sold">${t('SOLD')}</p><div class="purchase-stock-actions"><code>Stock #${esc(v.stockId)}</code>${shareBtnMarkup}</div></div><a class="sold-similar-banner" href="${esc(enquiry(v))}" target="_blank" rel="noopener"><span aria-hidden="true">✅</span><span>${tr('Sold — looking for something similar? Ask me.','已售 — 想找同款或类似车型？直接问 Danny。','Terjual — mencari kereta serupa? Tanya Danny.')}</span></a></div>`
+  : `<div class="purchase-price-row"><div class="purchase-price-main"><p class="stock-price">${money(v.priceRm)}</p>${monthly!=null?`<p class="detail-monthly-est">≈ ${money(monthly)}${tr('/month est.','/月供估算','/bln anggaran')}</p>`:''}</div><div class="purchase-stock-actions"><code>Stock #${esc(v.stockId)}</code>${shareBtnMarkup}</div></div>`;
+ $('#vehicleContent').innerHTML=`
+ <div class="detail-topline"><a class="detail-back-btn" href="${url('#inventory')}" id="detailBackBtn"><span class="back-arrow" aria-hidden="true">←</span><span>${tr('Back to Showroom','返回展厅车库','Kembali ke Showroom')}</span></a><div class="breadcrumbs"><a href="${url()}">${tr('Home','首页','Utama')}</a><span>/</span><a href="${url('#inventory')}">${t('Inventory')}</a><span>/</span><span>${esc(v.stockId)}</span></div></div>
+ <nav class="detail-section-nav" aria-label="${tr('Vehicle sections','车辆详情导航','Bahagian kereta')}">${sections.map(([target,name],i)=>`<a href="${anchor}#${target}" data-detail-section="${target}" ${i===0?'aria-current="location"':''}>${name}</a>`).join('')}</nav>
+ <div class="detail-grid">
+ ${galleryMarkup(photos,title,lang)}
+ <aside class="detail-purchase">
+ <div class="purchase-heading"><div class="detail-status"><span class="detail-eyebrow-meta">${esc(condEyebrow)} · 📍 ${esc(locEyebrow)}</span></div><h1>${esc(title)}</h1>${priceRowMarkup}</div>
+ <div class="purchase-summary"><div class="purchase-facts">${[['mileage','Mileage',v.mileage],['gear','Transmission',t(v.transmission)],['calendar','Year',v.year],['check','Auction / interior grade',(condition.example?tr('Example ','示例 ','Contoh '):'')+grade]].map(([ico,name,value])=>`<div>${icon(ico)}<span><small>${t(name)}</small><strong>${esc(value||t('Not provided'))}</strong></span></div>`).join('')}</div><p class="stock-location">${icon('pin')}${esc(v.location||'Shah Alam')}</p>
+ <a class="button vehicle-primary-enquiry" href="${esc(enquiry(v))}" target="_blank" rel="noopener">${icon('wa')}<span>${['sold','reserved'].includes(v.status)?t('Enquire about similar stock'):t('Enquire')}</span>${icon('arrow')}</a>
+ <div class="context-enquiries" aria-label="${tr('Ask about this car','询问这辆车','Tanya tentang kereta ini')}"><a href="${esc(ask('Please explain the vehicle condition and inspection report.'))}" target="_blank" rel="noopener">${icon('check')}${tr('Ask about condition','询问车况','Tanya keadaan')}</a><a href="${esc(ask('What warranty options are available for this car?'))}" target="_blank" rel="noopener">${icon('gear')}${tr('Ask about warranty','询问保修','Tanya waranti')}</a></div>
+ ${v.status==='available'?`<details class="viewing-disclosure"><summary>${icon('calendar')}${t('Book a showroom viewing')}<span aria-hidden="true">+</span></summary><form id="viewingForm" class="viewing-fields"><label class="field">${t('Your name')}<input name="name" required maxlength="100" autocomplete="name"></label><label class="field">${t('Phone / WhatsApp')}<input name="phone" type="tel" required pattern="[+0-9 ()-]{8,30}" autocomplete="tel"></label><label class="field">${t('Preferred date')}<input name="date" type="date" required min="${new Date().toLocaleDateString('en-CA')}"></label><label class="field">${t('Your question (optional)')}<textarea name="note" maxlength="2000"></textarea></label><button class="button">${t('Continue in WhatsApp')} ${icon('arrow')}</button></form></details>`:''}</div>
+ ${calculatorMarkup(v,d.finance,lang)}
+ <div class="detail-notes"><p class="detail-disclaimer">${tr('Confirm current availability, condition and final pricing with Danny.','实际库存、车况和最终价格请向 Danny 确认。','Sahkan stok, keadaan dan harga akhir dengan Danny.')}</p>${v.sample?`<p class="detail-disclaimer">${tr('Example listing or photography. Confirm the actual details with Danny.','示例车辆或图片，请向 Danny 确认实际资料。','Senarai atau foto contoh. Sahkan butiran dengan Danny.')}</p>`:''}</div>
+ </aside>
+ <section class="detail-info vehicle-specifications" id="vehicleSpecifications"><p class="eyebrow">${tr('THE DETAILS, AT A GLANCE','车辆核心信息与设备','BUTIRAN SEPINTAS LALU')}</p><h2>${tr('Vehicle information & Equipment','车辆信息与设备配置','Maklumat kenderaan & Peralatan')}</h2>${v.description?`<p>${esc(v.description)}</p>`:''}<div class="detail-spec-grid">${[['Year',v.year],['Engine',v.engineCc?v.engineCc+' cc':v.engine],['Transmission',t(v.transmission)],['Body',t(v.body)],['Colour',v.exteriorColor],['Chassis',v.chassisCode]].filter(([,value])=>value!==''&&value!=null).map(([name,value])=>`<div><small>${t(name)}</small><strong>${esc(value)}</strong></div>`).join('')}</div>${Object.entries(v.specs||{}).map(([name,rows])=>`<details class="specification-group"><summary>${esc(t(name))}<span aria-hidden="true">+</span></summary><div class="detail-spec-grid">${(Array.isArray(rows)?rows:[]).map(([key,value])=>`<div><small>${esc(key)}</small><strong>${esc(value)}</strong></div>`).join('')}</div></details>`).join('')}${v.features.length?`<h3>${tr('Installed equipment & features','随车设备与配置亮点','Peralatan & ciri dipasang')}</h3><div class="feature-tags">${v.features.map(f=>`<span>${icon('check')}${esc(f)}</span>`).join('')}</div>`:''}${v.warrantyInfo?`<h3>${tr('Warranty','保修资料','Waranti')}</h3><p>${esc(v.warrantyInfo)}</p>`:''}${v.conditionNotes?`<h3>${t('Condition notes')}</h3><p>${esc(v.conditionNotes)}</p>`:''}</section>
+ ${conditionMarkup(v,lang,wa)}
+ </div>
+ <div id="presenterSlot"></div>
+ <section class="detail-info other-stock" id="otherStockSection"><p class="eyebrow">${tr('OTHER CARS IN STOCK','其他在售现车','KERETA LAIN DALAM STOK')}</p><h2>${t('Explore other cars')}</h2><div class="other-stock-grid">${otherCars.map(x=>{const xTitle=[x.year,x.make,x.model,x.variant].filter(Boolean).join(' '),xSrc=staticImgSrc(x.coverImageUrl);return `<a class="other-car-card" href="${details(x)}"><div class="other-car-photo">${x.coverImageUrl?`<img ${xSrc?`src="${esc(xSrc)}" `:''}data-source="${esc(x.coverImageUrl)}" alt="${esc(xTitle)}" loading="lazy" decoding="async" width="480" height="300">`:`<div class="photo-placeholder">${icon('photo')}</div>`}</div><div class="other-car-body"><h3>${esc(xTitle)}</h3><p class="other-car-price">${x.status==='sold'?t('SOLD'):money(x.priceRm)}</p></div></a>`;}).join('')}</div></section>
+ <div class="mobile-detail-sticky" id="mobileDetailSticky" role="region" aria-label="${tr('Quick vehicle enquiry','快捷询价栏','Bar pertanyaan pantas')}"><div class="mobile-sticky-meta"><div class="mobile-sticky-price">${v.status==='sold'?t('SOLD'):money(v.priceRm)}</div><div class="mobile-sticky-sub">Stock #${esc(v.stockId)}</div></div><a class="button mobile-sticky-enquire" href="${esc(enquiry(v))}" target="_blank" rel="noopener">${icon('wa')}<span>${t('Enquire')}</span></a></div>`;
+ bindGallery(photos,title,lang,base,openPhoto);
+ const backBtn=$('#detailBackBtn');
+ if(backBtn){
+  backBtn.onclick=(e)=>{
+   if(window.history.length>1&&document.referrer&&document.referrer.includes(location.host)){
+    e.preventDefault();
+    history.back();
+   }
+  };
+ }
+ if($('#shareCarButton'))$('#shareCarButton').onclick=async()=>{
+  const shareUrl=location.origin+details(v),shareText=`${title} · ${v.status==='sold'?t('SOLD'):money(v.priceRm)} (Stock #${v.stockId}) — Danny Recond Select`;
+  if(navigator.share){try{await navigator.share({title:`${title} · Danny Recond Select`,text:shareText,url:shareUrl});return;}catch(err){if(err?.name==='AbortError')return;}}
+  try{await navigator.clipboard.writeText(shareUrl);}catch{const ta=document.createElement('textarea');ta.value=shareUrl;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}
+  const btn=$('#shareCarButton'),copiedText=tr('Link copied!','链接已复制！','Pautan disalin!');
+  if(btn){btn.classList.add('is-copied');btn.innerHTML=`${icon('check')}<span>${esc(copiedText)}</span>`;setTimeout(()=>{if(btn.isConnected){btn.classList.remove('is-copied');btn.innerHTML=`${icon('share')}<span>${esc(shareLabel)}</span>`;}},2200);}
+  toast(copiedText);
+ };
+ if($('#viewingForm'))$('#viewingForm').onsubmit=event=>{event.preventDefault();const f=Object.fromEntries(new FormData(event.target));location.href=wa(`Hi Danny, I would like a showroom viewing.\nCar: ${title} · Stock #${v.stockId}\nName: ${f.name}\nPhone: ${f.phone}\nPreferred date: ${f.date}\n${f.note||''}\n${location.href}`);};
+ if(videoId){
+  const previewImg=v.coverImageUrl||photos[0]?.url||'/assets/audi-s5/main-car-16x9.jpg',pSrc=staticImgSrc(previewImg);
+  $('#presenterSlot').innerHTML=`<section class="detail-info presenter-panel"><div><p class="eyebrow">${t('CAR EXPLAINED BY DANNY')}</p><h2>${t('See the car. Hear the story.')}</h2><p>${esc(v.presenter.title||title)}</p><div class="actions"><a class="button" href="${esc(v.presenter.url)}" target="_blank" rel="noopener">${t('Watch on TikTok')}</a>${v.presenter.facebook?`<a class="button quiet" href="${esc(v.presenter.facebook)}" target="_blank" rel="noopener">${t('Facebook version')}</a>`:''}</div></div><div class="presenter-stage" id="presenterStage"><button type="button" class="presenter-card-preview" id="loadPresenterVideo" aria-label="${t('Play walkthrough')}"><img ${pSrc?`src="${esc(pSrc)}" `:''}data-source="${esc(previewImg)}" alt="${esc(title)}" loading="lazy" decoding="async"><span class="presenter-play-badge">${icon('play')}<span>${t('Play walkthrough')}</span></span></button></div></section>`;
+  $('#loadPresenterVideo').onclick=()=>{
+   $('#presenterStage').innerHTML=`<iframe title="${esc(title)} with Danny" src="https://www.tiktok.com/player/v1/${videoId}?autoplay=1&description=1" allow="encrypted-media; fullscreen; picture-in-picture" loading="lazy" allowfullscreen></iframe>`;
+  };
+ }
+ bindVehicleCalculator(v,d.finance,lang,wa,car=>location.origin+details(car));await bindAuctionReport(v,base,openPhoto,lang);hydrateImages();translate();
+ const navLinks=[...document.querySelectorAll('[data-detail-section]')];const selectNav=id=>navLinks.forEach(a=>a.dataset.detailSection===id?a.setAttribute('aria-current','location'):a.removeAttribute('aria-current'));
+ navLinks.forEach(a=>a.onclick=()=>selectNav(a.dataset.detailSection));
+ detailObserver=new IntersectionObserver(entries=>{const visible=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top);if(visible.length)selectNav(visible[0].target.id);},{rootMargin:'-60px 0px -55% 0px',threshold:0});
+ sections.forEach(([id])=>{const node=document.getElementById(id);if(node)detailObserver.observe(node);});
+}
+function syncMobileWaFab(){
+ let fab=$('#mobileWaFab');
+ if(!fab){
+  fab=document.createElement('a');
+  fab.id='mobileWaFab';
+  fab.className='mobile-wa-fab';
+  fab.target='_blank';
+  fab.rel='noopener';
+  document.body.appendChild(fab);
+ }
+ fab.href=wa('Hi Danny, I would like to enquire about your recond cars.');
+ fab.setAttribute('aria-label',tr('Message Danny on WhatsApp','通过 WhatsApp 联系 Danny','Mesej Danny di WhatsApp'));
+ fab.setAttribute('title',tr('Message Danny on WhatsApp','通过 WhatsApp 联系 Danny','Mesej Danny di WhatsApp'));
+ fab.innerHTML=icon('wa');
+}
+function initSmartHeader(){
+ const header=$('header#top')||$('.showroom-header');
+ const hero=$('.showroom-hero');
+ const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ let lastY=window.scrollY,ticking=false;
+ const update=()=>{
+  const y=window.scrollY,delta=y-lastY;
+  if(header){
+   header.classList.toggle('is-scrolled',y>24);
+   if(y<=24)header.classList.remove('is-hidden');
+   else if(delta>6&&y>88)header.classList.add('is-hidden');
+   else if(delta<-5)header.classList.remove('is-hidden');
+  }
+  if(hero&&!reducedMotion&&y<720){
+   hero.style.setProperty('--hero-bg-y',`${Math.round(y*0.14)}px`);
+   hero.style.setProperty('--hero-danny-y',`${Math.round(y*0.07)}px`);
+  }
+  lastY=y;ticking=false;
+ };
+ window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(update);ticking=true;}},{passive:true});
+ update();
+}
+// Public pages never silently adopt browser edits. An explicit preview URL is required.
+if(new URLSearchParams(location.search).get('local-preview')==='1'){
+ try{const saved=await readLocal('preview');if(saved){d=normalizeDocument(saved);const banner=document.createElement('div');banner.className='local-preview-banner';banner.innerHTML=`<span>${lang==='zh'?'此浏览器预览，尚未更新线上网站。':lang==='ms'?'Pratonton pelayar ini. Belum diterbitkan ke laman web.':'Local browser preview. Export from Workbench to publish live.'}</span><a id="exitPreview" href="${url()}">${lang==='zh'?'退出预览':'Exit preview'}</a>`;document.body.prepend(banner);$('#exitPreview').onclick=()=>deleteLocal('preview');}}catch{}
+}else if(window.CMS_API_BASE){try{const response=await fetch(window.CMS_API_BASE.replace(/\/$/,'')+'/api/cms/public',{cache:'no-store',signal:AbortSignal.timeout(4000)});if(response.ok)d=normalizeDocument((await response.json()).document);}catch{/* Bundled snapshot is the exhibition source when no remote API is configured. */}}
+d.vehicles=d.vehicles.filter(v=>['available','reserved','sold'].includes(v.status)&&(v.status!=='sold'||d.homepage.showSoldVehicles));
+// Preserve the preview across detail and calculator links without affecting ordinary visitors.
+const render=()=>{const defaultCar=d.vehicles.find(v=>v.status==='available'&&v.priceRm!=null)||d.vehicles[0];document.querySelectorAll('[data-payment-link]').forEach(a=>a.href=(document.body.classList.contains('exhibition-home')||document.body.classList.contains('exhibition-services'))?(defaultCar?details(defaultCar)+'#vehicleCalculator':url('#inventory')):location.pathname+location.search+'#vehicleCalculator');syncFooter();if(document.body.classList.contains('exhibition-home'))renderHome();else if(document.body.classList.contains('exhibition-services')){renderServiceCare($('#service-care'),d.vehicles,lang,wa,d.tintPackages);observeScrollReveal();}else renderDetail();translate();syncMobileWaFab();if(new URLSearchParams(location.search).get('local-preview')==='1')document.querySelectorAll('a[href]').forEach(a=>{const parsed=new URL(a.href,location.origin);if(parsed.origin===location.origin&&(parsed.pathname.includes('/vehicle/')||parsed.pathname.endsWith('/calculator/')||parsed.pathname.endsWith('/services/'))){parsed.searchParams.set('local-preview','1');a.href=parsed.href;}});};
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.href=location.pathname+a.getAttribute('href'));
+$('#languageSelect').onchange=e=>{lang=e.target.value;try{localStorage.setItem('danny-language',lang);localStorage.setItem('danny-site-language',lang);}catch{}render();};initSmartHeader();render();
