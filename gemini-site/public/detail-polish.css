@@ -45,3 +45,108 @@
 @media(max-width:480px){.purchase-heading h1{font-size:28px}.purchase-price-row{gap:8px}.purchase-heading .stock-price{font-size:29px}.purchase-heading,.purchase-summary,.vehicle-calculator{padding:18px}.gallery-categories{gap:6px}.gallery-categories button{padding-inline:11px}.gallery-prev{left:9px}.gallery-next{right:9px}.gallery-enlarge{left:9px;bottom:9px;right:auto;font-size:10.5px;padding:4px 9px}.gallery-stage-counter{right:9px;bottom:9px;left:auto;font-size:11px;padding:4px 9px}.vehicle-gallery .detail-thumbs button{flex-basis:67px}.condition-heading h2{font-size:22px}.condition-heading{gap:8px}.example-report-preview{gap:14px}.example-report-preview img{width:88px;height:106px}.example-report-preview span{font-size:13px}.payment-tenure select{width:110px}.payment-field output{font-size:12px}.fixed-rate{font-size:12px}.context-enquiries a{font-size:12px}.detail-section-nav{gap:18px}.detail-section-nav a{font-size:12px}.down-presets button{min-height:44px}}
 @media(prefers-reduced-motion:reduce){.detail-section-nav a{transition:none}}
 
+/* finesse · commerce refinement · independent reading and decision cards */
+.detail-grid{grid-template-columns:minmax(0,1.5fr) minmax(340px,1fr);gap:24px}
+.vehicle-reading-column{grid-column:1;grid-row:1;display:flex;flex-direction:column;gap:20px;min-width:0}
+.detail-grid .detail-purchase{grid-column:2;grid-row:1;position:static;display:flex;flex-direction:column;gap:16px;padding:0;border:0;background:transparent;border-radius:0}
+.detail-purchase>.purchase-heading,.detail-purchase>.purchase-summary,.detail-purchase>.vehicle-contact,.detail-purchase>.vehicle-calculator{padding:22px;margin:0;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.detail-purchase>.purchase-heading{border-top:2px solid var(--mint)}
+.purchase-heading .detail-status{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.purchase-heading .detail-eyebrow-meta{font-size:10px;letter-spacing:.09em;line-height:1.6;color:var(--muted)}
+.vehicle-availability{padding:4px 9px;border:1px solid var(--line);border-radius:6px;font-size:11px;font-weight:550;white-space:nowrap}
+.vehicle-availability[data-status=available]{color:var(--mint);background:color-mix(in srgb,var(--mint) 8%,transparent)}
+.vehicle-availability[data-status=reserved]{color:var(--gold)}
+.purchase-heading h1{font-size:clamp(25px,2.4vw,34px);margin:16px 0 6px;line-height:1.17;text-wrap:balance}
+.vehicle-variant{font-size:14px;color:var(--muted);margin:0 0 18px;line-height:1.5}
+.purchase-heading .purchase-price-row{margin-top:18px;align-items:flex-end;gap:10px}
+.purchase-heading .stock-price{font-size:32px;line-height:1.2;letter-spacing:-.035em}
+.detail-monthly-est{margin-top:6px;font-size:12px;line-height:1.5}
+.purchase-stock-actions{flex:0 0 auto}
+.share-car-btn{min-height:38px;padding:7px 10px;border-radius:8px;font-size:12px}
+.vehicle-stock-ref{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin:18px 0 0;padding-top:12px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+.vehicle-stock-ref code{font-family:inherit;font-size:11px;letter-spacing:.04em}
+.detail-card-title{font-size:17px;font-weight:600;line-height:1.4;letter-spacing:-.02em;margin:0 0 16px}
+.purchase-facts{gap:0;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.purchase-facts>div{padding:12px 0;min-width:0;gap:9px;border-top:1px solid var(--line)}
+.purchase-facts>div:nth-child(-n+2){border-top:0;padding-top:0}
+.purchase-facts>div:nth-child(odd){padding-right:12px}
+.purchase-facts>div:nth-child(even){padding-left:14px;border-left:1px solid var(--line)}
+.purchase-facts>div:nth-last-child(-n+2){padding-bottom:0}
+.purchase-facts strong{font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.purchase-facts small{font-size:11px;line-height:1.4}
+.purchase-facts .icon{width:16px;height:16px;color:var(--muted)}
+.contact-card-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.contact-card-heading .detail-card-title{margin:0}
+.contact-card-heading>.icon{color:var(--mint);width:20px;height:20px}
+.contact-card-copy{font-size:13px;color:var(--muted);line-height:1.6;margin:6px 0 16px}
+.context-enquiries{gap:8px;margin-top:10px}
+.context-enquiries a{min-height:42px;font-size:11px;padding:8px;white-space:normal;text-align:center}
+.vehicle-showroom{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:16px;margin-top:16px}
+.vehicle-showroom>span{display:flex;align-items:center;gap:10px;min-width:0}
+.vehicle-showroom .icon{width:17px;height:17px;color:var(--muted);flex-shrink:0}
+.vehicle-showroom small{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
+.vehicle-showroom strong{font-size:13px;font-weight:500;overflow-wrap:anywhere}
+.vehicle-showroom>a{display:inline-flex;align-items:center;min-height:44px;font-size:12px;color:var(--mint);flex-shrink:0}
+.vehicle-contact .viewing-disclosure{margin-top:12px}
+.vehicle-contact .viewing-disclosure>summary{font-size:12px;min-height:46px}
+.detail-purchase .vehicle-calculator .eyebrow{display:none}
+.detail-purchase .tool-heading{margin-bottom:18px}
+.detail-purchase .tool-heading h2{font-size:20px;letter-spacing:-.02em}
+.detail-purchase .tool-currency{width:34px;height:34px;font-size:11px;border-radius:8px}
+.detail-purchase .payment-result{border:1px solid var(--line);padding:16px;margin:14px 0;background:var(--page)}
+.detail-purchase .payment-result>strong{color:var(--mint);font-size:32px}
+.detail-purchase .payment-result small,.detail-purchase .payment-result>span{color:var(--muted);font-size:12px}
+.detail-purchase .payment-tenure{margin:14px 0}
+.detail-purchase .fixed-rate{padding-top:14px;padding-bottom:0}
+.detail-purchase .calc-caption{font-size:11px;line-height:1.6}
+.detail-notes{padding:0 6px}
+.detail-notes .detail-disclaimer{font-size:11px;line-height:1.6;margin:0}
+.detail-notes .detail-disclaimer+.detail-disclaimer{margin-top:6px}
+.vehicle-reading-column>.detail-info{padding:24px;margin:0!important}
+.detail-section-heading{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.detail-section-icon{display:flex;align-items:center;justify-content:center;width:40px;height:40px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;flex-shrink:0;color:var(--mint)}
+.detail-section-icon .icon{width:19px;height:19px}
+.detail-section-heading .eyebrow{font-size:10px;letter-spacing:.1em;margin-bottom:5px;color:var(--muted)}
+.detail-section-heading h2{font-size:23px;line-height:1.25;margin:0;letter-spacing:-.025em}
+.specification-groups{display:flex;flex-direction:column;gap:10px}
+.vehicle-specifications .specification-group{border:1px solid var(--line);border-radius:10px;background:var(--page);overflow:hidden;padding:0;margin:0}
+.vehicle-specifications .specification-group summary{padding:14px 16px;min-height:52px;display:flex;align-items:center;font-size:14px;font-weight:550}
+.vehicle-specifications .specification-group summary .spec-group-label{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink);transform:none}
+.spec-group-label .icon{color:var(--muted);width:17px;height:17px;flex-shrink:0}
+.vehicle-specifications .specification-group[open] .spec-toggle{transform:rotate(45deg)}
+.vehicle-specifications .specification-group[open] summary{border-bottom:1px solid var(--line)}
+.vehicle-specifications .detail-spec-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin:0;padding:4px 16px 12px}
+.vehicle-specifications .detail-spec-grid>div{padding:14px 12px 10px 0;min-width:0}
+.vehicle-specifications dt{font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:5px}
+.vehicle-specifications dd{font-size:14px;color:var(--ink);line-height:1.5;font-weight:500;margin:0;overflow-wrap:anywhere}
+.vehicle-specifications .vehicle-chassis{font-size:12px;margin-top:16px;display:flex;gap:12px;justify-content:space-between}
+.vehicle-specifications .vehicle-chassis code{font-family:inherit;color:var(--ink)}
+.vehicle-specifications .vehicle-description{font-size:14px;margin-bottom:18px}
+.vehicle-reading-column .condition-panel h2{font-size:23px;letter-spacing:-.025em;margin-bottom:0}
+.vehicle-reading-column .condition-panel .eyebrow{font-size:10px;letter-spacing:.1em;margin-bottom:8px}
+.vehicle-reading-column .condition-summary-copy{font-size:13px;line-height:1.65;margin-top:10px}
+.vehicle-reading-column .report-wa-strip{flex-direction:column;align-items:flex-start;gap:12px}
+.vehicle-reading-column .report-wa-strip p{font-size:13px!important}
+.vehicle-reading-column .grade-explainer summary{font-size:13px}
+@media(hover:hover){.specification-group summary:hover{background:var(--surface-2)}.vehicle-showroom>a:hover{text-decoration:underline}}
+@media(min-width:1400px){.detail-grid{grid-template-columns:minmax(0,1.65fr) minmax(380px,1fr);gap:28px}.detail-purchase>.purchase-heading,.detail-purchase>.purchase-summary,.detail-purchase>.vehicle-contact,.detail-purchase>.vehicle-calculator{padding:24px}}
+@media(max-width:800px){
+  .detail-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+  .vehicle-reading-column,.detail-grid .detail-purchase{display:contents}
+  .vehicle-gallery{grid-column:1;grid-row:1}
+  .detail-grid .purchase-heading{grid-column:1;grid-row:2}
+  .detail-grid .purchase-summary{grid-column:1;grid-row:3}
+  .detail-grid .vehicle-contact{grid-column:1;grid-row:4}
+  .detail-grid .vehicle-specifications{grid-column:1;grid-row:5}
+  .detail-grid .condition-panel{display:block;grid-column:1;grid-row:6;order:initial}
+  .detail-grid .vehicle-calculator{grid-column:1;grid-row:7}
+  .detail-grid .detail-notes{grid-column:1;grid-row:8}
+  .detail-purchase>.purchase-heading,.detail-purchase>.purchase-summary,.detail-purchase>.vehicle-contact,.detail-purchase>.vehicle-calculator,.vehicle-reading-column>.detail-info{padding:20px}
+  .purchase-heading h1{font-size:29px}
+  .purchase-heading .detail-eyebrow-meta{font-size:11px}
+  .vehicle-specifications .specification-group summary .spec-group-label{font-size:14px}
+  .detail-section-heading h2{font-size:22px}
+  .detail-grid .vehicle-specifications,.detail-grid .condition-panel{display:block}
+}
+@media(max-width:380px){.purchase-heading .purchase-price-row{align-items:flex-start;flex-direction:column}.context-enquiries{grid-template-columns:1fr}.detail-section-heading h2{font-size:20px}}
+
