@@ -1,7 +1,8 @@
+import {visibleBrandFilters,matchesInventorySelection} from './inventory-brand-filters.mjs';
 import {galleryMarkup,bindGallery} from './vehicle-gallery.mjs';
 import {renderServiceCare} from './service-care.mjs';
 import {calculatorMarkup,bindVehicleCalculator,conditionMarkup,bindAuctionReport,conditionValues,translator} from './vehicle-tools.mjs';
-import {normalizeDocument,deriveSpecialBadges,estimate,label} from './inventory-domain.mjs';
+import {normalizeDocument,deriveSpecialBadges,estimate,label} from './inventory-domain.mjs?v=brand-buttons-20261018';
 import {readLocal,deleteLocal,photoUrl} from './browser-stock.mjs';
 import {icon} from './stock-icons.mjs';
 const $=s=>document.querySelector(s),base=window.SITE_BASE||'/',esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -11,7 +12,7 @@ let lang='en';try{lang=localStorage.getItem('danny-language')||localStorage.getI
 let viewMode='cards';try{viewMode=localStorage.getItem('danny-view-mode')||'cards';}catch{}if(!['cards','compact'].includes(viewMode))viewMode='cards';
 const t=s=>lang==='en'?s:words[s]?.[lang==='zh'?0:1]||s,tr=(en,zh,ms)=>lang==='zh'?zh:lang==='ms'?ms:en;
 const money=n=>n==null?t('Enquire'):'RM '+Number(n).toLocaleString('en-MY'),statusName=s=>t(s==='reserved'?'Booked':label(s));
-let d=normalizeDocument(window.CMS_DATA||{vehicles:[]}),compare=[],filters={search:'',make:'',status:'',transmission:'',body:'',sort:'price-up',featured:false},toastTimer;
+let d=normalizeDocument(window.CMS_DATA||{vehicles:[]}),compare=[],filters={search:'',make:'',status:'',sort:'price-up',featured:false},toastTimer;
 const localPreview=new URLSearchParams(location.search).get('local-preview')==='1';
 const url=(route='')=>base+route.replace(/^\//,''),details=v=>localPreview?url('audi/?vehicle='+encodeURIComponent(v.id)+'&local-preview=1'):url('vehicle/'+encodeURIComponent(v.id)+'/'),wa=message=>'https://wa.me/'+(d.profile.phone||'60125686528')+'?text='+encodeURIComponent(message);
 const enquiry=v=>wa(`Hi Danny, ${v.status==='reserved'||v.status==='sold'?'please share similar available stock to':'I am interested in'} ${v.year||''} ${v.make} ${v.model} ${v.variant}, Stock #${v.stockId}, ${money(v.priceRm)}. Please share the details.\n${location.origin}${details(v)}`);
@@ -140,21 +141,21 @@ function renderViewToggle(){
  });
 }
 function controls(){
- const makes=[...new Set(d.vehicles.map(v=>v.make).filter(Boolean))].sort();
- const bodies=[...new Set(d.vehicles.map(v=>v.body).filter(Boolean))].sort();
+ const tr=translator(lang),makes=visibleBrandFilters(d);
  const statuses=[['','All stock'],['available','Available'],['reserved','Booked'],...(d.homepage.showSoldVehicles?[['sold','Sold']]:[])];
- $('#inventoryControls').innerHTML=`<div class="inventory-controls"><div class="controls-top-row"><label class="search-field">${icon('search')}<input id="publicSearch" type="search" value="${esc(filters.search)}" placeholder="${t('Search model, stock #, colour...')}" aria-label="${t('Search model, stock #, colour...')}"></label>${selectControl('Make','make',[['','All makes'],...makes.map(v=>[v,v])])}${selectControl('Sort','sort',[['price-up','Price: low → high'],['price-down','Price: high → low']])}</div><div class="filter-pills" role="toolbar" aria-label="${t('Filter')}"><div class="pill-group">${statuses.map(([s,title])=>`<button type="button" data-public-status="${s}" aria-pressed="${filters.status===s}">${t(title)} <span>${d.vehicles.filter(v=>!s||v.status===s).length}</span></button>`).join('')}</div><span class="pill-divider" aria-hidden="true"></span><div class="pill-group">${[['Manual','Manual'],['Auto','Auto']].map(([val,labelKey])=>`<button type="button" data-public-trans="${val}" aria-pressed="${filters.transmission===val}">${t(labelKey)}</button>`).join('')}</div>${bodies.length?`<span class="pill-divider" aria-hidden="true"></span><div class="pill-group">${bodies.map(b=>`<button type="button" data-public-body="${esc(b)}" aria-pressed="${filters.body===b}">${esc(t(b))}</button>`).join('')}</div>`:''}<button type="button" id="resetPublic" class="pill-reset">${t('Reset')} ↺</button></div></div>`;
+ const currentStatus=statuses.find(([status])=>status===filters.status)?.[1]||'All stock';
+ $('#inventoryControls').innerHTML=`<div class="inventory-controls"><div class="controls-top-row"><label class="search-field">${icon('search')}<input id="publicSearch" type="search" value="${esc(filters.search)}" placeholder="${t('Search model, stock #, colour...')}" aria-label="${t('Search model, stock #, colour...')}"></label>${selectControl('Sort','sort',[['price-up','Price: low → high'],['price-down','Price: high → low']])}</div><div class="filter-pills" role="group" aria-label="${t('Filter')}"><div class="pill-group" role="group" aria-label="${t('Status')}">${statuses.map(([status,title])=>`<button type="button" data-public-status="${status}" aria-pressed="${filters.status===status}">${t(title)} <span>${d.vehicles.filter(v=>(!status||v.status===status)&&matchesInventorySelection(v,{make:filters.make})).length}</span></button>`).join('')}</div>${makes.length?`<span class="pill-divider" aria-hidden="true"></span><div class="pill-group" role="group" aria-label="${t('Make')}">${makes.map(make=>`<button type="button" data-public-make="${esc(make)}" aria-pressed="${filters.make===make}">${esc(make)} <span>${d.vehicles.filter(v=>matchesInventorySelection(v,{make,status:filters.status})).length}</span></button>`).join('')}</div>`:''}<button type="button" id="resetPublic" class="pill-reset">${t('Reset')} ↺</button></div><div class="inventory-filter-note" ${filters.make?'':'hidden'}><span>${tr('Showing','当前筛选','Paparan')}: ${esc(t(currentStatus))} · <strong>${esc(filters.make)}</strong></span><button type="button" id="clearBrandFilter">${tr('Clear brand','清除品牌','Kosongkan jenama')} ×</button></div></div>`;
  $('#publicSearch').oninput=e=>{filters.search=e.target.value;renderCards();};
  document.querySelectorAll('[data-filter]').forEach(select=>select.onchange=()=>{filters[select.dataset.filter]=select.value;renderCards();});
- document.querySelectorAll('[data-public-status]').forEach(b=>b.onclick=()=>{filters.status=b.dataset.publicStatus;controls();renderCards();});
- document.querySelectorAll('[data-public-trans]').forEach(b=>b.onclick=()=>{filters.transmission=filters.transmission===b.dataset.publicTrans?'':b.dataset.publicTrans;controls();renderCards();});
- document.querySelectorAll('[data-public-body]').forEach(b=>b.onclick=()=>{filters.body=filters.body===b.dataset.publicBody?'':b.dataset.publicBody;controls();renderCards();});
- $('#resetPublic').onclick=()=>{filters={search:'',make:'',status:'',transmission:'',body:'',sort:'price-up',featured:false};$('#featuredFilter').checked=false;controls();renderCards();};
+ document.querySelectorAll('[data-public-status]').forEach(button=>button.onclick=()=>{filters.status=button.dataset.publicStatus;controls();renderCards();document.querySelector(`[data-public-status="${filters.status}"]`)?.focus({preventScroll:true});});
+ document.querySelectorAll('[data-public-make]').forEach(button=>button.onclick=()=>{const make=button.dataset.publicMake;filters.make=filters.make===make?'':make;controls();renderCards();[...document.querySelectorAll('[data-public-make]')].find(b=>b.dataset.publicMake===make)?.focus({preventScroll:true});});
+ $('#clearBrandFilter').onclick=()=>{filters.make='';controls();renderCards();};
+ $('#resetPublic').onclick=()=>{filters={search:'',make:'',status:'',sort:'price-up',featured:false};$('#featuredFilter').checked=false;controls();renderCards();};
  $('#featuredFilter').onchange=e=>{filters.featured=e.target.checked;renderCards();};
  renderViewToggle();
 }
 function renderCards(){
- const cars=d.vehicles.filter(v=>(!filters.status||v.status===filters.status)&&(!filters.make||v.make===filters.make)&&(!filters.body||v.body===filters.body)&&(!filters.transmission||v.transmission===filters.transmission)&&(!filters.featured||v.isFeatured)&&[v.stockId,v.make,v.model,v.variant,v.exteriorColor,v.body,...(v.specialBadges||[])].join(' ').toLowerCase().includes(filters.search.toLowerCase()));
+ const cars=d.vehicles.filter(vehicle=>matchesInventorySelection(vehicle,filters));
  cars.sort((a,b)=>filters.sort==='price-down'?(b.priceRm??-1)-(a.priceRm??-1):(a.priceRm??Infinity)-(b.priceRm??Infinity));
  const availCount=cars.filter(v=>v.status==='available').length;
  const bookedCount=cars.filter(v=>v.status==='reserved').length;

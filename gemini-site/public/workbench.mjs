@@ -1,5 +1,6 @@
+import {inventoryBrands,visibleBrandFilters} from './inventory-brand-filters.mjs';
 import {photoCategory} from './vehicle-gallery.mjs';
-import {normalizeDocument,normalizeVehicle,normalizeTintPackage,vehicleIssues,STATUSES,GRADES,INTERIORS,SPECIAL_TAGS,vehicleSpecialBadges,label,estimate,number} from './inventory-domain.mjs';
+import {normalizeDocument,normalizeVehicle,normalizeTintPackage,vehicleIssues,STATUSES,GRADES,INTERIORS,SPECIAL_TAGS,vehicleSpecialBadges,label,estimate,number} from './inventory-domain.mjs?v=brand-buttons-20261018';
 import {tintPackages as defaultTintPackages} from './tint-packages.mjs';
 import {readLocal,writeLocal,deleteLocal,photoUrl,compressPhoto,prepareReportFile} from './browser-stock.mjs';
 import {icon} from './stock-icons.mjs';
@@ -76,7 +77,7 @@ function newVehicle(){if(busy)return toast('Wait for the photos to finish.');edi
 document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=async()=>{if(busy)return;if(editorDirty&&!await confirmAction('Leave unsaved changes?','Save this vehicle first to keep your edits. Leave the editor anyway?'))return;if(b.dataset.nav==='edit')newVehicle();else activate(b.dataset.nav);});
 const FIELD_GUIDES={
  stockId:{placeholder:'e.g. H89451 or DRS-2026-09',hint:'Unique stock code (letters, numbers, - or _). Click “⚡ Auto ID” to generate automatically.'},
- make:{placeholder:'e.g. Honda, Toyota, Mercedes-Benz, BMW, Porsche',hint:'Brand name — used for homepage Make filter.'},
+ make:{placeholder:'e.g. Honda, Toyota, Mercedes-Benz, BMW, Porsche',hint:'Brand name — used for homepage brand buttons. Manage visible brands in Settings.'},
  model:{placeholder:'e.g. Civic Type R, Alphard, Vellfire, Stepwgn, A45s',hint:'Main model name shown on the card title.'},
  variant:{placeholder:'e.g. FL5, 2.5 SC Package, Z Premier, Spada RP8, RF',hint:'Trim or chassis generation — helps auto-detect RS / RF / TYPE R badges.'},
  manufactureYear:{placeholder:'e.g. 2022',hint:'Unregistered / manufacture year (4 digits, e.g. 2020–2026).'},
@@ -362,6 +363,11 @@ function servicesMarkup(){
    <div class="wb-tint-grid">${threeM.map(renderPkgCard).join('')}</div>
   </section>`;
 }
+function brandFilterSettingsMarkup(){
+ const makes=inventoryBrands(doc.vehicles),manual=doc.homepage.brandFilterMode==='manual';
+ const selected=new Set(manual||doc.homepage.brandFilters.length?doc.homepage.brandFilters:visibleBrandFilters(doc));
+ return `<section class="wb-brand-settings" aria-labelledby="brandFilterSettingsTitle"><div class="wb-brand-settings-heading"><h3 id="brandFilterSettingsTitle">Homepage brand buttons · 首页品牌按钮</h3><p>Brand buttons sit beside All stock / Available / Booked / Sold. Removing a button never deletes cars or their sold history.</p></div><label class="field">Display mode · 显示方式<select name="brandFilterMode" id="brandFilterMode"><option value="auto" ${!manual?'selected':''}>Automatic: brands with available or booked cars · 自动显示有库存的品牌</option><option value="manual" ${manual?'selected':''}>Manual: choose brands below · 手动选择品牌</option></select></label><p class="wb-brand-hint">Automatic mode removes sold-out brands from the buttons. Sold still shows every published sold car. 手动隐藏品牌，不会影响 Sold 内的车辆。</p><fieldset id="brandFilterChoices" ${manual?'':'hidden'}><legend>Choose buttons to show · 勾选首页要显示的品牌</legend><div class="wb-brand-options">${makes.map(make=>{const active=doc.vehicles.filter(v=>v.make===make&&['available','reserved'].includes(v.status)).length,sold=doc.vehicles.filter(v=>v.make===make&&v.status==='sold').length;return `<label><input type="checkbox" name="brandFilters" value="${esc(make)}" ${selected.has(make)?'checked':''}><span><strong>${esc(make)}</strong><small>${active} in stock · ${sold} sold</small></span></label>`;}).join('')||'<p>Add a vehicle and enter its brand first. Brands appear here automatically.</p>'}</div></fieldset><p class="wb-brand-hint">Add a vehicle with a new brand to add it to this list. Choose Manual to hide individual buttons; leave all unchecked to hide the entire brand row. 新增车辆时填写品牌，这里就会出现。</p><button class="button small" type="submit">Save brand buttons · 保存品牌显示</button></section>`;
+}
 function settings(){
  return `<form id="settingsForm">
  <details class="wb-panel form-section settings-group" open>
@@ -377,6 +383,7 @@ function settings(){
    <label class="check-field"><input type="checkbox" name="autoLowKmBadge" ${doc.homepage.autoLowKmBadge!==false?'checked':''}> <strong>Automatically add “LOW KM” badge</strong> to vehicles with mileage under 25,000 km</label>
    <label class="check-field"><input type="checkbox" name="showSoldVehicles" ${doc.homepage.showSoldVehicles?'checked':''}> Show sold vehicles in the public showroom</label>
   </div>
+  ${brandFilterSettingsMarkup()}
   <button class="button" type="submit">Save Display &amp; Finance Defaults</button>
  </details>
  </form>
@@ -419,6 +426,7 @@ async function uploadStoryPhoto(storyId,file){
 }
 function render(){syncStatusBanner();content.innerHTML=view==='inventory'?inventory():view==='edit'?editor():view==='services'?servicesMarkup():view==='deliveries'?deliveriesView():settings();hydrateImages();bind();}
 function bind(){
+ if($('#brandFilterMode'))$('#brandFilterMode').onchange=event=>{$('#brandFilterChoices').hidden=event.target.value!=='manual';};
  if($('#vehicleForm'))$('#vehicleForm').oninput=event=>{editorDirty=true;if(['auctionGrade','interiorGrade','auctionHouse','gradeVerified'].includes(event.target.name)){editing.conditionExample=false;$('#vehicleForm input[name=conditionExample]').checked=false;}};
  const search=$('#stockSearch');if(search)search.oninput=()=>{query=search.value;const start=search.selectionStart;render();const next=$('#stockSearch');next.focus();next.setSelectionRange(start,start);};
  for(const [id,setter] of [['makeFilter',v=>make=v],['yearFilter',v=>year=v],['stockSort',v=>sort=v],['statusSelectFilter',v=>{filter=v;issueFilter='';}],['issueSelectFilter',v=>issueFilter=v]]){const node=$('#'+id);if(node)node.onchange=()=>{setter(node.value);render();};}
@@ -508,7 +516,7 @@ function bind(){
   toast('✨ Handover caption auto-filled.');
  });
  document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>runAction(b.dataset.action));
- if($('#settingsForm'))$('#settingsForm').onsubmit=async e=>{e.preventDefault();const values=Object.fromEntries(new FormData(e.target));for(const key of ['tiktok','facebook','rednote'])if(values[key]&&!/^https:\/\//i.test(values[key]))return toast('Social links must start with https://',true);const before=structuredClone(doc);for(const key of ['name','phone','email','location','intro','tiktok','facebook','rednote']){if(['tiktok','facebook','rednote'].includes(key)&&values[key]&&!/^https:\/\//i.test(values[key]))return toast('Social links must start with https://',true);doc.profile[key]=values[key];}doc.profile.locations=String(values.locations).split('\n').map(s=>s.trim()).filter(Boolean);for(const k of ['rate','tenure','downPayment'])doc.finance[k]=Number(values[k]);doc.homepage.showSoldVehicles=values.showSoldVehicles==='on';doc.homepage.hideAvailableBadge=values.hideAvailableBadge==='on';doc.homepage.autoLowKmBadge=values.autoLowKmBadge==='on';try{await persist();toast('Settings saved in this browser.');}catch(error){doc=before;toast(error.message,true);}};
+ if($('#settingsForm'))$('#settingsForm').onsubmit=async e=>{e.preventDefault();const values=Object.fromEntries(new FormData(e.target));for(const key of ['tiktok','facebook','rednote'])if(values[key]&&!/^https:\/\//i.test(values[key]))return toast('Social links must start with https://',true);const before=structuredClone(doc);for(const key of ['name','phone','email','location','intro','tiktok','facebook','rednote']){if(['tiktok','facebook','rednote'].includes(key)&&values[key]&&!/^https:\/\//i.test(values[key]))return toast('Social links must start with https://',true);doc.profile[key]=values[key];}doc.profile.locations=String(values.locations).split('\n').map(s=>s.trim()).filter(Boolean);for(const k of ['rate','tenure','downPayment'])doc.finance[k]=Number(values[k]);doc.homepage.brandFilterMode=values.brandFilterMode==='manual'?'manual':'auto';doc.homepage.brandFilters=new FormData(e.target).getAll('brandFilters').map(String);doc.homepage.showSoldVehicles=values.showSoldVehicles==='on';doc.homepage.hideAvailableBadge=values.hideAvailableBadge==='on';doc.homepage.autoLowKmBadge=values.autoLowKmBadge==='on';try{await persist();toast('Settings saved in this browser.');}catch(error){doc=before;toast(error.message,true);}};
  if($('#restoreBackup'))$('#restoreBackup').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>8*1024*1024)throw Error('Use a JSON backup under 8 MB.');const value=JSON.parse(await file.text()),restored=normalizeDocument(value.document||value);if(!Array.isArray(value.vehicles||value.document?.vehicles)||restored.vehicles.length>500)throw Error('Choose a valid inventory-workbench.json backup.');for(const v of restored.vehicles)if(vehicleIssues(v).length)throw Error('The backup contains invalid vehicle details.');if(!await confirmAction('Restore inventory?','Replace the inventory saved in this browser with this JSON backup?'))return;doc=restored;await persist();render();toast('Inventory restored. Keep uploaded photos in their matching website folder.');}catch(error){toast(error.message,true);}};
 }
 async function runAction(action){
@@ -588,7 +596,7 @@ async function exportUpdate(){
   const files={},nowIso=new Date().toISOString(),snapshot={document:publicSnapshot(doc),revision:Date.now(),updatedAt:nowIso};
   files['data/public-site.json']=strToU8(JSON.stringify(snapshot,null,2));
   files['data/inventory-workbench.json']=strToU8(JSON.stringify({document:doc},null,2));
-  files['README-UPDATE.txt']=strToU8('Danny Recond Select — Cloudflare Pages & GitHub Pages Update\n\n1. Extract this ZIP.\n2. Copy the data/ and public/ folders into your repository root (preserving folder names) and commit.\n3. Cloudflare Pages (build command: npm run build:cloudflare, output dir: dist-cloudflare) and GitHub Pages rebuild automatically.\n');
+  files['README-UPDATE.txt']=strToU8('Danny Recond Select — Cloudflare Pages & GitHub Pages Update\n\n1. Extract this ZIP.\n2. For danielong-bit/Car-Recond-Japan, copy the data/ and public/ folders into gemini-site/ (preserving folder names) and commit. This is the active website source folder.\n3. Cloudflare Pages (build command: npm run build:cloudflare, output dir: dist-cloudflare) and GitHub Pages rebuild automatically.\n');
   for(const url of new Set([...doc.vehicles.flatMap(v=>[...v.gallery.map(m=>m.url),v.auctionReport?.url].filter(Boolean)),...(doc.stories||[]).map(s=>s.image).filter(Boolean)].filter(p=>p.startsWith('/assets/uploads/')))){
    const blob=await readLocal(url);
    if(blob instanceof Blob)files['public'+url]=new Uint8Array(await blob.arrayBuffer());
@@ -604,7 +612,7 @@ async function exportUpdate(){
  finally{busy=false;b.disabled=false;b.innerHTML='Export site update ↓';}
 }
 $('#exportUpdate').onclick=exportUpdate;
-$('#exportHelp').onclick=()=>confirmAction('How publishing works (Local → Export ZIP → Cloudflare / GitHub Pages)','1. Auto-Saved in Browser: All edits to vehicles, XPEL/3M tint packages, and deliveries save immediately in your browser.\n2. Preview Anytime: Click “Preview showroom” to inspect your changes on the website.\n3. Publish to Cloudflare Pages or GitHub Pages: Click “Export site update” to download a ZIP containing data/public-site.json, data/inventory-workbench.json, and public/assets/uploads/*. Commit those folders to your repository to deploy.');
+$('#exportHelp').onclick=()=>confirmAction('How publishing works (Local → Export ZIP → Cloudflare / GitHub Pages)','1. Auto-Saved in Browser: All edits to vehicles, XPEL/3M tint packages, and deliveries save immediately in your browser.\n2. Preview Anytime: Click “Preview showroom” to inspect your changes on the website.\n3. Publish to Cloudflare Pages or GitHub Pages: Click “Export site update” to download a ZIP containing data/public-site.json, data/inventory-workbench.json, and public/assets/uploads/*. In Car-Recond-Japan, copy those folders into gemini-site/ and commit to deploy.');
 $('#openPreview').onclick=async()=>{if(editorDirty)return toast('Save this vehicle before opening its preview.',true);if(busy)return toast('Wait for the photos to finish.');try{await writeLocal('preview',publicSnapshot(doc));location.href=(view==='services'?base+'services/':base)+'?local-preview=1';}catch(error){toast(error.message,true);}};
 window.addEventListener('beforeunload',e=>{if(busy||editorDirty){e.preventDefault();e.returnValue='';}});
 try{
