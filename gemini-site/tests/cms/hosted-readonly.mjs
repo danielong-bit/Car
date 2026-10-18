@@ -1,0 +1,6 @@
+import assert from 'node:assert/strict';
+const origin='https://car-recond-japan.haloultraman3.chatgpt.site';
+for(const path of ['/','/calculator','/vehicle/audi-s5','/audi','/assets/stock-placeholders/alphard-z.svg','/cms-studio.js','/finance-engine.mjs']){const r=await fetch(origin+path);assert.equal(r.status,200,path);console.log('PASS hosted 200',path);}
+for(const path of ['/api/cms/draft','/api/cms/enquiries','/?preview=1']){const r=await fetch(origin+path);assert.equal(r.status,401,path);console.log('PASS hosted unauthorized',path);}
+const r=await fetch(origin+'/api/cms/published'),d=await r.json();assert.equal(d.document.vehicles.length,7);assert.equal(d.document.vehicles[0].price,438000);assert.ok(d.document.vehicles.filter(v=>v.id!=='audi-s5').every(v=>v.gallery[0].url.includes('stock-placeholders')));assert.ok(d.document.vehicles.every(v=>!('internalCost' in v)));assert.equal(d.document.stories.length,0);console.log('PASS hosted shared inventory, exact numeric price, placeholders, private fields and story consent');
+const forbidden=await fetch(origin+'/api/cms/draft',{method:'PUT',headers:{Origin:origin,'Content-Type':'application/json'},body:'{}'});assert.equal(forbidden.status,401);console.log('PASS hosted anonymous mutation rejected');

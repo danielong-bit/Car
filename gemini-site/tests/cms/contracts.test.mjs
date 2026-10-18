@@ -1,0 +1,10 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { validateDocument, publicDocument, authorize, safeMediaUrl } from '../../lib/cms/contracts.mjs';
+const doc = () => ({vehicles:[{id:'car-a',stockId:'A1',brand:'Toyota',model:'Example',year:2024,price:100000,status:'available',sample:true,gallery:[{url:'/assets/car.jpg',category:'exterior',x:50,y:50,zoom:1}],specs:{},features:{}}],stories:[],homepage:{order:['experience','inventory','contact','customer-stories'],hidden:[]},profile:{phone:'60125686528'},finance:{rate:3,tenure:7}});
+test('owner auth fails closed',()=>{assert.equal(authorize(null,'owner@example.com'),false);assert.equal(authorize({email:'other@example.com'},'owner@example.com'),false);assert.equal(authorize({email:'OWNER@example.com'},'owner@example.com'),true)});
+test('reject temporary and executable media',()=>{for(const s of ['blob:abc','data:image/png,abc','javascript:alert(1)','//evil.test/a.jpg'])assert.equal(safeMediaUrl(s),false);assert.equal(safeMediaUrl('/assets/a.jpg'),true)});
+test('publishing excludes draft/archived and private fields',()=>{const d=doc();d.vehicles[0].internalCost=5;d.vehicles.push({...d.vehicles[0],id:'draft',stockId:'A2',status:'draft'});const p=publicDocument(d);assert.equal(p.vehicles.length,1);assert.equal(p.vehicles[0].internalCost,undefined)});
+test('valid document and duplicate stock validation',()=>{assert.equal(validateDocument(doc()).length,0);const d=doc();d.vehicles.push({...d.vehicles[0],id:'other'});assert.ok(validateDocument(d).some(x=>x.includes('Stock')))});
+test('publishing rejects missing covers and consent',()=>{const d=doc();d.vehicles[0].gallery=[];d.stories=[{id:'s',published:true,consent:'pending',image:'/assets/a.jpg'}];assert.ok(validateDocument(d,true).length>=2)});
+test('unsafe content rejected before legacy HTML interpolation',()=>{const d=doc();d.vehicles[0].model='<img onerror=alert(1)>';assert.ok(validateDocument(d).length)});

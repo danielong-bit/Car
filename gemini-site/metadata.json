@@ -1,0 +1,6 @@
+{
+  "name": "Danny Recon Select",
+  "description": "Curated Japanese and European reconditioned vehicle showroom, inline hire-purchase calculator, XPEL/3M window tint configurator, and browser-based inventory workbench.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,6 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {loanSchedule,roadTax} from '../../public/finance-engine.mjs';
+test('JPJ private petrol/diesel class and band examples',()=>{assert.equal(roadTax(1000,'AB'),20);assert.equal(roadTax(1984,'AB'),372);assert.equal(roadTax(1984,'AC'),744);assert.equal(roadTax(2494,'AD'),835.2);assert.equal(roadTax(3000,'AB'),2130);assert.throws(()=>roadTax(2000,'AB','sabah'));assert.throws(()=>roadTax(0,'AD'));});
+test('zero interest fully repays principal',()=>{const r=loanSchedule(12000,1,0,'reducing');assert.equal(r.monthly,1000);assert.equal(r.totalInterest,0);assert.equal(r.rows.at(-1).balance,0)});
+test('reducing balance totals reconcile',()=>{const r=loanSchedule(90000,7,6,'reducing');assert.equal(r.rows.length,84);assert.ok(Math.abs(r.rows.reduce((n,r)=>n+r.principal,0)-90000)<.01);assert.ok(r.rows[0].interest>r.rows.at(-1).interest);assert.equal(r.rows.at(-1).balance,0)});
+test('legacy flat comparison explicit and correct',()=>{const r=loanSchedule(100000,5,3,'flat');assert.equal(r.totalInterest,15000);assert.ok(Math.abs(r.monthly-115000/60)<.01)});
+test('invalid values rejected',()=>{assert.throws(()=>loanSchedule(-1,0,2,'reducing'));assert.throws(()=>loanSchedule(1,1,Infinity,'reducing'))});
