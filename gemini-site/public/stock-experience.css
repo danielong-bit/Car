@@ -1,0 +1,182 @@
+/* Stock experience · same content and layout, Mountain Light / Classic Dark */
+:root{--font:Outfit,'Segoe UI','Microsoft YaHei',sans-serif}
+body{font-family:var(--font)}
+body .mountain-copy h1{font-family:MountainSans,var(--font)}
+body .showroom-header,body header#top,body header#top:nth-of-type(1){top:12px!important;min-height:56px;padding:7px 20px;max-width:1180px;gap:20px}
+body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1),body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1):hover{font-size:24px;letter-spacing:.13em}
+body header#top a.wordmark>small,body header#top a.wordmark:hover>small{font-size:7px;margin-top:5px}
+body .showroom-header nav{gap:22px}
+body .showroom-header nav a{font-size:14px;min-height:38px}
+body .language-control select{font-size:12px;min-height:36px;max-width:76px;padding:5px 8px}
+body .nav-contact{font-size:13px;min-height:36px;padding:6px 13px;gap:7px;border-radius:9px}
+body .nav-contact .wa-brand{width:22px;height:22px}
+body .nav-contact .mobile-contact{display:none}
+body .mountain-copy{padding-top:125px}
+body .mountain-copy>.actions{gap:12px}
+body #findYourCar{border-radius:999px;min-height:46px;padding:10px 23px}
+body .mountain-copy .actions .button{font-weight:600;min-height:46px}
+body .mountain-signature{bottom:35px}
+body.exhibition-home #inventoryGrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+body .stock-photo{aspect-ratio:4/3}
+body .stock-info{padding:17px 16px}
+body .stock-info h3{font-family:var(--font);font-size:18px;font-weight:700;line-height:1.3;letter-spacing:-.025em}
+body .stock-identifiers{display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:5px;line-height:1.5;min-width:0}
+body .stock-identifiers code{display:block;font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--muted);letter-spacing:.015em;overflow-wrap:anywhere}
+body .stock-identifiers .chassis-number{color:var(--muted)}
+body .spec-row,body .spec-row strong{font-size:13px;font-weight:700;color:var(--ink)}
+body .spec-row{gap:13px;padding-block:12px}
+body .stock-price{font-size:27px;line-height:1.15}
+body .monthly-price{font-size:13px}
+body .view-link{font-size:13px;min-height:36px;padding:7px 12px}
+body .stock-card-footer{padding-top:11px;margin-top:12px}
+body .inventory-controls .controls-top-row{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:10px;align-items:center}
+body .inventory-controls .controls-top-row .search-field{min-height:44px;border-radius:10px}
+body .inventory-controls .search-field input{font-size:14px;min-height:44px}
+body .inventory-controls .compact-field{min-width:0}
+body .inventory-controls .compact-field select{font-size:13px;min-height:46px;border-radius:10px;background:var(--surface);color:var(--ink)}
+body .filter-pills{gap:8px}
+body .filter-pills button{font-size:13px;padding:7px 13px;min-height:38px}
+body .inventory-section>.section-heading h2{font-size:34px}
+body .wb-theme-toggle{margin:18px 14px 10px;min-height:42px;font-size:13px;text-align:left;flex-shrink:0}
+body .wb-theme-settings{padding:20px;border:1px solid var(--line);border-radius:12px;margin:20px 0;background:var(--page)}
+body .wb-theme-settings h3{font-size:19px}
+body .wb-theme-settings p,body .wb-theme-settings>small{display:block;font-size:13px;color:var(--muted);margin:10px 0}
+.theme-swatches{display:flex;gap:12px;margin:16px 0}
+.theme-swatches span{padding:18px 22px;border:1px solid #b7c7d6;border-radius:10px;font-size:13px;font-weight:600}
+.theme-swatches .swatch-light{background:#faf9f6;color:#173e67}
+.theme-swatches .swatch-dark{background:#10151b;color:#91d6c7}
+/* Native dialog, visible focus, fixed progress and large tap choices. */
+body.finder-open{overflow:hidden}
+body #carFinder{width:min(660px,calc(100% - 32px));max-height:calc(100dvh - 48px);padding:26px;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--ink);box-shadow:0 24px 90px #142e4940}
+body #carFinder::backdrop{background:#10263c70;backdrop-filter:blur(8px)}
+.finder-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.finder-head .eyebrow{margin:0;font-size:11px}
+.finder-head button{min-width:40px;min-height:40px;padding:4px;font-size:24px;border-radius:50%;background:var(--surface)}
+.finder-progress{display:flex;gap:7px;margin:20px 0 12px}
+.finder-progress span{height:4px;border-radius:8px;flex:1;background:var(--line)}
+.finder-progress .complete{background:var(--blue)}
+.finder-step{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+#carFinder h2{font-size:30px;line-height:1.15;letter-spacing:-.035em;margin:9px 0 22px;outline:none}
+.finder-options{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+body .finder-choice{display:flex;position:relative;flex-direction:column;justify-content:center;gap:5px;text-align:left;padding:19px 35px 19px 17px;border:1px solid var(--line);border-radius:12px;min-height:88px;background:var(--surface-2);color:var(--ink);transition:border-color .18s,background .18s}
+.finder-choice strong{font-size:16px;font-weight:600;color:var(--ink)}
+.finder-choice>span:not(.finder-choice-arrow){font-size:12px;color:var(--muted)}
+.finder-choice-arrow{position:absolute;right:15px;top:18px;color:var(--blue)}
+body .finder-choice:hover{background:var(--surface);border-color:var(--blue)}
+.finder-footer{display:flex;justify-content:space-between;gap:12px;margin-top:22px;border-top:1px solid var(--line);padding-top:14px}
+.finder-footer button{border:0;background:transparent;padding:8px 0;min-height:40px;font-size:14px;color:var(--muted)}
+#finderBudgetForm{display:flex;gap:12px;align-items:end;padding-top:18px}
+#finderBudgetForm label{display:grid;gap:8px;font-size:13px;flex:1}
+#finderBudgetForm input{width:100%;min-height:46px}
+#finderBudgetForm .button{border-radius:10px;min-height:46px}
+.finder-summary{font-size:13px;color:var(--muted);line-height:1.6;margin:-8px 0 18px}
+.finder-notice{padding:12px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;font-size:13px;line-height:1.5;margin:12px 0 18px}
+.finder-results{display:grid;gap:12px}
+.finder-result{display:grid;grid-template-columns:130px minmax(0,1fr);gap:16px;border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--surface-2)}
+.finder-result>img{width:130px;height:110px;object-fit:cover;border-radius:8px;background:var(--line)}
+.finder-result h3{font-size:18px;line-height:1.3;margin-bottom:3px}
+.finder-result small{font-size:11px;color:var(--muted);font-family:ui-monospace,monospace}
+.finder-result p{font-size:12px;color:var(--muted);margin:5px 0}
+.finder-result strong{display:block;font-size:20px;color:var(--blue)}
+.finder-result-actions{display:flex;align-items:center;gap:14px;margin-top:10px;flex-wrap:wrap}
+.finder-result-actions .button{min-height:36px;font-size:12px;border-radius:8px}
+.finder-whatsapp{color:#087c46;font-size:13px;font-weight:600;min-height:36px;display:inline-flex;align-items:center}
+.finder-result-footer{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+.finder-result-footer .button{flex:1}
+.finder-result-footer button{background:var(--surface);color:var(--ink)}
+/* Classic Dark retains the earlier obsidian, champagne and mint palette. */
+html[data-theme=dark]{--page:#0c1015;--surface:#161c24;--surface-2:#1c2631;--line:#2d3a48;--ink:#eff4fa;--muted:#a7b5c5;--navy:#d3e4f5;--blue:#88d6c4;--blue-hover:#b1e6da;--mint:#88d6c4;--sky:#88d6c4;--gold:#e4c58d;--ds-text:#eff4fa;--ds-muted:#a7b5c5;--ds-surface:#161c24;--ds-border:#2d3a48;color-scheme:dark}
+html[data-theme=dark] body{background:var(--page);color:var(--ink)}
+html[data-theme=dark] body :is(h1,h2,h3){color:var(--ink)}
+html[data-theme=dark] body :is(input,select,textarea){background:var(--surface);color:var(--ink);border-color:var(--line)}
+html[data-theme=dark] body .button,html[data-theme=dark] body .view-link{background:var(--blue);border-color:var(--blue);color:#0c2621}
+html[data-theme=dark] body .button:hover,html[data-theme=dark] body .view-link:hover{background:var(--blue-hover);color:#0c2621}
+html[data-theme=dark] body .button.quiet,html[data-theme=dark] body .button.outline{background:#161c24a6;border-color:#53667b;color:var(--ink)}
+html[data-theme=dark] body header#top:nth-of-type(1){background:#0d1720a6;border-color:#7a95ac55;box-shadow:inset 0 1px 0 #ffffff20,0 8px 26px #0003}
+html[data-theme=dark] body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1),html[data-theme=dark] body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1):hover,html[data-theme=dark] body header#top a.wordmark>small,html[data-theme=dark] body header#top a.wordmark:hover>small{color:var(--ink)}
+html[data-theme=dark] body .showroom-header nav a,html[data-theme=dark] body .language-control select{color:var(--ink)}
+html[data-theme=dark] body .language-control select{background:#ffffff09;border-color:#ffffff25}
+html[data-theme=dark] body .showroom-hero.mountain-hero{background:#0c1015}
+html[data-theme=dark] .mountain-scene:after{background:linear-gradient(90deg,#07111dd9,#07111d85 35%,#07111d14 68%)}
+html[data-theme=dark] body .mountain-copy h1{color:#f1f6fc}
+html[data-theme=dark] body .mountain-copy .eyebrow{color:#e4c58d}
+html[data-theme=dark] body .stock-card,html[data-theme=dark] body .compact-row{background:var(--surface);border-color:var(--line);box-shadow:0 6px 20px #0002}
+html[data-theme=dark] body .stock-info h3,html[data-theme=dark] body .compact-main h3,html[data-theme=dark] body .spec-row,html[data-theme=dark] body .spec-row strong{color:var(--ink)}
+html[data-theme=dark] body .stock-price,html[data-theme=dark] body .monthly-price{color:var(--blue)}
+html[data-theme=dark] body .stock-card:hover{border-color:#4e8c81}
+html[data-theme=dark] body .filter-pills button,html[data-theme=dark] body .view-toggle{background:var(--surface);border-color:var(--line);color:var(--muted)}
+html[data-theme=dark] body .filter-pills button[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#0a2520}
+html[data-theme=dark] body .filter-pills button:hover{background:#273c3b;color:var(--ink);border-color:var(--blue)}
+html[data-theme=dark] body .filter-pills button[aria-pressed=true] span{color:#0a2520}
+html[data-theme=dark] body .inventory-controls .search-field{background:var(--surface);border-color:var(--line)}
+html[data-theme=dark] body .inventory-result,html[data-theme=dark] body .inventory-result label,html[data-theme=dark] body .inventory-result label span,html[data-theme=dark] body .compare-check{color:var(--muted)}
+html[data-theme=dark] body .view-toggle button[aria-pressed=true]{background:#283a40;color:var(--blue)}
+html[data-theme=dark] body :is(.contact-block,.contact-block.contact-primary,.contact-block.location-block,.about-image,.purchase-heading,.purchase-summary,.vehicle-contact,.detail-info,.vehicle-calculator,.other-car-body,.other-car-card){background:var(--surface);border-color:var(--line)}
+html[data-theme=dark] body .about-copy>h2,html[data-theme=dark] body .contact-block>a.contact-location,html[data-theme=dark] body .contact-phone{color:var(--ink)}
+html[data-theme=dark] body .contact-block small,html[data-theme=dark] body .contact-location .icon{color:var(--blue)}
+html[data-theme=dark] body .contact-block .contact-secondary a,html[data-theme=dark] body .contact-block.location-block .location-actions button{background:var(--surface-2);color:var(--ink);border-color:var(--line)}
+html[data-theme=dark] body .contact-block.location-block .location-actions a.location-directions{background:var(--blue);border-color:var(--blue);color:#0c2621}
+html[data-theme=dark] body .contact-block>a.viewing-link{color:var(--blue)}
+html[data-theme=dark] body .social-row a,html[data-theme=dark] body .showroom-footer{background:var(--surface);border-color:var(--line);color:var(--ink)}
+html[data-theme=dark] body .social-row img[src*=tiktok]{filter:invert(1)!important}
+html[data-theme=dark] body .detail-section-nav{background:#101922ed}
+html[data-theme=dark] body .detail-purchase>.purchase-heading,html[data-theme=dark] body .detail-purchase>.purchase-summary,html[data-theme=dark] body .detail-purchase>.vehicle-calculator{background:var(--surface);border-color:var(--line)}
+html[data-theme=dark] body .purchase-heading{border-top-color:var(--blue)!important}
+html[data-theme=dark] body .purchase-heading .stock-price,html[data-theme=dark] body .purchase-heading .monthly-price,html[data-theme=dark] body .purchase-facts strong{color:var(--blue)}
+html[data-theme=dark] body :is(.vehicle-availability,.context-enquiries a,.viewing-disclosure,.specification-group[open],.feature-tags>span,.condition-scores>div,.report-wa-strip,.interior-scale-item,.share-car-btn){background:var(--surface-2);color:var(--ink);border-color:var(--line)}
+html[data-theme=dark] body .vehicle-location{background:var(--surface-2);color:var(--ink)}
+html[data-theme=dark] body .detail-purchase .vehicle-calculator .payment-result{background:#0e1821;border-color:#3c5964}
+html[data-theme=dark] body .detail-purchase .vehicle-calculator .payment-result strong,html[data-theme=dark] body .condition-panel .condition-scores strong{color:var(--blue)}
+html[data-theme=dark] body .detail-purchase .vehicle-calculator .payment-result small,html[data-theme=dark] body .detail-purchase .vehicle-calculator .payment-result span,html[data-theme=dark] body .condition-scores small,html[data-theme=dark] body .condition-scores span,html[data-theme=dark] body .condition-panel .condition-summary-copy,html[data-theme=dark] body .report-wa-strip p,html[data-theme=dark] body .vehicle-contact .contact-card-copy{color:var(--muted)!important}
+html[data-theme=dark] body .detail-purchase .vehicle-calculator label,html[data-theme=dark] body .fixed-rate{color:var(--ink)}
+html[data-theme=dark] body .down-presets button[aria-pressed=true]{background:var(--blue);color:#0c2621;border-color:var(--blue)}
+html[data-theme=dark] body .example-label{background:#362d1d;color:#e4c58d;border-color:#6d5732}
+html[data-theme=dark] body :is(.tint-specs,.tint-package,.tint-note,.tint-body button,.tint-brands button,.tint-poster-button){background:var(--surface);color:var(--ink);border-color:var(--line)}
+html[data-theme=dark] body .tint-body button[aria-pressed=true],html[data-theme=dark] body .tint-brands button[aria-pressed=true]{background:var(--surface-2);border-color:var(--blue);color:var(--ink)}
+html[data-theme=dark] body #compareModal,html[data-theme=dark] body .compare-bar{background:var(--surface);color:var(--ink);border-color:var(--line)}
+html[data-theme=dark] body .compare-table td,html[data-theme=dark] body .compare-table thead td,html[data-theme=dark] body .compare-table tbody tr:nth-child(2) td{background:var(--surface-2);color:var(--ink);border-color:var(--line)}
+html[data-theme=dark] body .compare-table thead td>strong,html[data-theme=dark] body .compare-table th{color:var(--ink)}
+html[data-theme=dark] body .compare-table tbody tr:nth-child(1) td{color:var(--blue)}
+html[data-theme=dark] body .compare-win{background:#25423b;color:var(--blue);border-color:#43776b}
+html[data-theme=dark] body .finder-result-footer .whatsapp-action{background:#087c46;color:white;border-color:#087c46}
+html[data-theme=dark] body .finder-whatsapp{color:#94dcc6}
+/* Workbench uses the same dark palette, independent of the public website setting. */
+html[data-theme=dark] .workbench :is(.wb-sidebar,.wb-panel,.wb-kpis button,.wb-hook-bar,.stock-attention-bar,.wb-more-filters,.wb-tint-card,.wb-tint-prices,.backup-explainer-item,.wb-brand-settings,.wb-theme-settings){background:var(--surface);color:var(--ink);border-color:var(--line);box-shadow:none}
+html[data-theme=dark] .workbench .wb-sidebar .wordmark,html[data-theme=dark] .workbench .wb-sidebar .wordmark small,html[data-theme=dark] .workbench .wb-vehicle strong,html[data-theme=dark] .workbench .wb-kpis button strong{color:var(--ink)}
+html[data-theme=dark] .workbench .wb-sidebar nav button[aria-current],html[data-theme=dark] .workbench .wb-table-head,html[data-theme=dark] .workbench .wb-row:hover,html[data-theme=dark] .workbench .wb-brand-options>label:has(input:checked){background:var(--surface-2);color:var(--ink);border-color:var(--line)}
+html[data-theme=dark] .workbench :is(.attention-chip,.wb-preset-chip,.row-menu,.wb-toolbar .search-field,.wb-tint-xpel-meta,.wb-fill-guide,.wb-fill-guide-grid div){background:var(--surface-2);color:var(--ink);border-color:var(--line)}
+html[data-theme=dark] .workbench .wb-local-note{background:#1e303f;color:var(--muted);border-color:#3e5467}
+html[data-theme=dark] .workbench .wb-local-note[data-state=dirty]{background:#30291e;color:#e4cfaa;border-color:#6a5638}
+html[data-theme=dark] .workbench .wb-tint-name-input,html[data-theme=dark] .workbench .wb-feature-chip{background:var(--surface-2)!important;color:var(--ink)!important;border-color:var(--line)!important}
+html[data-theme=dark] body #mobileDetailSticky,html[data-theme=dark] body .mobile-detail-sticky{background:#101922f5!important;border-color:var(--line)!important}
+html[data-theme=dark] body .mobile-sticky-price,html[data-theme=dark] body .mobile-sticky-sub{color:var(--ink)!important}
+@media(max-width:1100px){body.exhibition-home #inventoryGrid{grid-template-columns:repeat(3,minmax(0,1fr))}body .showroom-header nav{gap:16px}body .showroom-header nav a{font-size:13px}body .nav-contact{font-size:12px}body .mountain-copy{padding-top:125px}}
+@media(max-width:900px){body.exhibition-home #inventoryGrid{grid-template-columns:repeat(2,minmax(0,1fr))}body .showroom-header,body header#top:nth-of-type(1){flex-wrap:nowrap;border-radius:999px;gap:12px}body .showroom-header nav{order:0;flex:1;justify-content:center;width:auto}body .showroom-header nav a{font-size:12px}body .header-actions{margin-left:0}body .nav-contact .desktop-contact{display:none}body .nav-contact .mobile-contact{display:inline}body .nav-contact .wa-brand{display:none}body .nav-contact{width:auto}body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1){font-size:22px}body:not(.exhibition-home):not(.workbench){padding-top:100px}}
+@media(max-width:700px){body .showroom-header,body header#top:nth-of-type(1){top:10px!important;flex-wrap:wrap;border-radius:18px;padding:10px 14px 5px;gap:6px 10px;min-height:0}body .showroom-header nav{order:3;flex:1 1 100%;justify-content:space-between;gap:12px;width:100%}body .showroom-header nav a{font-size:13px;min-height:34px}body .header-actions{margin-left:auto}body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1){font-size:24px}body header#top a.wordmark>small{font-size:7px}body .language-control select{font-size:12px;min-height:34px;max-width:66px}body .nav-contact.whatsapp-action{width:auto;min-height:34px;padding:6px 11px;font-size:12px;border-radius:8px}body .nav-contact .desktop-contact{display:none!important}body .nav-contact .mobile-contact{display:inline!important}body .nav-contact .wa-brand{display:none}body .mountain-copy{padding:145px 22px 0}body .showroom-hero.mountain-hero{height:690px}body .mountain-scene{inset:310px 0 auto;height:350px}body .mountain-copy h1{font-size:48px;max-width:330px}body .mountain-copy .actions{gap:9px;flex-wrap:wrap}body .mountain-copy .button{font-size:13px;padding:10px 17px}body #findYourCar{min-height:44px;padding:10px 18px}body .inventory-controls .controls-top-row{grid-template-columns:minmax(0,1fr) 145px;gap:8px}body .inventory-controls .search-field{padding-inline:11px}body .inventory-controls .search-field input{font-size:12px}body .inventory-controls .compact-field select{font-size:12px;padding-inline:9px}body .filter-pills{display:flex;flex-direction:column;align-items:stretch;gap:8px}body .filter-pills .pill-group{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding-bottom:3px;scrollbar-width:thin}body .filter-pills .pill-group button{flex:0 0 auto;font-size:12px;padding:6px 11px;min-height:36px}body .filter-pills>.pill-group:nth-of-type(2){flex-basis:auto}body .pill-divider{display:none}body .filter-pills .pill-reset{align-self:flex-end}body:not(.exhibition-home):not(.workbench){padding-top:125px}body .finder-options{gap:9px}body .finder-choice{padding:17px 29px 17px 13px;min-height:82px}body .finder-choice strong{font-size:14px}body #carFinder{padding:20px;max-height:calc(100dvh - 28px)}#carFinder h2{font-size:26px}.finder-result{grid-template-columns:95px minmax(0,1fr);gap:12px;padding:11px}.finder-result>img{width:95px;height:95px}.finder-result h3{font-size:16px}.finder-result strong{font-size:19px}.finder-result-actions{gap:10px}.finder-result-footer{gap:9px}.finder-result-footer .button{font-size:13px}.finder-result-footer>button{font-size:12px}.finder-result-actions .button{font-size:11px;padding:6px 10px}.finder-whatsapp{font-size:12px}}
+@media(max-width:520px){body.exhibition-home #inventoryGrid{grid-template-columns:minmax(0,1fr)}body .stock-info h3{font-size:20px}body .stock-info{padding:17px 18px}body .stock-photo{aspect-ratio:16/10}body .stock-identifiers code{font-size:12px}body .spec-row,body .spec-row strong{font-size:14px}}
+@media(prefers-reduced-motion:reduce){body .finder-choice{transition:none}}
+body .finder-result{grid-template-columns:105px minmax(0,1fr);gap:14px;padding:12px}
+body .finder-result>img{width:105px;height:105px}
+body .finder-result>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 10px;align-items:center}
+body .finder-result h3{grid-column:1/-1;font-size:17px;margin:0}
+body .finder-result small{grid-column:1;font-size:10px}
+body .finder-result>div>strong{grid-column:2;font-size:19px;white-space:nowrap}
+body .finder-result p{grid-column:1/-1;margin:3px 0;font-size:11px}
+body .finder-result-actions{grid-column:1/-1;margin-top:7px}
+body .local-preview-banner{min-height:46px;padding:10px 20px;background:#dceaf7;color:#173e67;font-size:13px;z-index:50}
+body:has(.local-preview-banner) header#top:nth-of-type(1){top:58px!important}
+html[data-theme=dark] body .local-preview-banner{background:#203647;color:#dfecf7;border-color:#38576e}
+html[data-theme=dark] body .toast{background:#263d50;color:#f1f7fd;border-color:#54738c}
+html[data-theme=dark] .workbench .toast{background:#263d50;color:#f1f7fd}
+@media(max-width:700px){body:has(.local-preview-banner) header#top:nth-of-type(1){top:85px!important}body .local-preview-banner{min-height:72px;padding:10px 15px;font-size:12px}body .finder-result{grid-template-columns:85px minmax(0,1fr);gap:10px}body .finder-result>img{width:85px;height:90px}body .finder-result>div{display:block}body .finder-result h3{font-size:15px}body .finder-result small{font-size:10px}body .finder-result>div>strong{font-size:18px;margin:5px 0}body .finder-result-actions{margin-top:6px}}
+html[data-theme=dark] body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1)>small{color:#d3e4f5}
+html[data-theme=dark] body #findYourCar{background:#88d6c4;color:#0c2621;border-color:#88d6c4}
+body>.local-preview-banner{position:fixed;top:0;left:0;right:0;z-index:60;min-height:46px;display:flex;justify-content:center;gap:20px;align-items:center}
+body.exhibition-home:has(.local-preview-banner) main{padding-top:46px}
+body:not(.exhibition-home):not(.workbench):has(.local-preview-banner){padding-top:150px}
+@media(max-width:700px){body>.local-preview-banner{min-height:72px;gap:3px}body.exhibition-home:has(.local-preview-banner) main{padding-top:72px}body:not(.exhibition-home):not(.workbench):has(.local-preview-banner){padding-top:197px}}
+/* Form controls follow their theme instead of legacy hard-coded black fills. */
+body.workbench :is(input,select,textarea){background:var(--surface)!important;color:var(--ink)!important;border-color:var(--line)!important}
+body.workbench input[type=checkbox]{accent-color:var(--blue)}
+body.workbench .wb-sidebar .wordmark:hover,body.workbench .wb-sidebar .wordmark:hover::first-letter,body.workbench .wb-sidebar .wordmark:hover>span{text-shadow:none;color:var(--ink)}
+@media(max-width:700px){body #inventoryControls,body .inventory-controls{min-width:0;max-width:100%}body .filter-pills{width:100%;min-width:0;max-width:100%}body .filter-pills>.pill-group{width:100%;min-width:0;max-width:100%;flex:0 1 auto}body .showroom-hero.mountain-hero{height:660px}body .mountain-scene{height:330px}}

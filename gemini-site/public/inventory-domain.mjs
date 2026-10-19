@@ -1,4 +1,4 @@
-import {normalizeBrandFilters} from './inventory-brand-filters.mjs';
+import {normalizeBrandFilters} from './inventory-brand-filters.mjs?v=stock-20261019d';
 import {tintPackages as defaultTintPackages} from './tint-packages.mjs';
 export const STATUSES=['draft','available','reserved','sold','unavailable','archived'];
 export const GRADES=['','S','6','5','4.5','4','3.5','R','RA'];
@@ -40,7 +40,7 @@ export function normalizeVehicle(input={}){
  const rawCond=String(v.conditionType||'Recond').trim();
  const conditionType=(rawCond===''||rawCond.toLowerCase()==='recon')?'Recond':rawCond;
  if(v.coverImageUrl&&gallery.some(m=>m.url===v.coverImageUrl)){const i=gallery.findIndex(m=>m.url===v.coverImageUrl);gallery.unshift(...gallery.splice(i,1));}
- const normalized={...v,id:v.id||'',stockId:String(v.stockId||'').trim(),make,brand:make,model:String(v.model||'').trim(),variant:v.variant||'',chassisCode:v.chassisCode||'',manufactureYear:year,year,registrationYear:number(v.registrationYear),conditionType,priceRm:price,price,mileageKm:mileage,mileage:mileage==null?'':mileage.toLocaleString('en-MY')+' km',engineCc:number(v.engineCc),transmission:v.transmission||'Auto',fuelType:v.fuelType||'',exteriorColor:color,color,interiorColor:v.interiorColor||'',auctionGrade:grade.auctionGrade,interiorGrade:v.interiorGrade||grade.interiorGrade,conditionExample:v.conditionExample===true,auctionReport:v.auctionReport?{url:String(v.auctionReport.url||''),name:String(v.auctionReport.name||'Auction report')}:null,auctionHouse:v.auctionHouse||'',gradeVerified:Boolean(v.gradeVerified),conditionNotes:v.conditionNotes||'',status,isFeatured:Boolean(v.isFeatured??v.featured),featured:Boolean(v.isFeatured??v.featured),badgeLabel:v.badgeLabel||'',specialBadges:Array.isArray(v.specialBadges)?v.specialBadges:[],lowKm:v.lowKm,location:v.location||'',warrantyInfo:v.warrantyInfo||'',features:Array.isArray(v.features)?v.features:[],legacyFeatures:!Array.isArray(v.features)?v.features:v.legacyFeatures,description:v.description||'',gallery,galleryUrls:gallery.filter(m=>!m.video&&m.visible!==false).map(m=>m.url),coverImageUrl:gallery.find(m=>!m.video&&m.visible!==false)?.url||'',tour:{...(v.tour||{}),hotspots:[]}};
+ const normalized={...v,id:v.id||'',stockId:String(v.stockId||'').trim(),make,brand:make,model:String(v.model||'').trim(),variant:v.variant||'',chassisCode:v.chassisCode||'',chassisNumber:String(v.chassisNumber||v.frameNumber||v.vin||'').trim(),manufactureYear:year,year,registrationYear:number(v.registrationYear),conditionType,priceRm:price,price,mileageKm:mileage,mileage:mileage==null?'':mileage.toLocaleString('en-MY')+' km',engineCc:number(v.engineCc),transmission:v.transmission||'Auto',fuelType:v.fuelType||'',exteriorColor:color,color,interiorColor:v.interiorColor||'',auctionGrade:grade.auctionGrade,interiorGrade:v.interiorGrade||grade.interiorGrade,conditionExample:v.conditionExample===true,auctionReport:v.auctionReport?{url:String(v.auctionReport.url||''),name:String(v.auctionReport.name||'Auction report')}:null,auctionHouse:v.auctionHouse||'',gradeVerified:Boolean(v.gradeVerified),conditionNotes:v.conditionNotes||'',status,isFeatured:Boolean(v.isFeatured??v.featured),featured:Boolean(v.isFeatured??v.featured),badgeLabel:v.badgeLabel||'',specialBadges:Array.isArray(v.specialBadges)?v.specialBadges:[],lowKm:v.lowKm,location:v.location||'',warrantyInfo:v.warrantyInfo||'',features:Array.isArray(v.features)?v.features:[],legacyFeatures:!Array.isArray(v.features)?v.features:v.legacyFeatures,description:v.description||'',gallery,galleryUrls:gallery.filter(m=>!m.video&&m.visible!==false).map(m=>m.url),coverImageUrl:gallery.find(m=>!m.video&&m.visible!==false)?.url||'',tour:{...(v.tour||{}),hotspots:[]}};
  normalized.specialBadges=deriveSpecialBadges(normalized);
  return normalized;
 }
@@ -87,6 +87,7 @@ export function normalizeTintPackage(p={},index=0){
 export function normalizeDocument(d={}){
  const homepage={
   ...d.homepage,
+  theme:d.homepage?.theme==='dark'?'dark':'light',
   ...normalizeBrandFilters(d.homepage),
   title:d.homepage?.title==='JAPAN RECON'?'JAPAN RECOND':(d.homepage?.title||'JAPAN RECOND'),
   showSoldVehicles:d.homepage?.showSoldVehicles??true,

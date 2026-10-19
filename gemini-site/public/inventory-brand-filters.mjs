@@ -32,7 +32,7 @@ export function visibleBrandFilters(document = {}) {
 }
 
 export function matchesInventorySelection(vehicle, filters = {}) {
-  const searchable = [vehicle.stockId, vehicle.make, vehicle.model, vehicle.variant,
+  const searchable = [vehicle.stockId, vehicle.chassisNumber, vehicle.make, vehicle.model, vehicle.variant,
     vehicle.exteriorColor, vehicle.body, ...(vehicle.specialBadges || [])].join(' ').toLocaleLowerCase('en');
   return (!filters.status || vehicle.status === filters.status)
     && (!filters.make || key(vehicle.make) === key(filters.make))
