@@ -231,3 +231,77 @@ body header#top a.wordmark,body header#top a.wordmark:hover{color:var(--ink);tex
 .workbench .wb-local-note[data-state=exported]{background:#e4f0e9;color:#355d46}
 .workbench .wb-local-note[data-state=dirty]{background:#f8f0df;color:#705a30}
 body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1),body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1):hover{color:var(--ink);text-shadow:none;font-family:var(--font);font-weight:500}
+/* finesse · mountain retreat / glass polish · 2026-10-19
+   Shared material follows the supplied blur / saturation / translucency / inner-edge recipe.
+   Refraction is represented by a fine luminous rim; readable content is never distorted. */
+:root{--glass-fill:rgb(255 255 255 / 24%);--glass-edge:rgb(255 255 255 / 65%);--glass-shadow:inset 0 1px 0 #fff8,inset 1px 0 0 #fff5,inset 0 -1px 0 #59799026,0 8px 28px #243e5312}
+@font-face{font-family:MountainSignature;src:url('assets/fonts/allura-regular.ttf') format('truetype');font-weight:400;font-display:swap}
+body .showroom-header,body header#top,body header#top:nth-of-type(1){background:linear-gradient(120deg,#ffffff45,#ffffff1a),var(--glass-fill);border:1px solid var(--glass-edge);backdrop-filter:blur(28px) saturate(170%);-webkit-backdrop-filter:blur(28px) saturate(170%);box-shadow:var(--glass-shadow);min-height:60px;padding-block:10px}
+body .showroom-header.is-scrolled{background:rgb(244 249 252 / 78%)}
+body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1),body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1):hover{font-family:MountainSans,'Segoe UI',sans-serif;font-size:23px;font-weight:400;letter-spacing:.17em;line-height:1;transform:none;filter:none;text-shadow:none;color:#102033;transition:opacity .18s}
+body header#top a.wordmark::first-letter,body header#top a.wordmark:hover::first-letter{color:inherit;text-shadow:none}
+body header#top a.wordmark>small,body header#top a.wordmark:hover>small{font-family:MountainSans,sans-serif;font-size:7px;font-weight:400;letter-spacing:.32em;color:#263e52;text-shadow:none;filter:none;line-height:1.1;margin-top:5px}
+body .language-control select{border:1px solid #ffffff85;background:rgb(255 255 255 / 20%);border-radius:999px;padding:7px 9px;max-width:82px;min-height:38px;box-shadow:inset 0 1px 0 #fff8}
+body .nav-contact{background:linear-gradient(130deg,#2b4e67b8,#1c3549db);border:1px solid #ffffff70;box-shadow:inset 0 1px 0 #ffffff60,0 3px 10px #2a45551a;backdrop-filter:blur(28px) saturate(170%);-webkit-backdrop-filter:blur(28px) saturate(170%);font-weight:400;min-height:40px}
+body .nav-contact:hover{background:#243e53e6}
+body .mountain-feature{background:linear-gradient(115deg,#ffffff4d,#ffffff12),rgb(255 255 255 / 10%);backdrop-filter:blur(28px) saturate(170%);-webkit-backdrop-filter:blur(28px) saturate(170%);border:1px solid #ffffffa6;box-shadow:var(--glass-shadow);border-radius:13px;padding:16px 30px}
+body .mountain-feature-car strong{font-size:20px;letter-spacing:-.025em}
+body .mountain-feature-car span{font-size:12px;color:#354f62}
+body .mountain-feature-story{color:#233e53;font-size:14px;font-weight:400}
+body .mountain-feature .button{background:linear-gradient(120deg,#42657dd4,#1e374c);box-shadow:inset 0 1px 0 #ffffff45;border-color:#ffffff65}
+body .mountain-signature{font-family:MountainSignature,cursive;font-weight:400;font-size:42px;line-height:1;transform:rotate(-10deg);right:3%;bottom:32px;text-shadow:0 1px 8px #20384d33}
+body .showroom-hero.mountain-hero::after{content:'';position:absolute;inset:auto 0 0;height:85px;background:linear-gradient(transparent,var(--page));z-index:1;pointer-events:none}
+body .mountain-feature,body .mountain-signature{z-index:3}
+body .mountain-copy h1{letter-spacing:-.045em;font-weight:700}
+body .mountain-lede{font-weight:400;line-height:1.45}
+/* Compact search followed immediately by status and make filters. */
+body .inventory-controls{display:grid;grid-template-columns:220px minmax(0,1fr);gap:12px 16px;align-items:center}
+body .controls-top-row{display:block;min-width:0}
+body .controls-top-row .search-field{width:100%;min-height:40px;padding:0 12px;gap:8px;border-radius:999px;background:#ffffff4d}
+body .search-field input{min-height:40px;font-size:13px}
+body .search-field .icon{width:16px;height:16px}
+body .filter-pills{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:0;min-width:0}
+body .pill-group{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+body .pill-divider{height:22px;background:#c5d3de;margin-inline:5px}
+body .filter-pills button{min-height:40px;border-radius:999px;padding:7px 13px;font-size:12px;background:#ffffff24;border-color:#cddbe5;color:#506577;white-space:nowrap}
+body .filter-pills button>span{font-size:10px;opacity:.65;margin-left:3px}
+body .filter-pills button[aria-pressed=true]{background:linear-gradient(120deg,#648196,#3b596f);color:white;border-color:#ffffff66;box-shadow:inset 0 1px 0 #ffffff66,0 3px 8px #233f5310}
+body .filter-pills .pill-reset{font-size:11px;border-color:transparent;background:transparent;min-height:36px;padding-inline:7px}
+body .inventory-sort{grid-column:1/-1;justify-self:end;margin-bottom:-6px}
+body .inventory-sort .compact-field{min-width:0}
+body .inventory-sort select{min-height:32px;font-size:11px;border-color:transparent;background:transparent;padding:3px 24px 3px 8px}
+body .inventory-filter-note{grid-column:1/-1}
+body .inventory-result{margin-top:8px}
+body .inventory-section .section-heading{margin-bottom:22px}
+body .stock-info h3{font-size:19px;line-height:1.25;font-weight:600}
+body .stock-card-footer{border-color:#dae4ec}
+body .stock-price{font-weight:600;letter-spacing:-.025em;color:#3d5b72}
+/* Brand asset stays original, surrounded by the site's glass material. */
+body a#mobileWaFab:nth-of-type(2),body a#mobileWaFab,body a#mobileWaFab:hover{width:58px!important;height:58px!important;background:rgb(255 255 255 / 70%)!important;color:inherit!important;border:1px solid #ffffffc9!important;border-radius:50%!important;box-shadow:var(--glass-shadow)!important;backdrop-filter:blur(28px) saturate(170%);-webkit-backdrop-filter:blur(28px) saturate(170%);padding:10px!important;transform:none}
+body a#mobileWaFab img{width:36px;height:36px;display:block;filter:none}
+body a#mobileWaFab:hover{background:#ffffffeb!important;box-shadow:inset 0 1px 0 #fff,0 8px 24px #243e5326!important}
+body .social-row a{background:linear-gradient(130deg,#ffffffa8,#ffffff45);border:1px solid #d7e3ec;border-radius:999px;box-shadow:inset 0 1px 0 #fff8;font-weight:400}
+body .social-row img{filter:none;opacity:1}
+/* Colour signals group detail content: slate summary, blue finance, warm condition. */
+body .purchase-heading{background:linear-gradient(135deg,#fcfdfe,#e5eff6);border-color:#c5d6e3;box-shadow:inset 0 1px 0 #fff,0 7px 24px #344f6610}
+body .detail-section-icon{background:#dfebf4;color:#41657f;border:1px solid #c0d4e3;border-radius:12px}
+body .vehicle-calculator{background:linear-gradient(140deg,#ecf4fa,#fafdff);border-color:#bad0e0}
+body .vehicle-calculator .payment-result{background:linear-gradient(120deg,#304f66,#52758d);border:1px solid #7695ab;border-radius:12px;padding:18px 20px;box-shadow:inset 0 1px 0 #ffffff50}
+body .detail-purchase .vehicle-calculator .payment-result :is(strong,small,span){color:#fff}
+body .condition-panel{border-color:#ded5c2;background:linear-gradient(140deg,#fffcf5,#fcfdfe 60%)}
+body .condition-scores{background:#f4f1e8;border-color:#dfd8c9;border-radius:12px}
+body .vehicle-facts{background:linear-gradient(120deg,#fcfdfe,#f0f5f9)}
+body .feature-tags>span{background:#eaf2f8;color:#3d5b72;border-color:#ccdde9}
+body .feature-tags .icon{color:#557f99}
+body .specification-group[open]{background:#f0f6fa;border-color:#c1d4e2}
+@supports not (backdrop-filter:blur(1px)){body header#top:nth-of-type(1),body .mountain-feature{background:#e9f1f6ed}}
+@media(min-width:1500px){body .inventory-section{display:grid;grid-template-columns:330px minmax(0,1fr);column-gap:25px}body .inventory-section>.section-heading{grid-column:1;margin:0;align-self:start;padding-top:2px}body .inventory-section>.section-heading h2{font-size:34px}body #inventoryControls{grid-column:2}body .inventory-section>:is(.inventory-result,.stock-grid,.stock-provenance){grid-column:1/-1}body .inventory-controls{grid-template-columns:230px minmax(0,1fr)}body .inventory-sort{display:none}}
+@media(max-width:1100px){body .inventory-controls{grid-template-columns:190px minmax(0,1fr)}body .filter-pills button{padding-inline:10px;font-size:11px}body .filter-pills button>span{display:none}}
+@media(max-width:700px){body .inventory-controls{grid-template-columns:1fr;gap:12px}body .filter-pills{gap:8px}body .pill-group{gap:6px}body .pill-divider{display:none}body .filter-pills>.pill-group:nth-of-type(2){flex-basis:100%;padding-top:3px}body .inventory-sort{grid-column:1}body .mountain-feature{padding:16px;background:linear-gradient(120deg,#ffffff85,#ffffff26),#e8f1f542}body .mountain-feature-car strong{font-size:17px}body .mountain-feature-car span{font-size:10px}body .showroom-hero.mountain-hero::after{height:50px}body .nav-contact{width:38px;min-height:38px}body .showroom-header nav a{font-size:11px}body .mountain-signature{display:none}body .vehicle-calculator .payment-result{padding:16px}}
+body .detail-purchase>.purchase-heading{background:linear-gradient(135deg,#fcfdfe,#e5eff6);border-color:#c5d6e3;border-top-color:#698ca5}
+body .detail-purchase>.vehicle-calculator{background:linear-gradient(140deg,#e5f0f8,#fafdff);border-color:#bad0e0}
+body .detail-purchase>.purchase-summary{background:linear-gradient(120deg,#fcfdfe,#f0f5f9)}
+body .inventory-result label{color:var(--muted)}
+@media(min-width:1500px){body .inventory-sort{display:block}}
+/* Small SVG displacement is confined to the glass rim; type remains sharp. */
+@supports (mask-composite:exclude){body .mountain-feature::before,body header#top::before{content:'';position:absolute;inset:0;padding:3px;border-radius:inherit;pointer-events:none;background:linear-gradient(125deg,#ffffff75,#ffffff05 45%,#6b91ac30 70%,#ffffff60);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);filter:url('assets/glass-refraction.svg#rim');mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude}}

@@ -1,0 +1,1 @@
+<svg xmlns="http://www.w3.org/2000/svg"><defs><filter id="rim" x="-5%" y="-10%" width="110%" height="120%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.015 0.045" numOctaves="2" seed="8" result="texture"/><feDisplacementMap in="SourceGraphic" in2="texture" scale="3" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg>
