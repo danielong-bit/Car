@@ -305,3 +305,155 @@ body .inventory-result label{color:var(--muted)}
 @media(min-width:1500px){body .inventory-sort{display:block}}
 /* Small SVG displacement is confined to the glass rim; type remains sharp. */
 @supports (mask-composite:exclude){body .mountain-feature::before,body header#top::before{content:'';position:absolute;inset:0;padding:3px;border-radius:inherit;pointer-events:none;background:linear-gradient(125deg,#ffffff75,#ffffff05 45%,#6b91ac30 70%,#ffffff60);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);filter:url('assets/glass-refraction.svg#rim');mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude}}
+/* finesse · owner-approved warm white / navy / clear blue · 2026-10-19 */
+:root{--page:#faf9f6;--surface:#ffffff;--surface-2:#edf4fc;--line:#dbe4ee;--ink:#102945;--muted:#52657c;--navy:#173e67;--blue:#1f65ad;--blue-hover:#164b83;--mint:#1f65ad;--sky:#1f65ad;--gold:#8b672b;--green:#087c46;--wa:#087c46;--ds-text:var(--ink);--ds-muted:var(--muted);--ds-surface:var(--surface);--ds-border:var(--line)}
+body{font-size:16px;color:var(--ink)}
+body :is(h1,h2,h3){color:var(--ink)}
+body .muted,body .spec-row{color:var(--muted)}
+body .button{background:var(--blue);border-color:var(--blue);color:white;font-weight:600}
+body .button:hover{background:var(--blue-hover);border-color:var(--blue-hover);color:white}
+body .button.quiet,body .button.outline{color:var(--navy);border-color:#b4cae0;background:#ffffffa6}
+body .button.quiet:hover,body .button.outline:hover{background:#e5f0fc;border-color:var(--blue);color:var(--navy)}
+body .showroom-header,body header#top,body header#top:nth-of-type(1){max-width:1280px;gap:22px;min-height:72px;padding:12px 24px}
+body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1),body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1):hover{font-size:29px;font-weight:500;letter-spacing:.13em;color:#102945}
+body header#top a.wordmark>small,body header#top a.wordmark:hover>small{font-size:9px;letter-spacing:.26em;color:#203f60;margin-top:6px}
+body .showroom-header nav{gap:24px}
+body .showroom-header nav a{font-size:15px;font-weight:500;min-height:44px;color:#193858}
+body .language-control select{font-size:14px;min-height:42px;max-width:88px}
+body .header-actions{gap:10px}
+body .nav-contact{font-size:14px;font-weight:600;padding:10px 16px;gap:8px;min-height:44px}
+body .nav-contact>span:first-child{display:inline}
+body .nav-contact>span[aria-hidden]{display:none}
+body .nav-contact.whatsapp-action{width:auto}
+body .mountain-copy .actions{margin-top:26px}
+body .mountain-copy .button{font-size:15px;min-height:46px}
+body .mountain-copy .eyebrow{font-size:12px;letter-spacing:.13em}
+body .mountain-feature-car strong{font-size:22px;color:var(--ink)}
+body .mountain-feature-car span{font-size:13px;color:#284c6c}
+body .mountain-feature-story{font-size:14px;color:#183c5e}
+body .mountain-feature .button{background:var(--navy);border-color:var(--navy);font-size:14px}
+/* Search spans the toolbar; status and makes form the next row. */
+body .inventory-section{display:block}
+body .inventory-section>.section-heading{margin-bottom:20px;padding:0}
+body .inventory-section>.section-heading h2{font-size:38px}
+body .inventory-controls{display:flex;flex-direction:column;align-items:stretch;gap:14px}
+body .controls-top-row{display:block;width:100%}
+body .controls-top-row .search-field{width:100%;min-height:50px;border-radius:12px;background:var(--surface);border-color:#c9d9e8;padding:0 16px}
+body .search-field input{font-size:16px;min-height:48px}
+body .search-field .icon{width:20px;height:20px;color:var(--blue)}
+body .filter-pills{gap:9px}
+body .filter-pills button{font-size:14px;min-height:42px;padding:8px 16px;color:#254b70;border-color:#ccdbeb;background:white}
+body .filter-pills button>span{font-size:12px;display:inline;opacity:.8}
+body .filter-pills button[aria-pressed=true]{background:#1f65ad;border-color:#1f65ad;color:white;box-shadow:none}
+body .filter-pills button:hover{background:#e8f2ff;border-color:#77a4d1;color:#173e67}
+body .filter-pills button[aria-pressed=true]:hover{background:#164b83;color:white}
+body .pill-group{gap:7px}
+body .inventory-sort{display:block;align-self:flex-end;justify-self:end;margin:0}
+body .inventory-sort select{font-size:13px;min-height:36px;color:#24496b}
+body .inventory-result{margin-top:8px;font-size:13px}
+body .inventory-result label,body .inventory-result label span{color:#35506d;font-size:14px}
+body .stock-info h3,body .compact-main h3{color:#102945;font-size:21px;line-height:1.25}
+body .spec-row{font-size:13px;gap:15px;padding-block:12px}
+body .stock-price{color:#173e67;font-size:26px;font-weight:700}
+body .monthly-price{color:#1f65ad;font-size:14px;font-weight:500;margin-top:5px}
+body .stock-card{border-color:#d6e2ed;background:#fff;box-shadow:0 5px 20px #163e6610}
+body .stock-card:hover{border-color:#8cb4da;box-shadow:0 12px 30px #173e6617}
+body .view-link,body .view-link:hover{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border-radius:9px;padding:8px 15px;background:#1f65ad;color:#fff;font-size:14px;font-weight:600;white-space:nowrap}
+body .view-link:hover{background:#164b83;color:#fff}
+body .compare-check{font-size:13px;color:#355578}
+/* Original WhatsApp mark is legible on a white disc; green is reserved for contact. */
+.wa-brand{display:inline-block;width:24px;height:24px;object-fit:contain;background:white;border-radius:50%;padding:2px;flex:0 0 auto;vertical-align:middle}
+body a.button.whatsapp-action,body a.button.whatsapp-action:hover,body a.nav-contact.whatsapp-action,body a.nav-contact.whatsapp-action:hover,body a.mobile-sticky-enquire.whatsapp-action{background:var(--wa)!important;border-color:var(--wa)!important;color:white!important;box-shadow:inset 0 1px 0 #ffffff30,0 3px 10px #087c4610!important}
+body a.button.whatsapp-action:hover,body a.nav-contact.whatsapp-action:hover{background:#056337!important;border-color:#056337!important}
+body .contact-card-heading .wa-brand{width:28px;height:28px;padding:0;background:none}
+body a#mobileWaFab img{width:36px;height:36px}
+/* Readable, coloured detail sections without decorative gradients. */
+body .detail-purchase>.purchase-heading,body .detail-purchase>.purchase-summary{background:#fff;border-color:#cfdeec}
+body .detail-purchase>.purchase-heading{border-top:3px solid #2368b0}
+body .purchase-heading h1{font-size:34px;line-height:1.17;color:#102945;font-weight:700}
+body .purchase-heading .stock-price{font-size:34px;font-weight:700;color:#173e67}
+body .purchase-heading .monthly-price{font-size:15px;color:#1f65ad}
+body .vehicle-availability{background:#e6f1ff;color:#1b5693;font-size:12px;border:1px solid #c3daf1}
+body .purchase-facts small{font-size:13px;color:#52657c}
+body .purchase-facts strong{font-size:16px;color:#163d64}
+body .purchase-facts .icon{color:#2873bc}
+body .detail-purchase>.vehicle-calculator{background:#edf5ff;border:1px solid #b8d4ee}
+body .detail-purchase .vehicle-calculator .payment-result{background:white;border:1px solid #a8c9e9;box-shadow:none;padding:18px;border-radius:12px}
+body .detail-purchase .vehicle-calculator .payment-result strong{color:#165ba0;font-size:38px;letter-spacing:-.025em}
+body .detail-purchase .vehicle-calculator .payment-result small,body .detail-purchase .vehicle-calculator .payment-result span{color:#345b7e;font-size:14px}
+body .detail-purchase .vehicle-calculator label,body .fixed-rate{font-size:14px;color:#25486b}
+body .detail-purchase .vehicle-calculator .tool-heading h2{font-size:25px}
+body .tool-currency{background:#dcecff;color:#1e5c98;border-color:#bcd6ef}
+body .down-presets button[aria-pressed=true]{background:#1f65ad;color:white;border-color:#1f65ad}
+body .vehicle-contact .contact-card-copy{color:#405b75;font-size:15px}
+body .context-enquiries a{font-size:13px;background:#edf5ff;color:#1b568d;border-color:#c7dcee}
+body .context-enquiries a:hover{background:#dcecff;color:#164b83;border-color:#7faad1}
+body .vehicle-location{background:#edf5ff;color:#1f65ad;border-radius:10px;padding:12px}
+body .vehicle-location strong,body .vehicle-location a{color:#174d81}
+body .viewing-disclosure{background:#f5f9fe;border-color:#ccdeef;color:#1d4c77}
+body .viewing-disclosure summary{font-size:14px}
+body .condition-panel{background:#fff;border-color:#c5d9eb}
+body .condition-panel .condition-summary-copy{font-size:14px;color:#405b75}
+body .condition-scores{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:transparent;border:0;padding:0;margin-block:20px}
+body .condition-scores>div{background:#edf5ff;border:1px solid #bdd6ed;border-radius:13px;padding:20px;box-shadow:inset 0 1px 0 white}
+body .condition-panel .condition-scores strong{font-size:44px;font-weight:700;line-height:1.2;color:#195b9d;margin-block:8px}
+body .condition-scores small{font-size:14px;font-weight:500;color:#254c72}
+body .condition-scores span{font-size:12px;color:#496681}
+body .example-label{background:#fff3d9;color:#865817;border-color:#e8cd91;font-size:11px}
+body .report-wa-strip{background:#f6f9fd;border-color:#d0e0ee;border-radius:12px;padding:16px}
+body .report-wa-strip p{font-size:13px;color:#405b75!important}
+/* The delivery rail contains photos only. */
+body .delivery-photo-only{background:transparent;border:0;box-shadow:none;flex-basis:calc((100% - 40px)/3);overflow:hidden;border-radius:14px;min-width:240px}
+body .delivery-photo-only>button{display:block;width:100%;padding:0;border:0;border-radius:14px;background:#e9eff5;overflow:hidden;min-height:0;aspect-ratio:4/3}
+body .delivery-photo-only>button img{width:100%;height:100%;object-fit:cover;transition:transform .25s}
+body .delivery-photo-only>button:hover img{transform:scale(1.025)}
+body .deliveries-section .section-heading h2{font-size:34px}
+/* Two purposeful contact cards instead of repeated advisor copy. */
+body .about-section{gap:40px}
+body .about-copy>h2{font-size:36px;color:#102945}
+body #profileIntro:empty{display:none}
+body .contact-blocks{display:grid;grid-template-columns:1fr 1.2fr;gap:16px;margin-block:24px}
+body .contact-block{padding:22px;border-radius:14px;background:#fff;border-color:#d0e0ee}
+body .contact-block small{font-size:12px;font-weight:600;letter-spacing:.08em;color:#285d8d;margin-bottom:14px}
+body .contact-block.contact-primary{background:#f2f8f4;border-color:#c9dfd0}
+body .contact-block .button{font-size:16px;min-height:48px;width:100%;gap:9px}
+body .contact-phone{font-size:15px;font-weight:500;color:#214e38;margin-top:14px}
+body .contact-secondary{margin-top:12px;gap:10px}
+body .contact-secondary a{font-size:14px;color:#244d73;border:1px solid #c5d8e8;background:white;padding:7px 13px;border-radius:8px}
+body .contact-block.location-block{grid-column:auto;background:#edf5ff;border-color:#c5dbef}
+body .contact-block>a.contact-location{color:#173e67;font-size:17px;font-weight:600;line-height:1.45;display:flex;align-items:flex-start;gap:10px}
+body .contact-location .icon{width:22px;height:22px;color:#2374bb;margin-top:2px;flex-shrink:0}
+body .location-actions{margin-top:17px;gap:8px;flex-direction:row!important}
+body .location-actions>a,body .location-actions>button{display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;min-height:40px;padding:8px 12px;border:1px solid #aecbe6;background:white;border-radius:8px;color:#1b5c98}
+body .location-actions>.location-directions{background:#1f65ad;color:white;border-color:#1f65ad}
+body .contact-block>a.viewing-link{font-size:13px;color:#1c5b97;margin-top:16px;display:block;font-weight:500}
+body .showroom-footer{background:#edf3f9}
+/* Boxed comparison columns and clear numeric emphasis. */
+body #compareModal{max-width:1080px;width:calc(100% - 48px);padding:28px;border-radius:20px;border-color:#c2d7eb;background:#f5f8fc;box-shadow:0 24px 80px #12355230}
+body #compareModal .dialog-head{margin-bottom:20px;border-bottom:1px solid #d1deeb;padding-bottom:16px}
+body #compareModal .dialog-head h2{font-size:29px}
+body .compare-table{border-collapse:separate;border-spacing:8px;font-size:14px;min-width:650px;table-layout:fixed}
+body .compare-table th{width:145px;background:transparent;color:#294c70;font-weight:600;font-size:13px;padding:14px 8px}
+body .compare-table td{border:1px solid #d0e0ef;border-radius:9px;background:white;color:#173e67;padding:14px;line-height:1.5}
+body .compare-table thead td{background:#eaf3ff;border-color:#b7d1ec;vertical-align:top}
+body .compare-table thead td>strong{display:block;font-size:18px;line-height:1.3;color:#102945}
+body .compare-table img{width:100%;aspect-ratio:16/10;border-radius:8px;margin-bottom:14px}
+body .compare-table code{font-size:11px;color:#526c85}
+body .compare-table tbody tr:nth-child(1) td{font-size:21px;font-weight:700;color:#145895}
+body .compare-table tbody tr:nth-child(2) td{background:#edf5ff;font-size:16px;font-weight:600;color:#175b9d}
+body .compare-table .compare-win{display:block;width:max-content;margin:7px 0 0;background:#e2efff;color:#1b5c98;border-color:#bcd6f0;font-size:10px}
+body .compare-head-actions{margin-top:14px;gap:8px}
+body .compare-head-actions .button{font-size:12px;min-height:38px;padding:7px 10px}
+body .compare-bar{background:#ffffffed;border-color:#b7cee5;color:#173e67}
+body .compare-bar>span{font-weight:600;font-size:15px}
+body .compare-bar .text-button{color:#1f65ad}
+@media(max-width:1100px){body .showroom-header nav{gap:16px}body .showroom-header nav a{font-size:14px}body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1){font-size:26px}body .nav-contact{font-size:13px;padding-inline:12px}body .header-actions{gap:7px}body .showroom-header,body header#top:nth-of-type(1){gap:16px;padding-inline:20px}body .nav-contact .wa-brand{width:22px;height:22px}}
+@media(max-width:900px){body .showroom-header nav{order:3;flex:1 1 100%;justify-content:space-between;width:100%}body .showroom-header,body header#top:nth-of-type(1){flex-wrap:wrap;gap:8px 18px;border-radius:24px}body .header-actions{margin-left:auto}body .showroom-header nav a{font-size:14px}body .nav-contact>span:first-child{display:inline}body:not(.exhibition-home):not(.workbench){padding-top:150px}body .mountain-copy{padding-top:165px}body .contact-blocks{grid-template-columns:1fr}body .delivery-photo-only{flex-basis:calc((100% - 16px)/2)}}
+@media(max-width:700px){body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1){font-size:27px}body header#top a.wordmark>small{font-size:8px}body .showroom-header,body header#top:nth-of-type(1){top:10px!important;padding:13px 16px 8px;min-height:0;gap:8px 12px}body .showroom-header nav{gap:12px}body .showroom-header nav a{font-size:13px;min-height:40px}body .language-control select{font-size:13px;min-height:40px;max-width:76px}body .nav-contact.whatsapp-action{width:42px;min-height:42px;padding:8px}body .nav-contact>span:first-child{display:none}body .nav-contact .wa-brand{width:24px;height:24px}body .mountain-copy{padding:166px 22px 0}body .mountain-copy .eyebrow{font-size:10px}body .mountain-copy .button{font-size:13px}body .mountain-copy .actions{margin-top:22px}body .mountain-feature-car strong{font-size:18px}body .mountain-feature-car span{font-size:11px}body .mountain-feature .button{font-size:12px}body .inventory-section>.section-heading h2{font-size:32px}body .filter-pills button{font-size:13px;min-height:42px;padding:7px 12px}body .inventory-controls{gap:12px}body .filter-pills>.pill-group:nth-of-type(2){flex-basis:100%}body .stock-info h3{font-size:21px}body .spec-row{font-size:13px}body .delivery-photo-only{flex-basis:85%}body .contact-blocks{grid-template-columns:1fr}body .about-copy>h2{font-size:32px}body .condition-scores>div{padding:17px}body .condition-panel .condition-scores strong{font-size:38px}body .detail-purchase .vehicle-calculator .payment-result strong{font-size:34px}body .purchase-heading h1{font-size:30px}}
+@media(prefers-reduced-motion:reduce){body .delivery-photo-only>button img{transition:none}}
+body .contact-block .contact-secondary a{padding:8px 13px;border:1px solid #c5d8e8;background:#fff;border-radius:8px;color:#214f78;font-size:14px;min-height:40px}
+body .contact-block.location-block .location-actions{margin-top:16px;gap:8px}
+body .contact-block.location-block .location-actions a,body .contact-block.location-block .location-actions button{padding:9px 12px;border:1px solid #aecbe6;background:white;border-radius:8px;color:#1b5c98;font-size:13px;min-height:42px;font-weight:500;white-space:nowrap}
+body .contact-block.location-block .location-actions a.location-directions{background:#1f65ad;color:white;border-color:#1f65ad}
+body .compare-table img.wa-brand{width:22px;height:22px;aspect-ratio:1;object-fit:contain;margin:0;padding:2px;display:inline-block;max-width:none;border-radius:50%}
+body .compare-table .compare-head-actions .button{display:inline-flex;gap:7px;min-height:40px;height:auto;overflow:visible;white-space:nowrap}
