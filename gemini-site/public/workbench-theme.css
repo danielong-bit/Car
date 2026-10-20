@@ -1,0 +1,30 @@
+/* Editor surfaces inherit the independently selected workbench theme. */
+body.workbench{--wb-danger:#b42d45;--wb-selected:color-mix(in srgb,var(--blue) 12%,var(--surface));--wb-editor-shadow:0 8px 28px #173e6717}
+html[data-theme=dark] body.workbench{--wb-danger:#ff9cab;--wb-editor-shadow:0 8px 28px #0004}
+body.workbench :is(.badge-picker-block,.upload-zone){background:var(--surface-2);border-color:var(--line);color:var(--ink)}
+body.workbench :is(.badge-picker-head strong,.upload-zone strong){color:var(--ink)}
+body.workbench :is(.badge-picker-head small,.upload-zone>span,.editor-save>span){color:var(--muted)}
+body.workbench .badge-tag-option{background:var(--surface);border-color:var(--line);color:var(--ink)}
+body.workbench .badge-tag-option:hover{background:var(--wb-selected);border-color:var(--blue);color:var(--ink)}
+body.workbench .badge-tag-option:has(input:checked){background:var(--wb-selected);border-color:var(--blue);color:var(--ink)}
+body.workbench .badge-tag-option input{accent-color:var(--blue)}
+body.workbench .badge-tag-option:focus-within{outline:2px solid var(--blue);outline-offset:3px}
+body.workbench .upload-zone{border-style:dashed}
+body.workbench .upload-zone:hover,body.workbench .upload-zone.dragging{background:var(--wb-selected);border-color:var(--blue)}
+body.workbench .upload-zone .icon{color:var(--blue)}
+body.workbench .upload-zone:focus-within{outline-color:var(--blue)}
+body.workbench .photo-tile{background:var(--surface);border-color:var(--line)}
+body.workbench .photo-tile>div:first-child{background:var(--surface-2)}
+body.workbench .photo-category-field{color:var(--ink)}
+body.workbench .photo-actions{background:var(--surface-2);border-color:var(--line)}
+body.workbench .photo-actions button,body.workbench .replace-photo{background:transparent;color:var(--ink)}
+body.workbench .photo-actions button:hover:not(:disabled),body.workbench .replace-photo:hover{background:var(--wb-selected);color:var(--ink)}
+body.workbench .photo-actions button:disabled{color:var(--muted);opacity:.55}
+body.workbench .photo-actions .danger-text{color:var(--wb-danger)}
+body.workbench .photo-actions .danger-text:hover{background:color-mix(in srgb,var(--wb-danger) 10%,var(--surface));color:var(--wb-danger)}
+body.workbench .editor-save{background:var(--surface);border-color:var(--line);color:var(--ink);box-shadow:var(--wb-editor-shadow)}
+body.workbench .editor-save .button.quiet{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
+body.workbench .editor-save .button.quiet:hover{background:var(--wb-selected);border-color:var(--blue)}
+body.workbench #editorError:not(:empty){color:var(--muted)}
+body.workbench .form-section-title>.count{background:var(--surface-2);border-color:var(--line);color:var(--muted)}
+body.workbench .photo-actions button.danger-text{color:var(--wb-danger)!important}
