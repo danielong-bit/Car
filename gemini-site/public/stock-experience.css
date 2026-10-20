@@ -575,3 +575,40 @@ body #contact .contact-primary>.button{background:#087c46;border-color:#087c46;c
 body #contact .contact-primary>.button:hover{background:#06653a;border-color:#06653a;color:#fff}
 body a.whatsapp-action>.wa-brand{background:transparent!important;border:0;border-radius:0;padding:0;width:22px;height:22px;filter:brightness(0) invert(1);box-shadow:none}
 @media(max-width:700px){body #contact.about-section{grid-template-columns:minmax(0,1fr);gap:25px;padding:24px 0 30px}body #contact .about-image{position:relative;inset:auto;width:100%;height:auto;aspect-ratio:1;border-radius:12px;mask-image:none;-webkit-mask-image:none}body #contact .about-copy{margin:0;padding:0 10px;width:auto}body #contact .about-copy>h2{font-size:29px;margin-bottom:22px}}
+/* Aligned reading rhythm for cards; regular-weight supporting facts. */
+body #inventory .stock-info{padding:15px 14px;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(36px,auto) 13px 39px auto auto 1fr;align-content:start}
+body #inventory .card-heading-row{min-height:36px}
+body #inventory .stock-info h3{font-size:15px;line-height:1.25;min-height:0;font-weight:650}
+body #inventory .stock-identifiers{margin:3px 0 0}
+body #inventory .stock-identifiers code{font-size:9px;line-height:1.2}
+body #inventory .spec-row{display:grid;grid-template-columns:auto 1fr;align-content:start;align-items:baseline;gap:2px 10px;padding:9px 0 0;margin:0;font-size:11px;line-height:1.35;font-weight:400;color:var(--ink)}
+body #inventory .spec-row .listing-grade{grid-column:1/-1;font-size:11px;line-height:1.35;font-weight:400;color:var(--muted)}
+body #inventory :is(.fact-year,.fact-mileage,.grade-value,.listing-grade){font-weight:400!important}
+body #inventory .spec-row .grade-value{color:var(--ink)}
+body #inventory .stock-price{margin:12px 0 0;font-size:27px;line-height:1.15}
+body #inventory .monthly-price{margin:5px 0 0;font-size:10px;line-height:1.4}
+body #inventory .stock-card-footer{margin:0;padding:14px 0 0;min-height:34px;align-self:end;display:flex;justify-content:space-between;align-items:center;gap:10px}
+body #inventory .stock-card-footer .compare-check{font-size:10px}
+body #inventory .stock-card-footer>.view-link{font-size:11px;margin-left:auto}
+body #inventory .compact-meta{font-size:11px;font-weight:400;gap:5px 10px}
+body #inventory .compact-meta .listing-grade,body #inventory .compact-meta .grade-value{font-size:11px;font-weight:400;color:var(--ink)}
+body #inventory .compact-bottom{margin-top:5px}
+body #inventory .compact-pricing .stock-price{margin-top:0}
+/* Reference-style footer: brand and three calm link columns. */
+body footer#siteFooter.showroom-footer{background:var(--page)!important;border-top:1px solid var(--line);padding:58px max(32px,calc((100% - 1360px)/2));text-align:left;color:var(--ink);margin-top:0}
+body #siteFooter .footer-columns{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.5fr);gap:36px;max-width:1360px;margin:0 auto;align-items:start}
+body #siteFooter .footer-brand .footer-title{display:inline-flex;flex-direction:column;font-family:MountainSans,var(--font);font-size:24px;font-weight:500;letter-spacing:.1em;line-height:1;color:var(--ink);text-shadow:none}
+body #siteFooter .footer-title small{font-size:7px;font-weight:500;letter-spacing:.22em;margin-top:7px;color:var(--ink)}
+body #siteFooter .footer-brand p{font-size:11px;line-height:1.6;color:var(--muted);margin:18px 0 0;letter-spacing:0;max-width:none}
+body #siteFooter .footer-brand p+p{margin-top:0}
+body #siteFooter .footer-column{display:flex;flex-direction:column;align-items:flex-start;gap:15px;min-width:0}
+body #siteFooter .footer-column h2{font-size:15px;font-weight:600;letter-spacing:0;line-height:1.3;color:var(--ink);margin:0 0 5px}
+body #siteFooter .footer-column a{font-size:12px;font-weight:400;letter-spacing:0;line-height:1.6;color:var(--muted);overflow-wrap:anywhere;text-decoration:none;padding:0;min-height:22px}
+body #siteFooter .footer-column a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+body #siteFooter .footer-column a:focus-visible{outline:2px solid var(--blue);outline-offset:5px}
+body #siteFooter .footer-column .footer-workbench-link{font-size:11px;margin-top:7px}
+@media(max-width:1100px){body #inventory .stock-info{padding:13px 11px}body #inventory .stock-info h3{font-size:14px}body #inventory .stock-price{font-size:25px}body #siteFooter .footer-columns{grid-template-columns:1.7fr .8fr .8fr 1.4fr;gap:25px}body footer#siteFooter.showroom-footer{padding:44px 32px}}
+@media(max-width:700px){body #inventory .stock-info{padding:12px 10px;grid-template-rows:minmax(35px,auto) 12px 37px auto auto 1fr}body #inventory .stock-info h3{font-size:14px}body #inventory .spec-row{font-size:10px;gap:2px 7px;padding-top:8px}body #inventory .spec-row .listing-grade{font-size:10px}body #inventory .stock-price{font-size:24px;margin-top:10px}body #inventory .stock-card-footer{padding-top:11px;min-height:30px;justify-content:flex-end}body #inventory .stock-card-footer>.view-link{font-size:10px}body #inventory .compact-meta,body #inventory .compact-meta .listing-grade,body #inventory .compact-meta .grade-value{font-size:9px}body #inventory .compact-bottom:has(.compare-check){display:none}body #inventory .compact-pricing .stock-price{font-size:18px;margin-top:0}body footer#siteFooter.showroom-footer{padding:34px 22px 40px}body #siteFooter .footer-columns{grid-template-columns:1fr 1fr;gap:30px 24px}body #siteFooter .footer-brand{grid-column:1/-1}body #siteFooter .footer-column:last-child{grid-column:1/-1}body #siteFooter .footer-column{gap:11px}body #siteFooter .footer-column a{min-height:28px;font-size:12px}body #siteFooter .footer-brand p{margin-top:13px}}
+body footer#siteFooter.showroom-footer{--ink:#f0f3f6;--muted:#adb7c2;background:#10171e!important;border-color:#29343f;color:var(--ink)}
+body footer#siteFooter.showroom-footer{display:block}
+body #siteFooter .footer-columns{width:100%}
