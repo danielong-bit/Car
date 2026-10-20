@@ -180,3 +180,154 @@ body.workbench :is(input,select,textarea){background:var(--surface)!important;co
 body.workbench input[type=checkbox]{accent-color:var(--blue)}
 body.workbench .wb-sidebar .wordmark:hover,body.workbench .wb-sidebar .wordmark:hover::first-letter,body.workbench .wb-sidebar .wordmark:hover>span{text-shadow:none;color:var(--ink)}
 @media(max-width:700px){body #inventoryControls,body .inventory-controls{min-width:0;max-width:100%}body .filter-pills{width:100%;min-width:0;max-width:100%}body .filter-pills>.pill-group{width:100%;min-width:0;max-width:100%;flex:0 1 auto}body .showroom-hero.mountain-hero{height:660px}body .mountain-scene{height:330px}}
+/* Mobile stock refinement: short navigation, two-column cards and true list rows. */
+:root{--price-accent:#087e70}
+html[data-theme=dark]{--price-accent:#80e0c8}
+body .stock-price,body .purchase-heading .stock-price,body .other-car-price{color:var(--price-accent)}
+html[data-theme=dark] body .stock-price,html[data-theme=dark] body .purchase-heading .stock-price{color:var(--price-accent)}
+.mobile-detail-wordmark{display:none}
+@media(max-width:700px){
+ body .showroom-header,body header#top:nth-of-type(1){top:0!important;left:0;right:0;width:100%;max-width:none;transform:none;margin:0;min-height:54px;padding:5px 10px;gap:8px;flex-wrap:nowrap;border-radius:0;border-width:0 0 1px;box-shadow:0 3px 15px #10294508}
+ body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1){font-size:17px;letter-spacing:.08em;flex:0 0 auto}
+ body header#top a.wordmark>small{font-size:5px;letter-spacing:.13em;margin-top:3px}
+ body .showroom-header nav{order:0;flex:1 1 auto;width:auto;gap:8px;justify-content:center;min-width:0}
+ body .showroom-header nav a{font-size:11px;min-height:42px;padding:0;white-space:nowrap;letter-spacing:-.02em}
+ body .header-actions{gap:4px;margin-left:0;flex:0 0 auto}
+ body .language-control select{font-size:10px;max-width:35px;width:35px;padding:0 1px;min-height:38px;border:0;background:transparent}
+ body .nav-contact.whatsapp-action{font-size:10px;padding:5px 7px;min-height:34px;border-radius:6px;gap:0}
+ body .nav-contact>span[aria-hidden]{display:none}
+ body .showroom-hero.mountain-hero{height:590px;min-height:0;overflow:hidden}
+ body .mountain-copy{padding:100px 22px 0;position:relative;z-index:2}
+ body .mountain-copy .eyebrow{font-size:10px;margin-bottom:12px}
+ body .mountain-copy h1{font-size:43px;line-height:1.02;max-width:310px;margin-bottom:22px}
+ body .mountain-copy .actions{gap:9px;flex-wrap:nowrap}
+ body .mountain-copy .actions .button{font-size:12px;padding:10px 15px;min-height:44px}
+ body .mountain-scene{inset:230px 0 0;height:auto}
+ body .mountain-scene img{height:100%;object-fit:cover;object-position:65% center}
+ body .mountain-scene:after{background:linear-gradient(180deg,var(--page) 0%,transparent 24%,transparent 83%,var(--page) 100%)}
+ body .mountain-signature{bottom:36px;right:20px;font-size:27px}
+ body .inventory-section{padding:26px 12px 38px}
+ body .inventory-section>.section-heading{margin-bottom:17px}
+ body .inventory-section>.section-heading h2{font-size:27px;letter-spacing:-.04em}
+ body .inventory-controls{margin-bottom:14px}
+ body .inventory-controls .controls-top-row{grid-template-columns:minmax(0,1fr) 130px}
+ body .inventory-result{margin:12px 0;gap:8px;flex-wrap:wrap}
+ body .inventory-result p{font-size:10px}
+ body .view-toggle button{font-size:11px;min-height:34px;padding:5px 9px}
+ body.exhibition-home #inventoryGrid:not(.compact-view){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ body .stock-card{min-width:0;border-radius:12px;overflow:hidden}
+ body .stock-photo{aspect-ratio:4/3}
+ body .stock-info{padding:10px 10px 11px}
+ body .stock-info h3{font-size:14px;line-height:1.22;letter-spacing:-.025em}
+ body .stock-identifiers{gap:2px;margin-top:4px}
+ body .stock-identifiers code{font-size:9px;line-height:1.3}
+ body .stock-identifiers .chassis-number{display:none}
+ body .spec-row{display:flex;flex-wrap:wrap;gap:3px 7px;padding:8px 0 7px;line-height:1.3}
+ body .spec-row,body .spec-row strong{font-size:10px;color:var(--ink)}
+ body .stock-price{font-size:23px;font-weight:800;letter-spacing:-.04em;white-space:nowrap}
+ body .monthly-price{font-size:10px;margin:4px 0 0;color:var(--muted)}
+ body .stock-card-footer{margin-top:8px;padding-top:0;border:0;justify-content:flex-end}
+ body .stock-card-footer .view-link{background:transparent;color:var(--ink);font-size:11px;min-height:32px;padding:4px 0;border:0}
+ body .photo-count-tag{font-size:9px;padding:3px 5px}
+ body .card-badge-cluster{top:7px;left:7px;gap:3px}
+ body .card-badge-cluster>*{font-size:8px;padding:3px 5px}
+ body.exhibition-home #inventoryGrid.compact-view{display:flex;flex-direction:column;gap:8px}
+ body .compact-row{display:grid;grid-template-columns:86px minmax(0,1fr) 90px;grid-template-rows:auto auto;gap:0 9px;min-height:112px;padding:0 9px 0 0;border-radius:11px;overflow:hidden;align-items:center}
+ body .compact-thumb{grid-column:1;grid-row:1/3;width:86px;height:100%;min-height:112px;align-self:stretch;border-radius:0;aspect-ratio:auto}
+ body .compact-thumb img{width:100%;height:100%;object-fit:cover}
+ body .compact-main{grid-column:2;grid-row:1/3;padding:10px 0;min-width:0}
+ body .compact-main h3{font-size:12px;line-height:1.25;margin:0;letter-spacing:-.025em}
+ body .compact-title-line{display:block}
+ body .compact-meta{display:flex;flex-wrap:wrap;gap:3px 6px;font-size:9px;line-height:1.35;margin-top:7px}
+ body .compact-meta>span:nth-last-child(-n+4){display:none}
+ body .compact-pricing{grid-column:3;grid-row:1;display:block;text-align:right;padding:10px 0 0;align-self:end;min-width:0}
+ body .compact-pricing .stock-price{font-size:18px;letter-spacing:-.05em}
+ body .compact-pricing .monthly-price{font-size:9px;margin:4px 0}
+ body .compact-actions{grid-column:3;grid-row:2;display:flex;justify-content:flex-end;padding:0 0 7px;align-self:start}
+ body .compact-actions .view-link{font-size:10px;min-height:28px;padding:2px 0;background:transparent;color:var(--ink);border:0}
+ body .compact-actions .compare-check{display:none}
+ body.exhibition-detail{padding-top:54px!important}
+ body.exhibition-detail>header#top{display:none!important}
+ body.exhibition-detail #vehicleContent{padding:0 14px 100px;max-width:100%}
+ body .detail-topline{position:fixed;top:0;left:0;right:0;z-index:40;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin:0;background:var(--page);border-bottom:1px solid var(--line)}
+ body .detail-back-btn{font-size:12px;padding:0;min-height:44px;border:0;background:transparent;box-shadow:none;color:var(--muted)}
+ body .mobile-detail-wordmark{display:flex;flex-direction:column;font-size:18px;letter-spacing:.13em;font-weight:600;color:var(--ink);line-height:1}
+ body .mobile-detail-wordmark small{font-size:5px;letter-spacing:.2em;margin-top:4px}
+ body .detail-topline .breadcrumbs,body .detail-section-nav{display:none}
+ body .detail-grid{gap:18px;margin-top:12px}
+ body .vehicle-gallery{border:0;background:transparent;border-radius:0;overflow:hidden}
+ body .gallery-stage{border-radius:0}
+ body .detail-purchase>.purchase-heading{padding:0!important;background:transparent!important;border:0!important;box-shadow:none}
+ body .purchase-heading h1{font-size:30px;line-height:1.04;letter-spacing:-.04em;margin:12px 0 5px}
+ body .vehicle-variant{font-size:15px;margin:0 0 7px}
+ body .detail-status{font-size:10px;gap:8px}
+ body .purchase-price-row{display:flex!important;flex-direction:row!important;align-items:center!important;margin:15px 0 7px}
+ body .purchase-heading .stock-price{font-size:37px;letter-spacing:-.055em;line-height:1.1}
+ body .detail-monthly-est{font-size:12px;color:var(--muted);margin-top:5px}
+ body .vehicle-stock-ref{font-size:10px;margin:7px 0;color:var(--muted)}
+ body .share-car-btn{font-size:11px;padding:8px;min-height:40px;gap:4px}
+ body .detail-purchase>.purchase-summary{padding:0!important;border:1px solid var(--line);border-radius:12px;box-shadow:none;overflow:hidden}
+ body .purchase-summary>h2{display:none}
+ body .purchase-facts{display:grid;grid-template-columns:1fr 1fr;gap:0}
+ body .purchase-facts>div{padding:15px;min-height:78px;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+ body .purchase-facts>div:nth-child(even){border-right:0}
+ body .purchase-facts>div:last-child{grid-column:1/-1;border-bottom:0}
+ body .purchase-facts>div>.icon{display:none}
+ body .purchase-facts small{font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;display:block}
+ body .purchase-facts strong{font-size:14px;color:var(--ink)!important}
+ body .detail-purchase>.vehicle-contact{padding:0!important;background:transparent!important;border:0;box-shadow:none}
+ body .contact-card-heading,body .vehicle-contact .contact-card-copy,body .context-enquiries{display:none}
+ body .vehicle-primary-enquiry{min-height:48px;font-size:15px;border-radius:9px}
+ body .vehicle-showroom{margin-top:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+ body .viewing-disclosure{margin-top:12px}
+ body .vehicle-reading-column>.vehicle-specifications{padding:0!important;border:0;background:transparent!important;box-shadow:none}
+ body .vehicle-specifications .detail-section-heading{margin-bottom:12px}
+ body .vehicle-specifications .detail-section-icon,body .vehicle-specifications .eyebrow{display:none}
+ body .detail-section-heading h2{font-size:20px}
+ body .vehicle-description{font-size:13px;line-height:1.6;margin-bottom:16px}
+ body .specification-group,body .specification-group[open]{border:0;border-bottom:1px solid var(--line);background:transparent!important;border-radius:0;margin:0;box-shadow:none}
+ body .specification-group summary{padding:14px 0;min-height:44px}
+ body .spec-group-label>.icon{display:none}
+ body .detail-spec-grid{display:block;padding:0!important}
+ body .detail-spec-grid>div{display:grid;grid-template-columns:40% minmax(0,1fr);gap:12px;padding:11px 0;border:0;border-top:1px solid var(--line);background:transparent}
+ body .detail-spec-grid dt{font-size:12px;color:var(--muted)}
+ body .detail-spec-grid dd{font-size:13px;margin:0;color:var(--ink);text-align:left}
+ body .feature-tags{gap:6px}
+ body .feature-tags>span{font-size:11px;padding:6px 9px;border-radius:999px}
+ body .feature-tags .icon{display:none}
+ body .condition-panel{padding:16px!important;border-radius:12px;box-shadow:none}
+ body .detail-purchase>.vehicle-calculator{padding:16px!important;border-radius:12px;box-shadow:none}
+ body .vehicle-calculator .eyebrow,body .tool-currency{display:none}
+ body .vehicle-calculator h2{font-size:20px}
+ body .vehicle-calculator .payment-result{padding:14px;margin:12px 0;background:var(--surface-2)!important;border:1px solid var(--line)!important;border-radius:9px}
+ body .vehicle-calculator .payment-result strong{font-size:30px;color:var(--price-accent)!important}
+ body .vehicle-calculator .calc-caption{font-size:11px;line-height:1.5}
+ body #mobileDetailSticky{padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-radius:0;background:var(--page)!important}
+ body .mobile-sticky-price,html[data-theme=dark] body .mobile-sticky-price{font-size:24px;color:var(--price-accent)!important}
+ body .mobile-sticky-sub{font-size:9px}
+ body .mobile-sticky-enquire{min-height:44px;font-size:14px;border-radius:8px}
+ body.exhibition-detail .whatsapp-float{display:none}
+}
+@media(max-width:374px){body .showroom-header nav{gap:6px}body .showroom-header nav a{font-size:10px}body .header-actions{gap:1px}body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1){font-size:15px}body .stock-price{font-size:21px}body .compact-row{grid-template-columns:74px minmax(0,1fr) 80px;gap:0 7px}body .compact-thumb{width:74px}body .compact-pricing .stock-price{font-size:16px}}
+@media(max-width:700px){body header#top:nth-of-type(1){transform:none!important}body .mountain-scene img{object-fit:contain;object-position:center 70%;transform:none!important}body .mountain-scene{background:var(--page)}body .inventory-section>.section-heading{text-align:left}body .inventory-section>.section-heading h2{text-align:left}}
+@media(max-width:700px){
+ body #inventory.inventory-section{margin:0;width:100%;padding:24px 12px 36px;scroll-margin-top:64px}
+ body #inventory>.section-heading{justify-content:flex-start;text-align:left}
+ body #inventory>.section-heading h2{text-align:left}
+ body .inventory-result{display:flex;flex-direction:row;justify-content:space-between;align-items:center;min-height:36px;gap:5px}
+ body .inventory-result>label{display:none}
+ body .inventory-result p{font-size:9px;margin:0}
+ body .inventory-result .view-toggle{margin:0;min-height:34px}
+ body .filter-pills .pill-group{scrollbar-width:none;padding-bottom:0}
+ body .filter-pills .pill-group::-webkit-scrollbar{display:none}
+ body .filter-pills .pill-reset{min-height:26px;padding:2px 5px;font-size:10px}
+ body .filter-pills{gap:6px}
+ body .showroom-hero.mountain-hero{height:560px}
+ body .mountain-scene{inset:260px 0 0;height:300px}
+ body .mountain-scene img{object-fit:cover;object-position:66% center}
+ body .showroom-header,body header#top:nth-of-type(1){background:#faf9f6df!important;backdrop-filter:blur(22px) saturate(150%);border:0;border-bottom:1px solid #173e671a}
+ html[data-theme=dark] body header#top:nth-of-type(1){background:#0c1015df!important;border-color:#ffffff18}
+ body #mobileWaFab{width:44px;height:44px;right:12px;bottom:14px}
+}
+@media(max-width:700px){body.exhibition-detail #vehicleContent{margin:0;width:100%}body .detail-topline{max-width:none!important;width:100%;gap:12px}body .mobile-detail-wordmark{margin-left:auto}body .detail-back-btn{border-radius:0!important;background:transparent!important;box-shadow:none!important}body .vehicle-stock-ref{display:block;border:0;padding:0}body .vehicle-stock-ref code{margin-left:6px}body .purchase-facts>div{min-height:72px;padding:14px}body .purchase-facts strong{font-weight:700}}
+@media(max-width:700px){body #inventory .inventory-result{flex-wrap:nowrap}body #inventory .inventory-result-right{width:auto;gap:0}body #inventory .inventory-result .check-field:not(:has(input:checked)){display:none}body #inventory #resultCount{font-size:9px;white-space:nowrap}body #inventory .section-heading{display:block;text-align:left}body #inventory .section-heading h2{text-align:left}body #inventory .inventory-result-right .view-toggle{padding:2px}body #inventory .view-toggle button{font-size:10px;padding:5px 7px}body #inventory .inventory-result .check-field:has(input:checked){font-size:10px}}
