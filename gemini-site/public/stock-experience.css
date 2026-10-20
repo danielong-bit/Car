@@ -331,3 +331,105 @@ html[data-theme=dark] body .stock-price,html[data-theme=dark] body .purchase-hea
 }
 @media(max-width:700px){body.exhibition-detail #vehicleContent{margin:0;width:100%}body .detail-topline{max-width:none!important;width:100%;gap:12px}body .mobile-detail-wordmark{margin-left:auto}body .detail-back-btn{border-radius:0!important;background:transparent!important;box-shadow:none!important}body .vehicle-stock-ref{display:block;border:0;padding:0}body .vehicle-stock-ref code{margin-left:6px}body .purchase-facts>div{min-height:72px;padding:14px}body .purchase-facts strong{font-weight:700}}
 @media(max-width:700px){body #inventory .inventory-result{flex-wrap:nowrap}body #inventory .inventory-result-right{width:auto;gap:0}body #inventory .inventory-result .check-field:not(:has(input:checked)){display:none}body #inventory #resultCount{font-size:9px;white-space:nowrap}body #inventory .section-heading{display:block;text-align:left}body #inventory .section-heading h2{text-align:left}body #inventory .inventory-result-right .view-toggle{padding:2px}body #inventory .view-toggle button{font-size:10px;padding:5px 7px}body #inventory .inventory-result .check-field:has(input:checked){font-size:10px}}
+/* Stock facts and open specifications share a readable, restrained type system. */
+:root{--font:MountainSans,'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif}
+body .stock-info h3,body .compact-main h3{font-family:var(--font);font-weight:700;letter-spacing:-.025em}
+body .compact-meta,body .compact-meta strong,body .spec-row,body .spec-row strong{color:var(--ink)!important}
+body .compact-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 10px}
+body .compact-meta strong{font-weight:700}
+body .compact-grade{font-size:11px;color:var(--muted)}
+body .compact-location{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);margin:8px 0 0}
+body .compact-location .icon{width:12px;height:12px;color:#c05b7c;flex:none}
+body .badge-transmission{background:#17222ce8;color:#f3f7fa;border:1px solid #ffffff26;text-transform:uppercase;font-weight:700}
+body .compact-thumb .card-badge-cluster{display:flex;flex-wrap:wrap;top:6px;left:6px;max-width:calc(100% - 12px);gap:3px}
+body .card-badge-cluster .badge-transmission{display:inline-flex}
+body .full-spec-list{margin:15px 0 0;padding:0}
+body .full-spec-list>div{display:grid;grid-template-columns:minmax(130px,.8fr) minmax(0,1.3fr);gap:20px;padding:13px 0;border-bottom:1px solid var(--line);align-items:baseline}
+body .full-spec-list dt{font-size:14px;color:var(--muted);line-height:1.5}
+body .full-spec-list dd{font-size:14px;margin:0;color:var(--ink);line-height:1.5;overflow-wrap:anywhere}
+body .spec-list-heading{font-size:12px!important;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:28px 0 14px!important;color:var(--muted)!important}
+body .spec-list-heading:first-child{margin-top:0!important}
+body .spec-report-link{display:inline-flex;align-items:center;min-height:44px;margin-top:10px;font-size:12px;color:var(--blue);text-decoration:underline;text-underline-offset:3px}
+body .vehicle-reading-column>.vehicle-specifications{border:0;background:transparent!important;box-shadow:none;padding:20px 0}
+body a#mobileWaFab,body a#mobileWaFab:nth-of-type(2),body a#mobileWaFab:hover{width:52px!important;height:52px!important;padding:12px!important;background:#20d467!important;border:1px solid #0caf4d!important;box-shadow:0 4px 14px #123d2626!important;backdrop-filter:none;-webkit-backdrop-filter:none}
+body a#mobileWaFab img{width:28px!important;height:28px!important;filter:brightness(0) saturate(100%)!important;opacity:.87}
+body.exhibition-detail .detail-back-btn,body.exhibition-detail .detail-back-btn:hover,body.exhibition-detail .detail-back-btn:focus-visible,body.exhibition-detail .detail-back-btn:visited{color:var(--ink)!important;background:transparent!important;border-color:transparent!important;box-shadow:none!important;transition:none}
+body .detail-back-btn .back-arrow{color:inherit!important}
+body .vehicle-calculator .tool-heading{margin-bottom:12px}
+body .vehicle-calculator .tool-heading .eyebrow,body .vehicle-calculator .tool-currency{display:none}
+body .vehicle-calculator h2{font-size:21px}
+body .vehicle-calculator .payment-result{padding:14px;margin:12px 0}
+body .vehicle-calculator .payment-result strong{font-size:30px}
+@media(max-width:700px){
+ body .compact-row{grid-template-columns:108px minmax(0,1fr) 91px;min-height:122px;gap:0 8px}
+ body .compact-thumb{width:108px;min-height:122px}
+ body .compact-thumb img{object-fit:cover;object-position:center}
+ body .compact-main{padding:10px 0}
+ body .compact-main h3{font-size:13px;line-height:1.22}
+ body .compact-meta{font-size:10px;gap:4px 7px;line-height:1.4;margin-top:6px}
+ body .compact-meta>span:nth-last-child(-n+4){display:inline}
+ body .compact-grade{font-size:9px}
+ body .compact-meta strong{font-weight:700}
+ body .compact-location{font-size:9px;line-height:1.4;margin-top:6px;gap:3px}
+ body .compact-location .icon{width:10px;height:10px}
+ body .compact-row .stock-identifiers code{font-size:8px}
+ body .compact-pricing .stock-price{font-size:18px}
+ body .compact-pricing .monthly-price{font-size:9px}
+ body .compact-thumb .card-badge-cluster>*{font-size:7px;padding:2px 4px;line-height:1.2}
+ body .compact-thumb .card-badge-cluster{gap:2px;left:4px;top:4px;max-width:100px}
+ body .stock-photo{aspect-ratio:1/1}
+ body .stock-photo img{object-fit:cover}
+ body .stock-info h3{font-size:14px}
+ body .stock-info .spec-row,body .stock-info .spec-row strong{font-size:11px}
+ body .stock-info .spec-row{gap:4px 7px}
+ body .stock-card .stock-price{font-size:24px}
+ body .purchase-summary .purchase-facts>div{min-height:67px;padding:13px 15px}
+ body .purchase-summary .purchase-facts>div:last-child{display:none}
+ body .purchase-summary .purchase-facts>div:nth-child(n+3){border-bottom:0}
+ body .purchase-summary .purchase-facts small{font-family:var(--font);font-size:10px;letter-spacing:.08em;margin-bottom:5px}
+ body .purchase-summary .purchase-facts strong{font-size:15px}
+ body .full-spec-list>div{grid-template-columns:40% minmax(0,1fr);gap:12px;padding:11px 0}
+ body .full-spec-list dt,body .full-spec-list dd{font-size:13px}
+ body .detail-purchase>.vehicle-calculator{display:grid;grid-template-columns:1fr;gap:0;padding:16px!important}
+ body .vehicle-calculator .tool-heading{grid-row:1;margin-bottom:10px}
+ body .vehicle-calculator .payment-result{grid-row:2;margin:0 0 14px!important;padding:0!important;background:transparent!important;border:0!important;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+ body .vehicle-calculator .payment-result small{flex:1 1 100%;font-size:10px}
+ body .vehicle-calculator .payment-result strong{font-size:28px;line-height:1.2}
+ body .vehicle-calculator .payment-result span{font-size:11px}
+ body #vehicleCalcForm{display:grid;grid-template-columns:minmax(0,1fr) 100px;gap:10px 16px}
+ body .payment-field{margin:0}
+ body .payment-field>div:first-child{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+ body #vehicleCalcForm label{font-size:11px;line-height:1.3}
+ body #paymentDownValue{font-size:11px}
+ body #paymentDown{margin:10px 0 0;height:20px}
+ body .down-presets{display:none}
+ body .payment-tenure{gap:6px;margin:0}
+ body #paymentYears{min-height:36px;padding:6px;font-size:12px}
+ body #vehicleCalcForm .fixed-rate{grid-column:1/-1;display:flex;justify-content:space-between;font-size:10px;padding:0;margin:0}
+ body #paymentError:empty{display:none}
+ body #paymentEnquiry{font-size:12px;min-height:38px;margin-top:12px;padding:8px 12px}
+ body .vehicle-calculator .calc-caption{font-size:10px;line-height:1.45;margin:10px 0 0}
+}
+@media(max-width:374px){body .compact-row{grid-template-columns:98px minmax(0,1fr) 78px;gap:0 7px;padding-right:7px}body .compact-thumb{width:98px}body .compact-pricing .stock-price{font-size:16px}body .compact-main h3{font-size:12px}body .compact-meta{font-size:9px}body .compact-grade{font-size:8px}}
+body .compact-thumb{position:relative;overflow:hidden}
+body .compact-thumb .card-badge-cluster{position:absolute!important;z-index:2;top:6px;left:6px}
+body .stock-photo>.card-badge-cluster{position:absolute!important;z-index:2;top:8px;left:8px}
+body .compact-thumb .card-badge-cluster .spec-badge{border-radius:4px;line-height:1.2}
+body .stock-photo>.card-badge-cluster .badge-transmission{background:#17222ce8;color:#f3f7fa}
+@media(max-width:700px){body .compact-thumb .card-badge-cluster{top:5px;left:5px}body .stock-photo>.card-badge-cluster{top:6px;left:6px;max-width:calc(100% - 12px)}}
+@media(max-width:700px){
+ body .detail-purchase .vehicle-calculator .payment-result{display:grid!important;grid-template-columns:auto 1fr;grid-template-rows:auto auto;align-items:baseline;gap:3px 9px!important;min-height:0!important;margin:0 0 12px!important}
+ body .detail-purchase .vehicle-calculator .payment-result small{grid-column:1/-1;width:auto;min-height:0;margin:0!important;line-height:1.3;font-size:10px}
+ body .detail-purchase .vehicle-calculator .payment-result strong{grid-column:1;width:auto;margin:0!important;font-size:28px!important;line-height:1.15}
+ body .detail-purchase .vehicle-calculator .payment-result span{grid-column:2;width:auto;margin:0!important;font-size:10px;line-height:1.3}
+ body #vehicleCalcForm .payment-tenure{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:6px;line-height:1.3}
+ body #vehicleCalcForm .payment-field{padding:0;align-self:start}
+ body #vehicleCalcForm .fixed-rate{min-height:0;padding:0!important;margin:0!important;border:0}
+ body #vehicleCalcForm .payment-tenure select{width:100%;max-width:none;flex:none}
+ body .detail-purchase>.vehicle-calculator{background:var(--surface)!important}
+ body .vehicle-calculator .tool-heading h2{font-size:18px!important}
+}
+body .stock-card .stock-location{display:flex!important;align-items:center;gap:4px;font-size:11px;color:var(--muted);margin:8px 0 0}
+body .stock-card .stock-location .icon{width:11px;height:11px;color:#c05b7c}
+body .stock-card .card-grade{font-size:11px;font-weight:400}
+@media(max-width:700px){body .stock-card .stock-location{font-size:10px}body .stock-card .card-grade,body .stock-card .card-grade strong{font-size:10px}}

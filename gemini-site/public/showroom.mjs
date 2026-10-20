@@ -3,7 +3,7 @@ import {openCarFinder} from './car-finder.mjs';
 import {visibleBrandFilters,matchesInventorySelection} from './inventory-brand-filters.mjs?v=stock-20261019d';
 import {galleryMarkup,bindGallery} from './vehicle-gallery.mjs';
 import {renderServiceCare} from './service-care.mjs';
-import {calculatorMarkup,bindVehicleCalculator,conditionMarkup,bindAuctionReport,conditionValues,translator} from './vehicle-tools.mjs';
+import {calculatorMarkup,bindVehicleCalculator,conditionValues,translator} from './vehicle-tools.mjs';
 import {normalizeDocument,deriveSpecialBadges,estimate,label} from './inventory-domain.mjs?v=stock-themes-20261019';
 import {readLocal,deleteLocal,photoUrl} from './browser-stock.mjs';
 import {icon} from './stock-icons.mjs';
@@ -81,6 +81,7 @@ function specBadgeClass(tag){
 }
 function badgeClusterMarkup(v,{inline=false}={}){
  const pills=[];
+ if(!inline)pills.push(`<span class="spec-badge badge-transmission">${esc(t(v.transmission||'Auto'))}</span>`);
  if(v.status==='sold')pills.push(`<span class="badge sold">${esc(t('SOLD'))}</span>`);
  else if(v.status==='reserved')pills.push(`<span class="badge reserved">${esc(t('BOOKED'))}</span>`);
  else if(d.homepage?.hideAvailableBadge===false)pills.push(`<span class="badge available">${esc(t('AVAILABLE'))}</span>`);
@@ -103,12 +104,12 @@ function photoMarkup(v,eager=false){
 function card(v,idx=0){
  const monthly=estimate(v,d.finance),grade=(v.conditionExample?t('Example')+' ':'')+[conditionValues(v).auctionGrade,conditionValues(v).interiorGrade].filter(Boolean).join('/');
  const isSold=v.status==='sold',delay=Math.min(idx%4,3)*45;
- return `<article class="stock-card reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}">${photoMarkup(v,idx<4)}<div class="stock-info"><div class="card-heading-row"><a href="${details(v)}"><h3>${esc(v.make)} ${esc(v.model)}</h3></a></div><div class="stock-identifiers"><code>Stock #${esc(v.stockId)}</code>${v.chassisNumber?`<code class="chassis-number" title="${esc(v.chassisNumber)}">${esc(v.chassisNumber)}</code>`:''}</div><div class="spec-row"><span><strong>${v.year||'—'}</strong></span><span><strong>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</strong></span><span>${esc(t(v.transmission||'Auto'))}</span></div><div class="stock-price ${isSold?'is-sold':''}">${isSold?t('SOLD'):money(v.priceRm)}</div><p class="monthly-price">${monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p><p class="stock-location">${icon('pin')}${esc(v.location||'Shah Alam')}</p><div class="stock-card-footer"><label class="compare-check"><input type="checkbox" data-compare="${esc(v.id)}" ${compare.includes(v.id)?'checked':''}><span>${t('Compare')}</span></label><div class="footer-links"><a class="view-link" href="${details(v)}">${t('Details')} →</a></div></div></div></article>`;
+ return `<article class="stock-card reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}">${photoMarkup(v,idx<4)}<div class="stock-info"><div class="card-heading-row"><a href="${details(v)}"><h3>${esc(v.make)} ${esc(v.model)}</h3></a></div><div class="stock-identifiers"><code>Stock #${esc(v.stockId)}</code>${v.chassisNumber?`<code class="chassis-number" title="${esc(v.chassisNumber)}">${esc(v.chassisNumber)}</code>`:''}</div><div class="spec-row"><span><strong>${v.year||'—'}</strong></span><span><strong>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</strong></span>${grade?`<span class="card-grade">${v.conditionExample?t('Example'):t('Grade')} <strong>${esc([conditionValues(v).auctionGrade,conditionValues(v).interiorGrade].filter(Boolean).join('/'))}</strong></span>`:''}</div><div class="stock-price ${isSold?'is-sold':''}">${isSold?t('SOLD'):money(v.priceRm)}</div><p class="monthly-price">${monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p><p class="stock-location">${icon('pin')}${esc(v.location||'Shah Alam')}</p><div class="stock-card-footer"><label class="compare-check"><input type="checkbox" data-compare="${esc(v.id)}" ${compare.includes(v.id)?'checked':''}><span>${t('Compare')}</span></label><div class="footer-links"><a class="view-link" href="${details(v)}">${t('Details')} →</a></div></div></div></article>`;
 }
 function compactRow(v,idx=0){
  const monthly=estimate(v,d.finance),grade=(v.conditionExample?t('Example')+' ':'')+[conditionValues(v).auctionGrade,conditionValues(v).interiorGrade].filter(Boolean).join('/');
  const isSold=v.status==='sold',srcAttr=staticImgSrc(v.coverImageUrl),delay=Math.min(idx%6,5)*35;
- return `<article class="compact-row reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}"><a class="compact-thumb" href="${details(v)}">${v.coverImageUrl?`<img ${srcAttr?`src="${esc(srcAttr)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="${idx<4?'eager':'lazy'}" decoding="async" width="160" height="100">`:`<div class="photo-placeholder">${icon('photo')}</div>`}${badgeClusterMarkup(v)}</a><div class="compact-main"><div class="compact-title-line"><a href="${details(v)}"><h3>${esc(v.make)} ${esc(v.model)}</h3></a><div class="stock-identifiers"><code>Stock #${esc(v.stockId)}</code>${v.chassisNumber?`<code class="chassis-number" title="${esc(v.chassisNumber)}">${esc(v.chassisNumber)}</code>`:''}</div></div><div class="compact-meta"><strong>${v.year||'—'}</strong><span>${esc(t(v.transmission||'Auto'))}</span><span>·</span><span>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</span>${grade?`<span>·</span><span>${esc(grade)}</span>`:''}<span>·</span><span>${esc(v.location||'Shah Alam')}</span></div></div><div class="compact-pricing"><div class="stock-price ${isSold?'is-sold':''}">${isSold?t('SOLD'):money(v.priceRm)}</div><p class="monthly-price">${monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p></div><div class="compact-actions"><label class="compare-check"><input type="checkbox" data-compare="${esc(v.id)}" ${compare.includes(v.id)?'checked':''}><span>${t('Compare')}</span></label><a class="view-link" href="${details(v)}">${t('Details')} →</a></div></article>`;
+ return `<article class="compact-row reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}"><a class="compact-thumb" href="${details(v)}">${v.coverImageUrl?`<img ${srcAttr?`src="${esc(srcAttr)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="${idx<4?'eager':'lazy'}" decoding="async" width="160" height="100">`:`<div class="photo-placeholder">${icon('photo')}</div>`}${badgeClusterMarkup(v)}</a><div class="compact-main"><div class="compact-title-line"><a href="${details(v)}"><h3>${esc(v.make)} ${esc(v.model)}</h3></a><div class="stock-identifiers"><code>Stock #${esc(v.stockId)}</code>${v.chassisNumber?`<code class="chassis-number" title="${esc(v.chassisNumber)}">${esc(v.chassisNumber)}</code>`:''}</div></div><div class="compact-meta"><strong>${v.year||'—'}</strong><strong>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</strong>${grade?`<span class="compact-grade">${v.conditionExample?t('Example'):t('Grade')} <strong>${esc([conditionValues(v).auctionGrade,conditionValues(v).interiorGrade].filter(Boolean).join('/'))}</strong></span>`:''}</div><p class="compact-location">${icon('pin')}${esc(v.location||'Shah Alam')}</p></div><div class="compact-pricing"><div class="stock-price ${isSold?'is-sold':''}">${isSold?t('SOLD'):money(v.priceRm)}</div><p class="monthly-price">${monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p></div><div class="compact-actions"><label class="compare-check"><input type="checkbox" data-compare="${esc(v.id)}" ${compare.includes(v.id)?'checked':''}><span>${t('Compare')}</span></label><a class="view-link" href="${details(v)}">${t('Details')} →</a></div></article>`;
 }
 function selectControl(name,key,options){return `<label class="compact-field"><span class="sr-only">${t(name)}</span><select data-filter="${key}" aria-label="${t(name)}">${options.map(([v,title])=>`<option value="${esc(v)}" ${filters[key]===v?'selected':''}>${esc(t(title))}</option>`).join('')}</select></label>`;}
 function renderViewToggle(){
@@ -230,6 +231,20 @@ function renderHome(){
  hydrateImages();observeScrollReveal();translate();
 }
 let detailObserver;
+function fullSpecificationRows(v){
+ const c=conditionValues(v),grade=[c.auctionGrade,c.interiorGrade].filter(Boolean).join('/');
+ const rows=[['Model',[v.make,v.model,v.variant].filter(Boolean).join(' ')],['Body',t(v.body)],['Transmission',t(v.transmission)],['Year',v.year],['Mileage',v.mileage],['Auction grade',grade?grade+(c.example?' · '+t('Example'):''):null],['Colour',v.exteriorColor],['Chassis',v.chassisNumber],['Location',v.location]];
+ const keys=new Set(rows.map(([key])=>key.toLowerCase()));
+ for(const [group,values] of Object.entries(v.specs||{})){
+  if(group==='Vehicle status')continue;
+  for(const [key,value] of Array.isArray(values)?values:[]){
+   const normalized=String(key).toLowerCase();
+   if(keys.has(normalized)||['chassis','chassis code','platform code','auction grade','interior grade'].includes(normalized))continue;
+   rows.push([key,value]);keys.add(normalized);
+  }
+ }
+ return rows.filter(([,value])=>value!=null&&String(value).trim()!=='');
+}
 async function renderDetail(){
  detailObserver?.disconnect();
  const parts=location.pathname.split('/').filter(Boolean),id=new URLSearchParams(location.search).get('vehicle')||decodeURIComponent(parts.at(-1)||''),v=d.vehicles.find(v=>v.id===id||v.stockId===id||((id==='audi'||id==='audi.html')&&v.id==='audi-s5')),tr=translator(lang);
@@ -239,7 +254,7 @@ async function renderDetail(){
  const videoId=v.presenter?.url?.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/)?.[1];
  const ask=topic=>wa(`Hi Danny, I have a question about ${title}.\nStock #${v.stockId} · ${money(v.priceRm)}\nQuestion: ${topic}\n${location.origin+details(v)}`);
  document.title=title+' · Danny Recond Select';
- const sections=[['vehicleGallery',tr('Photos','照片','Foto')],['vehicleSpecifications',tr('Equipment & specs','设备与配置','Peralatan & spesifikasi')],['vehicleCondition',tr('Grade & condition','等级与车况','Gred & keadaan')],['vehicleCalculator',tr('Loan calculator','月供计算器','Kalkulator pinjaman')],['vehicleContact',tr('Enquire & visit','询问与看车','Pertanyaan & lawatan')],...(videoId?[['presenterSlot',tr('Danny’s walkthrough','Danny 讲解','Penerangan Danny')]]:[])];
+ const sections=[['vehicleGallery',tr('Photos','照片','Foto')],['vehicleSpecifications',tr('Equipment & specs','设备与配置','Peralatan & spesifikasi')],['vehicleCalculator',tr('Loan calculator','月供计算器','Kalkulator pinjaman')],['vehicleContact',tr('Enquire & visit','询问与看车','Pertanyaan & lawatan')],...(videoId?[['presenterSlot',tr('Danny’s walkthrough','Danny 讲解','Penerangan Danny')]]:[])];
  const otherCars=d.vehicles.filter(x=>x.id!==v.id&&x.status==='available').sort((a,b)=>{
   if(v.priceRm!=null&&a.priceRm!=null&&b.priceRm!=null)return Math.abs(a.priceRm-v.priceRm)-Math.abs(b.priceRm-v.priceRm);
   return 0;
@@ -258,8 +273,7 @@ async function renderDetail(){
  <div class="vehicle-reading-column">
  ${galleryMarkup(photos,title,lang)}
 
- <section class="detail-info vehicle-specifications" id="vehicleSpecifications" aria-labelledby="vehicleSpecsTitle"><div class="detail-section-heading"><span class="detail-section-icon">${icon('gear')}</span><div><p class="eyebrow">${tr('EXPLORE THE CAR','了解这辆车','TEROKAI KERETA')}</p><h2 id="vehicleSpecsTitle">${tr('Specifications & equipment','车辆规格与配备','Spesifikasi & kelengkapan')}</h2></div></div>${v.description?`<p class="vehicle-description">${esc(v.description)}</p>`:''}<div class="specification-groups">${Object.entries(v.specs||{}).filter(([name])=>name!=='Vehicle status').map(([name,rows],index)=>`<details class="specification-group" ${index===0?'open':''}><summary><span class="spec-group-label">${icon(index===0?'gear':name.includes('Interior')?'grid':'photo')}<span>${esc(t(name))}</span></span><span class="spec-toggle" aria-hidden="true">+</span></summary><dl class="detail-spec-grid">${(Array.isArray(rows)?rows:[]).map(([key,value])=>`<div><dt>${esc(t(key))}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl></details>`).join('')||`<dl class="detail-spec-grid">${[['Engine',v.engineCc?v.engineCc+' cc':v.engine],['Power',v.power],['Torque',v.torque]].filter(([,value])=>value).map(([name,value])=>`<div><dt>${t(name)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>`}</div>${v.chassisNumber?`<p class="vehicle-chassis">${tr('Chassis / VIN','车架号','Nombor casis')} <code>${esc(v.chassisNumber)}</code></p>`:''}${v.chassisCode?`<p class="vehicle-chassis">${t('Chassis')} <code>${esc(v.chassisCode)}</code></p>`:''}${v.features.length?`<h3>${tr('Equipment highlights','配备亮点','Ciri utama')}</h3><div class="feature-tags">${v.features.map(f=>`<span>${icon('check')}${esc(f)}</span>`).join('')}</div>`:''}${v.warrantyInfo?`<h3>${tr('Warranty','保修资料','Waranti')}</h3><p>${esc(v.warrantyInfo)}</p>`:''}${v.conditionNotes?`<h3>${t('Condition notes')}</h3><p>${esc(v.conditionNotes)}</p>`:''}</section>
- ${conditionMarkup(v,lang,wa)}
+ <section class="detail-info vehicle-specifications" id="vehicleSpecifications" aria-labelledby="vehicleSpecsTitle">${v.features.length?`<h3 class="spec-list-heading">${tr('Equipment','配备','Kelengkapan')}</h3><div class="feature-tags">${v.features.map(f=>`<span>${esc(f)}</span>`).join('')}</div>`:''}<h2 class="spec-list-heading" id="vehicleSpecsTitle">${tr('Full specification','完整车辆规格','Spesifikasi penuh')}</h2><dl class="full-spec-list">${fullSpecificationRows(v).map(([name,value])=>`<div><dt>${esc(t(name))}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl><a class="spec-report-link" href="${esc(conditionValues(v).report?.url||ask('Please share the original auction report and explain the vehicle grade.'))}" target="_blank" rel="noopener">${tr('Request original auction report','索取原始拍卖报告','Minta laporan lelong asal')} ↗</a>${v.warrantyInfo?`<h3 class="spec-list-heading">${tr('Warranty','保修资料','Waranti')}</h3><p>${esc(v.warrantyInfo)}</p>`:''}${v.conditionNotes?`<p>${esc(v.conditionNotes)}</p>`:''}</section>
  </div>
  <aside class="detail-purchase" aria-label="${tr('Vehicle summary and enquiries','车辆概要与询问','Ringkasan dan pertanyaan kereta')}">
  <section class="purchase-heading" aria-labelledby="vehicleTitle"><div class="detail-status"><span class="detail-eyebrow-meta">${esc(v.year)} · ${esc(condEyebrow)}</span><span class="vehicle-availability" data-status="${esc(v.status)}">${esc(statusText)}</span></div><h1 id="vehicleTitle">${esc(v.make+' '+v.model)}</h1>${v.variant?`<p class="vehicle-variant">${esc(v.variant)}</p>`:''}${priceRowMarkup}<p class="vehicle-stock-ref">${tr('Stock reference','库存编号','Rujukan stok')} <code>${esc(v.stockId)}</code></p></section>
@@ -302,7 +316,7 @@ async function renderDetail(){
    $('#presenterStage').innerHTML=`<iframe title="${esc(title)} with Danny" src="https://www.tiktok.com/player/v1/${videoId}?autoplay=1&description=1" allow="encrypted-media; fullscreen; picture-in-picture" loading="lazy" allowfullscreen></iframe>`;
   };
  }
- bindVehicleCalculator(v,d.finance,lang,wa,car=>location.origin+details(car));await bindAuctionReport(v,base,openPhoto,lang);hydrateImages();translate();
+ bindVehicleCalculator(v,d.finance,lang,wa,car=>location.origin+details(car));hydrateImages();translate();
  const navLinks=[...document.querySelectorAll('[data-detail-section]')];const selectNav=id=>navLinks.forEach(a=>a.dataset.detailSection===id?a.setAttribute('aria-current','location'):a.removeAttribute('aria-current'));
  navLinks.forEach(a=>a.onclick=()=>selectNav(a.dataset.detailSection));
  detailObserver=new IntersectionObserver(entries=>{const visible=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top);if(visible.length)selectNav(visible[0].target.id);},{rootMargin:'-60px 0px -55% 0px',threshold:0});
