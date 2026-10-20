@@ -447,11 +447,6 @@ body .compact-grade sup,body .card-grade sup{font-size:9px;color:var(--muted);ma
 body .photo-low-km{position:absolute;z-index:3;right:6px;top:6px;display:inline-flex;align-items:center;padding:4px 6px;border-radius:4px;background:#f4ac43;color:#352304;border:1px solid #b7731e55;font-size:9px;font-weight:750;letter-spacing:.035em;line-height:1.1;white-space:nowrap}
 body .compact-thumb>.card-badge-cluster,body .stock-photo>.card-badge-cluster{max-width:58%}
 body .compact-thumb .badge,body .stock-photo .badge{position:static!important;padding:3px 5px;line-height:1.1;font-size:8px;border-radius:4px;background:#4d5965;color:#fff}
-body .compact-row[data-status=reserved],body .compact-row[data-status=sold],body .stock-card[data-status=reserved],body .stock-card[data-status=sold]{--state-ink:#64707b;background:#edf0f2!important;border-color:#d1d7dc!important;box-shadow:none}
-html[data-theme=dark] body :is(.compact-row,.stock-card):is([data-status=reserved],[data-status=sold]){--state-ink:#a2aab2;background:#20252a!important;border-color:#394149!important}
-body :is(.compact-row,.stock-card):is([data-status=reserved],[data-status=sold]) :is(h3,.stock-price,.monthly-price,.compact-meta,.compact-meta strong,.stock-identifiers code,.compact-location,.spec-row,.spec-row strong,.card-grade,.stock-location,.compare-check){color:var(--state-ink)!important}
-body :is(.compact-row,.stock-card):is([data-status=reserved],[data-status=sold]) .view-link{background:transparent!important;color:var(--state-ink)!important;border-color:var(--state-ink)!important}
-body :is(.compact-row,.stock-card):is([data-status=reserved],[data-status=sold]) :is(.compact-location,.stock-location) .icon{color:var(--state-ink)!important}
 body .stock-price s{text-decoration-thickness:1.5px;text-decoration-color:currentColor}
 body .stock-location .icon,body .compact-location .icon{color:var(--muted)}
 body #contact.about-section{position:relative;isolation:isolate;display:block;min-height:550px;padding:52px 0;margin-top:44px;overflow:hidden;background:var(--page);border-top:1px solid var(--line)}
@@ -477,3 +472,96 @@ body #contact .social-row a{background:transparent;border-color:var(--line);colo
 body #contact .social-row img{width:18px;height:18px;object-fit:contain}
 body .mountain-copy h1{max-width:600px;font-size:clamp(44px,4.5vw,68px);line-height:1.02}
 @media(max-width:700px){body .photo-low-km{font-size:7px;padding:3px 4px;right:5px;top:5px}body .compact-title-line .stock-identifiers{margin-top:3px!important}body .compact-meta{gap:3px 6px;margin-top:5px;font-size:9px}body .compact-grade{font-size:8px}body .compact-location{margin-top:5px}body .mountain-copy h1{font-size:38px;max-width:330px}body #contact.about-section{padding:0 0 30px;min-height:0;margin:24px 12px 0;width:calc(100% - 24px)}body #contact .about-image{position:relative;z-index:0;top:auto;bottom:auto;width:100%;height:230px;mask-image:linear-gradient(180deg,#000 60%,transparent 100%)}body #contact .about-image img{object-position:center 45%;opacity:1}body #contact .about-copy{margin:-15px 0 0;width:100%;padding:0 12px}body #contact .about-copy>h2{font-size:29px;margin-bottom:23px}body #contact .contact-primary>.button{width:100%}body #contact .contact-block,body #contact .contact-block.contact-primary,body #contact .contact-block.location-block{padding-bottom:20px;margin-bottom:20px}body #contact .contact-location,body #contact .contact-block>a.contact-location{font-size:15px}}
+/* Reference stock layout: light surfaces, quiet prices for unavailable cars. */
+body.exhibition-home #inventoryGrid:not(.compact-view){grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+body #inventory .stock-card{display:flex;flex-direction:column;border-radius:12px;background:var(--surface);border:1px solid var(--line);box-shadow:none;overflow:hidden}
+body #inventory .stock-photo{aspect-ratio:4/3;border-radius:0}
+body #inventory .stock-info{display:flex;flex-direction:column;padding:12px;gap:0;min-height:0;flex:1}
+body #inventory .stock-info h3{font-size:15px;line-height:1.22;font-weight:700;letter-spacing:-.025em;margin:0;min-height:0}
+body #inventory .card-heading-row{margin:0;padding:0;min-height:0}
+body #inventory .stock-identifiers{display:block;margin:4px 0 0;line-height:1.2}
+body #inventory .stock-identifiers code{font-size:9px;line-height:1.2;letter-spacing:.03em;color:var(--muted)}
+body #inventory .spec-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:0;padding:9px 0 8px;font-size:11px;line-height:1.3;min-height:0;border:0}
+body #inventory .spec-row strong{font-size:11px;color:var(--ink);font-weight:700}
+body #inventory .listing-grade{font-size:10px;color:var(--muted);white-space:nowrap}
+body #inventory .listing-grade strong{font-size:inherit;color:var(--ink)}
+body #inventory .listing-grade sup{font-size:8px;margin-left:1px}
+body #inventory .stock-price{font-family:MountainSans,var(--font);font-size:27px;line-height:1.15;font-weight:700;letter-spacing:-.045em;color:var(--price-accent);margin:0;white-space:nowrap}
+body #inventory .monthly-price{font-size:10px;line-height:1.3;margin:4px 0 0;color:var(--muted)}
+body #inventory .stock-card-footer{display:flex;flex-wrap:wrap;align-items:center;gap:3px 8px;border:0;padding:12px 0 0;margin:0;margin-top:auto;min-height:0}
+body #inventory .stock-card-footer .stock-location{display:flex!important;flex:1 1 auto;gap:3px;align-items:center;font-size:9px;line-height:1.3;margin:0;min-height:24px}
+body #inventory .compare-check{display:inline-flex;gap:3px;align-items:center;font-size:10px;margin:0;padding:0;line-height:1.2;min-height:28px;color:var(--muted);white-space:nowrap}
+body #inventory .compare-check input{width:12px;height:12px;min-height:12px;padding:0;margin:0}
+body #inventory .view-link{display:inline-flex;align-items:center;min-height:28px;font-size:11px;font-weight:650;padding:2px 0;background:transparent!important;color:var(--ink)!important;border:0!important;border-radius:0;white-space:nowrap}
+body #inventory .view-link:hover{text-decoration:underline;text-underline-offset:3px}
+body #inventory .photo-count-tag{display:none}
+body #inventory .card-badge-cluster{max-width:62%;top:7px!important;left:7px!important;gap:3px}
+body #inventory .card-badge-cluster>.spec-badge{font-size:8px!important;padding:3px 5px!important;border:0;box-shadow:none;backdrop-filter:none;background:#27323de8;color:#f7f9fb}
+body #inventory .card-badge-cluster>.badge-rs{background:#e46e59;color:#fff}
+body #inventory .card-badge-cluster>.badge-rf{background:#e9bd54;color:#33280a}
+body #inventory .photo-status,body #inventory .photo-low-km{position:absolute;top:7px;right:7px;z-index:3;border:0;border-radius:4px;font-size:8px;font-weight:700;line-height:1.1;letter-spacing:.03em;padding:4px 6px;white-space:nowrap}
+body #inventory .photo-status{background:#e56d57;color:#fff}
+body #inventory .photo-low-km{background:#efbd55;color:#3b2a06}
+body #inventory :is(.stock-card,.compact-row):is([data-status=sold],[data-status=reserved]){background:var(--surface)!important;border-color:var(--line)!important;box-shadow:none}
+body #inventory :is(.stock-card,.compact-row):is([data-status=sold],[data-status=reserved]) :is(.stock-photo img,.compact-thumb img){filter:brightness(.67) saturate(.8)}
+body #inventory :is(.stock-card,.compact-row):is([data-status=sold],[data-status=reserved]) .stock-price{color:var(--muted)!important}
+body #inventory .stock-price.is-sold{font-size:18px;letter-spacing:.07em;font-weight:600}
+body #inventory .stock-price s{text-decoration-thickness:1.5px}
+body #inventoryGrid.compact-view{display:flex;flex-direction:column;gap:8px}
+body #inventory .compact-row{display:grid;grid-template-columns:116px minmax(0,1fr) 145px;grid-template-rows:auto;align-items:center;gap:0 12px;padding:0 13px 0 0;min-height:92px;border:1px solid var(--line);border-radius:11px;overflow:hidden;box-shadow:none;background:var(--surface)}
+body #inventory .compact-thumb{grid-column:1;grid-row:1;display:flex;align-items:center;position:relative;width:116px;height:auto!important;min-height:0;aspect-ratio:auto;align-self:stretch;border-radius:0;overflow:hidden;background:var(--surface-2)}
+body #inventory .compact-thumb img{display:block;width:100%;height:auto!important;min-height:0;aspect-ratio:auto;object-fit:contain;object-position:center}
+body #inventory .compact-main{grid-column:2;grid-row:1;padding:10px 0;min-width:0;align-self:center}
+body #inventory .compact-main h3{font-size:14px;line-height:1.2;font-weight:700;letter-spacing:-.025em;margin:0;min-height:0}
+body #inventory .compact-title-line{display:block;line-height:1.2}
+body #inventory .compact-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 9px;margin:7px 0 0;line-height:1.3;font-size:11px}
+body #inventory .compact-meta strong{font-size:11px;color:var(--ink);font-weight:700}
+body #inventory .compact-bottom{display:flex;flex-wrap:wrap;gap:0 12px;align-items:center;margin-top:4px}
+body #inventory .compact-location{display:flex;align-items:center;gap:3px;font-size:10px;line-height:1.3;margin:0;min-height:24px;color:var(--muted)}
+body #inventory :is(.compact-location,.stock-location) .icon{width:11px;height:11px;color:#b55778;flex:none}
+body #inventory .compact-pricing{grid-column:3;grid-row:1;display:flex;flex-direction:column;align-items:flex-end;align-self:center;text-align:right;padding:8px 0;min-width:0;gap:0}
+body #inventory .compact-pricing .stock-price{font-size:24px}
+body #inventory .compact-pricing .stock-price.is-sold{font-size:15px}
+body #inventory .compact-pricing .view-link{margin-top:3px;font-size:10px}
+@media(max-width:1100px){body #inventory .stock-info{padding:10px}body #inventory .stock-info h3{font-size:14px}body #inventory .stock-price{font-size:24px}body #inventory .stock-card-footer{gap:0 6px}body #inventory .stock-card-footer .stock-location{flex-basis:100%}body #inventory .stock-card-footer>.view-link{margin-left:auto}}
+@media(max-width:700px){
+ body.exhibition-home #inventoryGrid:not(.compact-view){grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ body #inventory .stock-info h3{font-size:14px}
+ body #inventory .spec-row{gap:3px 7px;padding:8px 0 7px}
+ body #inventory .spec-row,body #inventory .spec-row strong{font-size:10px}
+ body #inventory .listing-grade{font-size:9px}
+ body #inventory .stock-price{font-size:24px}
+ body #inventory .stock-price.is-sold{font-size:16px}
+ body #inventory .stock-card-footer{padding-top:9px}
+ body #inventory .stock-card-footer .stock-location{font-size:9px;flex:1 1 auto}
+ body #inventory .stock-card-footer .compare-check{display:none}
+ body #inventory .card-badge-cluster{top:5px!important;left:5px!important;gap:2px;max-width:60%}
+ body #inventory .card-badge-cluster>.spec-badge{font-size:6px!important;padding:3px!important}
+ body #inventory .photo-status,body #inventory .photo-low-km{font-size:6px;top:5px;right:5px;padding:4px}
+ body #inventory .compact-row{grid-template-columns:98px minmax(0,1fr) 85px;gap:0 8px;padding:0 8px 0 0;min-height:98px}
+ body #inventory .compact-thumb{width:98px;min-height:0}
+ body #inventory .compact-main{padding:9px 0}
+ body #inventory .compact-main h3{font-size:12px;line-height:1.22}
+ body #inventory .compact-main .stock-identifiers code{font-size:8px}
+ body #inventory .compact-meta{gap:3px 6px;margin-top:6px;font-size:9px}
+ body #inventory .compact-meta strong{font-size:9px}
+ body #inventory .compact-meta .listing-grade,body #inventory .compact-meta .listing-grade strong{font-size:8px}
+ body #inventory .compact-bottom{margin-top:4px}
+ body #inventory .compact-location{font-size:8px;min-height:18px}
+ body #inventory .compact-bottom .compare-check{display:none}
+ body #inventory .compact-pricing .stock-price{font-size:18px}
+ body #inventory .compact-pricing .stock-price.is-sold{font-size:12px}
+ body #inventory .compact-pricing .monthly-price{font-size:8px}
+ body #inventory .compact-pricing .view-link{font-size:9px}
+}
+@media(max-width:374px){body #inventory .compact-row{grid-template-columns:86px minmax(0,1fr) 78px;gap:0 7px;padding-right:7px}body #inventory .compact-thumb{width:86px}body #inventory .compact-pricing .stock-price{font-size:16px}body #inventory .compact-main h3{font-size:11px}}
+body #inventory .card-badge-cluster>.badge-rs{background:#e46e59!important;color:#fff!important}
+body #inventory .card-badge-cluster>.badge-rf{background:#e9bd54!important;color:#33280a!important}
+body #inventory .card-badge-cluster>.badge-transmission{background:#27323de8!important;color:#f7f9fb!important}
+body #inventory .stock-card-footer{flex-wrap:nowrap;gap:6px;min-height:32px;padding-top:7px}
+body #inventory .stock-card-footer .stock-location{flex:1 1 auto;min-width:0;min-height:26px;font-size:9px}
+body #inventory .stock-card-footer .compare-check{font-size:9px;min-height:26px}
+body #inventory .stock-card-footer>.view-link{font-size:10px;margin-left:0;min-height:26px}
+body #inventory .compact-thumb img{min-height:92px;object-fit:cover}
+@media(max-width:700px){body #inventory .compact-thumb img{min-height:98px}body #inventory .stock-card-footer .stock-location{font-size:8px}body #inventory .stock-card-footer>.view-link{font-size:9px}}
+body #inventoryGrid{scroll-margin-top:90px}
