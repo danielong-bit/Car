@@ -80,21 +80,12 @@ function specBadgeClass(tag){
  return 'spec-badge badge-custom';
 }
 function badgeClusterMarkup(v,{inline=false}={}){
- const pills=[];
-
- if(v.status==='sold')pills.push(`<span class="badge sold">${esc(t('SOLD'))}</span>`);
- else if(v.status==='reserved')pills.push(`<span class="badge reserved">${esc(t('BOOKED'))}</span>`);
- else if(d.homepage?.hideAvailableBadge===false)pills.push(`<span class="badge available">${esc(t('AVAILABLE'))}</span>`);
- const specials=deriveSpecialBadges(v,d.homepage);
- for(const tag of specials){
-  if(tag==='LOW KM')continue;
-  const display=tag==='LOW KM'?t('LOW KM'):tag;
-  pills.push(`<span class="${specBadgeClass(tag)}">${esc(display)}</span>`);
- }
- if(!pills.length&&v.status==='available'&&inline){
-  pills.push(`<span class="spec-badge badge-lowkm">${esc(t('AVAILABLE'))}</span>`);
- }
- return (pills.length?`<div class="${inline?'detail-badge-cluster':'card-badge-cluster'}">${pills.join('')}</div>`:'')+(!inline&&v.status!=='sold'&&specials.includes('LOW KM')?`<span class="photo-low-km">${esc(t('LOW KM'))}</span>`:'');
+ const special=deriveSpecialBadges(v,d.homepage).filter(tag=>tag!=='LOW KM');
+ const pills=special.map(tag=>`<span class="${specBadgeClass(tag)}">${esc(tag)}</span>`);
+ if(!inline)pills.push(`<span class="spec-badge badge-transmission">${esc(t(v.transmission||'Auto'))}</span>`);
+ const state=v.status==='sold'?'SOLD':v.status==='reserved'?'BOOKED':'';
+ const right=state?`<span class="photo-status">${esc(t(state))}</span>`:!inline&&deriveSpecialBadges(v,d.homepage).includes('LOW KM')?`<span class="photo-low-km">${esc(t('LOW KM'))}</span>`:'';
+ return (pills.length?`<div class="${inline?'detail-badge-cluster':'card-badge-cluster'}">${pills.join('')}</div>`:'')+right;
 }
 function photoMarkup(v,eager=false){
  const transTag='';
@@ -102,15 +93,22 @@ function photoMarkup(v,eager=false){
  const srcAttr=staticImgSrc(v.coverImageUrl);
  return `<div class="stock-photo"><a href="${details(v)}">${v.coverImageUrl?`<img ${srcAttr?`src="${esc(srcAttr)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="${eager?'eager':'lazy'}" ${eager?'fetchpriority="high" ':''}decoding="async" width="640" height="400">`:`<div class="photo-placeholder">${icon('photo')}<span>${lang==='zh'?'车辆照片待上传':lang==='ms'?'Foto akan ditambah':'Photos to be added'}</span></div>`}</a><div class="card-top-chips">${bodyTag}${transTag}</div>${badgeClusterMarkup(v)}<span class="photo-count-tag">${icon('photo')} ${v.gallery.filter(m=>m.visible!==false).length}</span></div>`;
 }
+function listingFacts(v){
+ const c=conditionValues(v),grade=[c.auctionGrade,c.interiorGrade].filter(Boolean).join('/');
+ return `<strong>${v.year||'—'}</strong><strong>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</strong>${grade?`<span class="listing-grade">${t('Grade')} <strong>${esc(grade)}</strong>${c.example?`<sup title="${esc(t('Example'))}" aria-label="${esc(t('Example'))}">*</sup>`:''}</span>`:''}`;
+}
+function listingPrice(v){
+ if(v.status==='sold')return esc(t('SOLD'));
+ return v.status==='reserved'&&v.priceRm!=null?`<s>${money(v.priceRm)}</s>`:money(v.priceRm);
+}
+function listingCompare(v){return `<label class="compare-check"><input type="checkbox" data-compare="${esc(v.id)}" ${compare.includes(v.id)?'checked':''}><span>${t('Compare')}</span></label>`;}
 function card(v,idx=0){
- const monthly=estimate(v,d.finance),grade=(v.conditionExample?t('Example')+' ':'')+[conditionValues(v).auctionGrade,conditionValues(v).interiorGrade].filter(Boolean).join('/');
- const isSold=v.status==='sold',delay=Math.min(idx%4,3)*45;
- return `<article class="stock-card reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}" data-status="${esc(v.status)}">${photoMarkup(v,idx<4)}<div class="stock-info"><div class="card-heading-row"><a href="${details(v)}"><h3>${esc(v.make)} ${esc(v.model)}</h3></a></div><div class="stock-identifiers"><code>Stock #${esc(v.stockId)}</code>${v.chassisNumber?`<code class="chassis-number" title="${esc(v.chassisNumber)}">${esc(v.chassisNumber)}</code>`:''}</div><div class="spec-row"><span>${esc(t(v.transmission||'Auto'))}</span><span><strong>${v.year||'—'}</strong></span><span><strong>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</strong></span>${grade?`<span class="card-grade">${t('Grade')} <strong>${esc([conditionValues(v).auctionGrade,conditionValues(v).interiorGrade].filter(Boolean).join('/'))}</strong>${v.conditionExample?`<sup title="${esc(t('Example'))}" aria-label="${esc(t('Example'))}">*</sup>`:''}</span>`:''}</div><div class="stock-price ${isSold?'is-sold':''}">${isSold&&v.priceRm!=null?`<s>${money(v.priceRm)}</s>`:isSold?t('SOLD'):money(v.priceRm)}</div><p class="monthly-price">${isSold?t('SOLD'):v.status==='reserved'?t('BOOKED'):monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p><p class="stock-location">${icon('pin')}${esc(v.location||'Shah Alam')}</p><div class="stock-card-footer"><label class="compare-check"><input type="checkbox" data-compare="${esc(v.id)}" ${compare.includes(v.id)?'checked':''}><span>${t('Compare')}</span></label><div class="footer-links"><a class="view-link" href="${details(v)}">${t('Details')} →</a></div></div></div></article>`;
+ const monthly=estimate(v,d.finance),delay=Math.min(idx%4,3)*45;
+ return `<article class="stock-card reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}" data-status="${esc(v.status)}">${photoMarkup(v,idx<4)}<div class="stock-info"><div class="card-heading-row"><a href="${details(v)}"><h3>${esc(v.make)} ${esc(v.model)}</h3></a></div><div class="stock-identifiers"><code>Stock #${esc(v.stockId)}</code></div><div class="spec-row">${listingFacts(v)}</div><div class="stock-price ${v.status==='sold'?'is-sold':''}">${listingPrice(v)}</div><p class="monthly-price">${monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p><div class="stock-card-footer"><p class="stock-location">${icon('pin')}${esc(v.location||'Shah Alam')}</p>${listingCompare(v)}<a class="view-link" href="${details(v)}">${t('Details')} →</a></div></div></article>`;
 }
 function compactRow(v,idx=0){
- const monthly=estimate(v,d.finance),grade=(v.conditionExample?t('Example')+' ':'')+[conditionValues(v).auctionGrade,conditionValues(v).interiorGrade].filter(Boolean).join('/');
- const isSold=v.status==='sold',srcAttr=staticImgSrc(v.coverImageUrl),delay=Math.min(idx%6,5)*35;
- return `<article class="compact-row reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}" data-status="${esc(v.status)}"><a class="compact-thumb" href="${details(v)}">${v.coverImageUrl?`<img ${srcAttr?`src="${esc(srcAttr)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="${idx<4?'eager':'lazy'}" decoding="async" width="160" height="100">`:`<div class="photo-placeholder">${icon('photo')}</div>`}${badgeClusterMarkup(v)}</a><div class="compact-main"><div class="compact-title-line"><a href="${details(v)}"><h3>${esc(v.make)} ${esc(v.model)}</h3></a><div class="stock-identifiers"><code>Stock #${esc(v.stockId)}</code>${v.chassisNumber?`<code class="chassis-number" title="${esc(v.chassisNumber)}">${esc(v.chassisNumber)}</code>`:''}</div></div><div class="compact-meta"><span class="transmission-fact">${esc(t(v.transmission||'Auto'))}</span><strong>${v.year||'—'}</strong><strong>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</strong>${grade?`<span class="compact-grade">${t('Grade')} <strong>${esc([conditionValues(v).auctionGrade,conditionValues(v).interiorGrade].filter(Boolean).join('/'))}</strong>${v.conditionExample?`<sup title="${esc(t('Example'))}" aria-label="${esc(t('Example'))}">*</sup>`:''}</span>`:''}</div><p class="compact-location">${icon('pin')}${esc(v.location||'Shah Alam')}</p></div><div class="compact-pricing"><div class="stock-price ${isSold?'is-sold':''}">${isSold&&v.priceRm!=null?`<s>${money(v.priceRm)}</s>`:isSold?t('SOLD'):money(v.priceRm)}</div><p class="monthly-price">${isSold?t('SOLD'):v.status==='reserved'?t('BOOKED'):monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p></div><div class="compact-actions"><label class="compare-check"><input type="checkbox" data-compare="${esc(v.id)}" ${compare.includes(v.id)?'checked':''}><span>${t('Compare')}</span></label><a class="view-link" href="${details(v)}">${t('Details')} →</a></div></article>`;
+ const monthly=estimate(v,d.finance),srcAttr=staticImgSrc(v.coverImageUrl),delay=Math.min(idx%6,5)*35;
+ return `<article class="compact-row reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}" data-status="${esc(v.status)}"><a class="compact-thumb" href="${details(v)}">${v.coverImageUrl?`<img ${srcAttr?`src="${esc(srcAttr)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="${idx<4?'eager':'lazy'}" decoding="async">`:`<div class="photo-placeholder">${icon('photo')}</div>`}${badgeClusterMarkup(v)}</a><div class="compact-main"><div class="compact-title-line"><a href="${details(v)}"><h3>${esc(v.make)} ${esc(v.model)}</h3></a><div class="stock-identifiers"><code>Stock #${esc(v.stockId)}</code></div></div><div class="compact-meta">${listingFacts(v)}</div><div class="compact-bottom"><p class="compact-location">${icon('pin')}${esc(v.location||'Shah Alam')}</p>${listingCompare(v)}</div></div><div class="compact-pricing"><div class="stock-price ${v.status==='sold'?'is-sold':''}">${listingPrice(v)}</div><p class="monthly-price">${monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p><a class="view-link" href="${details(v)}">${t('Details')} →</a></div></article>`;
 }
 function selectControl(name,key,options){return `<label class="compact-field"><span class="sr-only">${t(name)}</span><select data-filter="${key}" aria-label="${t(name)}">${options.map(([v,title])=>`<option value="${esc(v)}" ${filters[key]===v?'selected':''}>${esc(t(title))}</option>`).join('')}</select></label>`;}
 function renderViewToggle(){
