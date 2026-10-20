@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "car-recond-japan",
+  "compatibility_date": "2026-10-20",
+  "workers_dev": true,
+  "build": {
+    "command": "node gemini-site/scripts/build-cloudflare.mjs"
+  },
+  "assets": {
+    "directory": "./gemini-site/dist-cloudflare",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
