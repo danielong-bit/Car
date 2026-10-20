@@ -95,7 +95,7 @@ function photoMarkup(v,eager=false){
 }
 function listingFacts(v){
  const c=conditionValues(v),grade=[c.auctionGrade,c.interiorGrade].filter(Boolean).join('/');
- return `<strong>${v.year||'—'}</strong><strong>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</strong>${grade?`<span class="listing-grade">${t('Grade')} <strong>${esc(grade)}</strong>${c.example?`<sup title="${esc(t('Example'))}" aria-label="${esc(t('Example'))}">*</sup>`:''}</span>`:''}`;
+ return `<span class="fact-year">${v.year||'—'}</span><span class="fact-mileage">${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</span>${grade?`<span class="listing-grade">${t('Grade')} <span class="grade-value">${esc(grade)}</span>${c.example?`<sup title="${esc(t('Example'))}" aria-label="${esc(t('Example'))}">*</sup>`:''}</span>`:''}`;
 }
 function listingPrice(v){
  if(v.status==='sold')return esc(t('SOLD'));
@@ -104,11 +104,11 @@ function listingPrice(v){
 function listingCompare(v){return `<label class="compare-check"><input type="checkbox" data-compare="${esc(v.id)}" ${compare.includes(v.id)?'checked':''}><span>${t('Compare')}</span></label>`;}
 function card(v,idx=0){
  const monthly=estimate(v,d.finance),delay=Math.min(idx%4,3)*45;
- return `<article class="stock-card reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}" data-status="${esc(v.status)}">${photoMarkup(v,idx<4)}<div class="stock-info"><div class="card-heading-row"><a href="${details(v)}"><h3>${esc(v.make)} ${esc(v.model)}</h3></a></div><div class="stock-identifiers"><code>Stock #${esc(v.stockId)}</code></div><div class="spec-row">${listingFacts(v)}</div><div class="stock-price ${v.status==='sold'?'is-sold':''}">${listingPrice(v)}</div><p class="monthly-price">${monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p><div class="stock-card-footer"><p class="stock-location">${icon('pin')}${esc(v.location||'Shah Alam')}</p>${listingCompare(v)}<a class="view-link" href="${details(v)}">${t('Details')} →</a></div></div></article>`;
+ return `<article class="stock-card reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}" data-status="${esc(v.status)}">${photoMarkup(v,idx<4)}<div class="stock-info"><div class="card-heading-row"><a href="${details(v)}"><h3>${esc(v.make)} ${esc(v.model)}</h3></a></div><div class="stock-identifiers"><code>Stock #${esc(v.stockId)}</code></div><div class="spec-row">${listingFacts(v)}</div><div class="stock-price ${v.status==='sold'?'is-sold':''}">${listingPrice(v)}</div><p class="monthly-price">${monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p><div class="stock-card-footer">${listingCompare(v)}<a class="view-link" href="${details(v)}">${t('Details')} →</a></div></div></article>`;
 }
 function compactRow(v,idx=0){
  const monthly=estimate(v,d.finance),srcAttr=staticImgSrc(v.coverImageUrl),delay=Math.min(idx%6,5)*35;
- return `<article class="compact-row reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}" data-status="${esc(v.status)}"><a class="compact-thumb" href="${details(v)}">${v.coverImageUrl?`<img ${srcAttr?`src="${esc(srcAttr)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="${idx<4?'eager':'lazy'}" decoding="async">`:`<div class="photo-placeholder">${icon('photo')}</div>`}${badgeClusterMarkup(v)}</a><div class="compact-main"><div class="compact-title-line"><a href="${details(v)}"><h3>${esc(v.make)} ${esc(v.model)}</h3></a><div class="stock-identifiers"><code>Stock #${esc(v.stockId)}</code></div></div><div class="compact-meta">${listingFacts(v)}</div><div class="compact-bottom"><p class="compact-location">${icon('pin')}${esc(v.location||'Shah Alam')}</p>${listingCompare(v)}</div></div><div class="compact-pricing"><div class="stock-price ${v.status==='sold'?'is-sold':''}">${listingPrice(v)}</div><p class="monthly-price">${monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p><a class="view-link" href="${details(v)}">${t('Details')} →</a></div></article>`;
+ return `<article class="compact-row reveal-on-scroll" style="--reveal-delay:${delay}ms" data-id="${esc(v.id)}" data-status="${esc(v.status)}"><a class="compact-thumb" href="${details(v)}">${v.coverImageUrl?`<img ${srcAttr?`src="${esc(srcAttr)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="${idx<4?'eager':'lazy'}" decoding="async">`:`<div class="photo-placeholder">${icon('photo')}</div>`}${badgeClusterMarkup(v)}</a><div class="compact-main"><div class="compact-title-line"><a href="${details(v)}"><h3>${esc(v.make)} ${esc(v.model)}</h3></a><div class="stock-identifiers"><code>Stock #${esc(v.stockId)}</code></div></div><div class="compact-meta">${listingFacts(v)}</div><div class="compact-bottom">${listingCompare(v)}</div></div><div class="compact-pricing"><div class="stock-price ${v.status==='sold'?'is-sold':''}">${listingPrice(v)}</div><p class="monthly-price">${monthly==null?t('Enquire'):'≈ '+money(monthly)+'/mo'}</p><a class="view-link" href="${details(v)}">${t('Details')} →</a></div></article>`;
 }
 function selectControl(name,key,options){return `<label class="compact-field"><span class="sr-only">${t(name)}</span><select data-filter="${key}" aria-label="${t(name)}">${options.map(([v,title])=>`<option value="${esc(v)}" ${filters[key]===v?'selected':''}>${esc(t(title))}</option>`).join('')}</select></label>`;}
 function renderViewToggle(){
@@ -198,16 +198,11 @@ function comparisonBar(){
 }
 window.addEventListener('resize',()=>{if(isMobileViewport()){const bar=$('#compareBar'),cmpModal=$('#compareModal');if(bar)bar.hidden=true;if(cmpModal?.open)cmpModal.close();}},{passive:true});
 function syncFooter(){
- const host=$('#footerContactLinks');
- if(!host)return;
- const p=d.profile||{};
- const rawPhone=String(p.phone||'60125686528').replace(/\D/g,'');
- const displayPhone=rawPhone.startsWith('60')?'0'+rawPhone.slice(2,4)+'-'+rawPhone.slice(4,7)+' '+rawPhone.slice(7):rawPhone;
- const parts=[`<span>WhatsApp <a href="${esc(wa('Hi Danny, I would like to enquire about your recond cars.'))}" target="_blank" rel="noopener">${esc(displayPhone)}</a></span>`];
- if(p.tiktok)parts.push(`<a href="${esc(p.tiktok)}" target="_blank" rel="noopener">TikTok</a>`);
- if(p.rednote)parts.push(`<a href="${esc(p.rednote)}" target="_blank" rel="noopener">小红书</a>`);
- if(p.facebook)parts.push(`<a href="${esc(p.facebook)}" target="_blank" rel="noopener">Facebook</a>`);
- host.innerHTML=parts.join('<span aria-hidden="true">·</span>');
+ const host=$('#siteFooter');if(!host)return;
+ const p=d.profile||{},tr=translator(lang),phone=String(p.phone||'60125686528').replace(/\D/g,'');
+ const displayPhone=phone.startsWith('60')?'+60 '+phone.slice(2,4)+'-'+phone.slice(4,7)+' '+phone.slice(7):phone;
+ const socials=[['TikTok',p.tiktok],['小红书',p.rednote],['Facebook',p.facebook||'https://www.facebook.com/reel/1834658307548568']].filter(([,href])=>href);
+ host.innerHTML=`<div class="footer-columns"><div class="footer-brand"><a href="${url()}" class="footer-title">DANNY<small>RECON SELECT</small></a><p>© ${new Date().getFullYear()} Danny Recon Select.</p><p>${tr('All rights reserved.','保留所有权利。','Hak cipta terpelihara.')}</p></div><nav class="footer-column" aria-label="${tr('Footer navigation','页脚导航','Navigasi footer')}"><h2>${tr('Navigate','网站导航','Navigasi')}</h2><a href="${url('#inventory')}">${t('Stock')}</a><a href="${url('#customer-stories')}">${t('Deliveries')}</a><a href="${url('services/')}">${t('Service')}</a><a href="${url('#contact')}">${t('About')}</a></nav><div class="footer-column"><h2>${tr('Social','社交平台','Sosial')}</h2>${socials.map(([name,href])=>`<a href="${esc(href)}" target="_blank" rel="noopener">${esc(name)}</a>`).join('')}</div><div class="footer-column"><h2>${tr('Contact','联系','Hubungi')}</h2><a href="${esc(wa('Hi Danny, I would like to enquire about your recond cars.'))}" target="_blank" rel="noopener">${esc(displayPhone)}</a>${p.email?`<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>`:''}<a class="footer-workbench-link" href="${url('studio/')}">${t('Stock workbench')} ↗</a></div></div>`;
 }
 function renderHome(){
  const tr=translator(lang),featured=d.vehicles.find(v=>v.id==='audi-s5'&&v.status==='available')||d.vehicles.find(v=>v.status==='available')||d.vehicles[0];
