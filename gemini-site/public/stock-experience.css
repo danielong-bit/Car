@@ -437,3 +437,43 @@ body .stock-card .card-grade{font-size:11px;font-weight:400}
 body .stock-photo>.card-badge-cluster,body .compact-thumb>.card-badge-cluster{display:flex!important;flex-wrap:wrap;align-items:flex-start;gap:4px;width:max-content;max-width:calc(100% - 12px);height:auto;padding:0!important;background:transparent!important;backdrop-filter:none!important;box-shadow:none;line-height:1}
 body .stock-photo>.card-badge-cluster>.spec-badge,body .compact-thumb>.card-badge-cluster>.spec-badge{position:static!important;display:inline-flex!important;flex:0 0 auto;align-items:center;justify-content:center;width:auto!important;min-width:0;max-width:none;height:auto!important;min-height:0!important;margin:0!important;padding:4px 5px!important;font-size:9px!important;line-height:1.1!important;border-radius:4px;white-space:nowrap;letter-spacing:.025em;transform:none!important}
 @media(max-width:700px){body .stock-photo>.card-badge-cluster>.spec-badge,body .compact-thumb>.card-badge-cluster>.spec-badge{font-size:7px!important;padding:3px 4px!important}body .stock-photo>.card-badge-cluster,body .compact-thumb>.card-badge-cluster{gap:3px}}
+/* Clear vehicle states, photo labels and a single contact composition. */
+body .compact-title-line{display:block!important;line-height:1.2}
+body .compact-title-line h3{margin:0!important;line-height:1.2}
+body .compact-title-line .stock-identifiers{margin-top:4px!important;line-height:1.25}
+body .compact-title-line .stock-identifiers code{margin:0!important;line-height:1.25}
+body .compact-meta{margin-top:7px}
+body .compact-grade sup,body .card-grade sup{font-size:9px;color:var(--muted);margin-left:2px}
+body .photo-low-km{position:absolute;z-index:3;right:6px;top:6px;display:inline-flex;align-items:center;padding:4px 6px;border-radius:4px;background:#f4ac43;color:#352304;border:1px solid #b7731e55;font-size:9px;font-weight:750;letter-spacing:.035em;line-height:1.1;white-space:nowrap}
+body .compact-thumb>.card-badge-cluster,body .stock-photo>.card-badge-cluster{max-width:58%}
+body .compact-thumb .badge,body .stock-photo .badge{position:static!important;padding:3px 5px;line-height:1.1;font-size:8px;border-radius:4px;background:#4d5965;color:#fff}
+body .compact-row[data-status=reserved],body .compact-row[data-status=sold],body .stock-card[data-status=reserved],body .stock-card[data-status=sold]{--state-ink:#64707b;background:#edf0f2!important;border-color:#d1d7dc!important;box-shadow:none}
+html[data-theme=dark] body :is(.compact-row,.stock-card):is([data-status=reserved],[data-status=sold]){--state-ink:#a2aab2;background:#20252a!important;border-color:#394149!important}
+body :is(.compact-row,.stock-card):is([data-status=reserved],[data-status=sold]) :is(h3,.stock-price,.monthly-price,.compact-meta,.compact-meta strong,.stock-identifiers code,.compact-location,.spec-row,.spec-row strong,.card-grade,.stock-location,.compare-check){color:var(--state-ink)!important}
+body :is(.compact-row,.stock-card):is([data-status=reserved],[data-status=sold]) .view-link{background:transparent!important;color:var(--state-ink)!important;border-color:var(--state-ink)!important}
+body :is(.compact-row,.stock-card):is([data-status=reserved],[data-status=sold]) :is(.compact-location,.stock-location) .icon{color:var(--state-ink)!important}
+body .stock-price s{text-decoration-thickness:1.5px;text-decoration-color:currentColor}
+body .stock-location .icon,body .compact-location .icon{color:var(--muted)}
+body #contact.about-section{position:relative;isolation:isolate;display:block;min-height:550px;padding:52px 0;margin-top:44px;overflow:hidden;background:var(--page);border-top:1px solid var(--line)}
+body #contact .about-image{position:absolute;z-index:-1;left:0;top:0;bottom:0;width:51%;height:auto;aspect-ratio:auto;border:0;border-radius:0;background:var(--page);box-shadow:none;overflow:hidden;mask-image:linear-gradient(90deg,#000 55%,transparent 100%)}
+body #contact .about-image img{width:100%;height:100%;object-fit:cover;object-position:50% center;filter:none;opacity:.9}
+body #contact .about-copy{position:relative;margin-left:46%;width:54%;padding:0 20px 0 32px}
+body #contact .about-copy>h2{font-size:36px;line-height:1.1;letter-spacing:-.04em;color:var(--ink);margin-bottom:25px}
+body #contact #profileIntro:empty{display:none}
+body #contact .contact-blocks{display:block;gap:0}
+body #contact .contact-block,body #contact .contact-block.contact-primary,body #contact .contact-block.location-block{padding:0 0 24px;margin:0 0 24px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent!important;box-shadow:none}
+body #contact .contact-section-label{display:flex;gap:9px;align-items:center;margin-bottom:13px;color:var(--muted);font-size:11px;font-weight:650;letter-spacing:.08em}
+body #contact .contact-section-label .icon{width:20px;height:20px;color:var(--ink);flex:none}
+body #contact .contact-primary>.button{width:auto;min-width:220px;min-height:46px;padding:10px 18px;border-radius:9px;font-size:15px}
+body #contact .contact-secondary{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:13px}
+body #contact .contact-secondary a,body #contact .contact-block .contact-secondary a{display:inline-flex;align-items:center;gap:7px;padding:3px 0;background:transparent;border:0;border-radius:0;color:var(--ink);font-size:13px;min-height:32px}
+body #contact .contact-secondary .icon{width:16px;height:16px;color:var(--muted)}
+body #contact .contact-location,body #contact .contact-block>a.contact-location{display:block;font-size:16px;line-height:1.5;color:var(--ink);font-weight:600;margin:0}
+body #contact .location-actions{display:flex;gap:18px;align-items:center;margin:10px 0 0}
+body #contact .location-actions a.location-directions,body #contact .contact-block.location-block .location-actions a.location-directions,body #contact .contact-block.location-block .location-actions button{background:transparent;color:var(--ink);border:0;border-radius:0;padding:3px 0;min-height:34px;font-size:12px;text-decoration:underline;text-underline-offset:4px}
+body #contact .location-actions button{color:var(--muted)!important}
+body #contact .social-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:0}
+body #contact .social-row a{background:transparent;border-color:var(--line);color:var(--ink);font-size:12px;padding:7px 11px;border-radius:8px;min-height:38px}
+body #contact .social-row img{width:18px;height:18px;object-fit:contain}
+body .mountain-copy h1{max-width:600px;font-size:clamp(44px,4.5vw,68px);line-height:1.02}
+@media(max-width:700px){body .photo-low-km{font-size:7px;padding:3px 4px;right:5px;top:5px}body .compact-title-line .stock-identifiers{margin-top:3px!important}body .compact-meta{gap:3px 6px;margin-top:5px;font-size:9px}body .compact-grade{font-size:8px}body .compact-location{margin-top:5px}body .mountain-copy h1{font-size:38px;max-width:330px}body #contact.about-section{padding:0 0 30px;min-height:0;margin:24px 12px 0;width:calc(100% - 24px)}body #contact .about-image{position:relative;z-index:0;top:auto;bottom:auto;width:100%;height:230px;mask-image:linear-gradient(180deg,#000 60%,transparent 100%)}body #contact .about-image img{object-position:center 45%;opacity:1}body #contact .about-copy{margin:-15px 0 0;width:100%;padding:0 12px}body #contact .about-copy>h2{font-size:29px;margin-bottom:23px}body #contact .contact-primary>.button{width:100%}body #contact .contact-block,body #contact .contact-block.contact-primary,body #contact .contact-block.location-block{padding-bottom:20px;margin-bottom:20px}body #contact .contact-location,body #contact .contact-block>a.contact-location{font-size:15px}}
