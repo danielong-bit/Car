@@ -433,3 +433,7 @@ body .stock-card .stock-location{display:flex!important;align-items:center;gap:4
 body .stock-card .stock-location .icon{width:11px;height:11px;color:#c05b7c}
 body .stock-card .card-grade{font-size:11px;font-weight:400}
 @media(max-width:700px){body .stock-card .stock-location{font-size:10px}body .stock-card .card-grade,body .stock-card .card-grade strong{font-size:10px}}
+/* Labels wrap as individual chips, never as a full-width overlay. */
+body .stock-photo>.card-badge-cluster,body .compact-thumb>.card-badge-cluster{display:flex!important;flex-wrap:wrap;align-items:flex-start;gap:4px;width:max-content;max-width:calc(100% - 12px);height:auto;padding:0!important;background:transparent!important;backdrop-filter:none!important;box-shadow:none;line-height:1}
+body .stock-photo>.card-badge-cluster>.spec-badge,body .compact-thumb>.card-badge-cluster>.spec-badge{position:static!important;display:inline-flex!important;flex:0 0 auto;align-items:center;justify-content:center;width:auto!important;min-width:0;max-width:none;height:auto!important;min-height:0!important;margin:0!important;padding:4px 5px!important;font-size:9px!important;line-height:1.1!important;border-radius:4px;white-space:nowrap;letter-spacing:.025em;transform:none!important}
+@media(max-width:700px){body .stock-photo>.card-badge-cluster>.spec-badge,body .compact-thumb>.card-badge-cluster>.spec-badge{font-size:7px!important;padding:3px 4px!important}body .stock-photo>.card-badge-cluster,body .compact-thumb>.card-badge-cluster{gap:3px}}
