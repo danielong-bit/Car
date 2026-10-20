@@ -565,3 +565,13 @@ body #inventory .stock-card-footer>.view-link{font-size:10px;margin-left:0;min-h
 body #inventory .compact-thumb img{min-height:92px;object-fit:cover}
 @media(max-width:700px){body #inventory .compact-thumb img{min-height:98px}body #inventory .stock-card-footer .stock-location{font-size:8px}body #inventory .stock-card-footer>.view-link{font-size:9px}}
 body #inventoryGrid{scroll-margin-top:90px}
+/* Keep the original photograph separate from readable contact details. */
+body #contact.about-section{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:44px;align-items:center;min-height:0;padding:44px 0;overflow:visible}
+body #contact .about-image{position:relative;inset:auto;z-index:auto;width:100%;height:auto;aspect-ratio:1;align-self:center;border:1px solid var(--line);border-radius:14px;overflow:hidden;mask-image:none;-webkit-mask-image:none;background:var(--surface)}
+body #contact .about-image img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;opacity:1;filter:none;mask-image:none;-webkit-mask-image:none}
+body #contact .about-copy{width:auto;margin:0;padding:0;min-width:0}
+body #contact .about-copy>h2{font-size:32px;margin-bottom:23px}
+body #contact .contact-primary>.button{background:#087c46;border-color:#087c46;color:#fff;box-shadow:none;border-radius:8px}
+body #contact .contact-primary>.button:hover{background:#06653a;border-color:#06653a;color:#fff}
+body a.whatsapp-action>.wa-brand{background:transparent!important;border:0;border-radius:0;padding:0;width:22px;height:22px;filter:brightness(0) invert(1);box-shadow:none}
+@media(max-width:700px){body #contact.about-section{grid-template-columns:minmax(0,1fr);gap:25px;padding:24px 0 30px}body #contact .about-image{position:relative;inset:auto;width:100%;height:auto;aspect-ratio:1;border-radius:12px;mask-image:none;-webkit-mask-image:none}body #contact .about-copy{margin:0;padding:0 10px;width:auto}body #contact .about-copy>h2{font-size:29px;margin-bottom:22px}}
