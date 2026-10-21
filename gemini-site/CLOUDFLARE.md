@@ -28,3 +28,10 @@ The deployed Worker requires two Cloudflare secrets, managed outside the reposit
 Do not put passwords, hashes or session signing keys in frontend code or commit them. Rotating the session secret invalidates all sessions. Use the existing authenticated Wrangler secret commands to rotate credentials. The workbench sidebar includes a logout form. Inventory edits remain browser-local; authentication does not add cross-device inventory sync.
 
 Cloudflare routing reference: https://developers.cloudflare.com/workers/static-assets/routing/worker-script/
+
+## Content publishing (product refinement)
+The owner can now save drafts and publish directly. `content-store.mjs` implements the `ShowroomContent` SQLite Durable Object; `content-contracts.mjs` validates content and creates the public projection. The `content-v1` migration must remain in subsequent Wrangler configurations. Uploaded images/reports are private until referenced by a successful publication. Owner endpoints require the existing signed session and same-origin POST requests. Public content is read from `/api/content/published`; private costs, drafts and unapproved deliveries are excluded.
+
+Production credentials remain in the existing Cloudflare secrets. `.dev.vars*` and `.wrangler/` are local-only and must never be committed. Local browser verification used separate fixture credentials and a local content store, not production inventory.
+
+The local runtime bundled with Wrangler 4.92 supports compatibility date 2026-05-22; use a local-only config for browser checks. The production compatibility date remains 2026-10-20.

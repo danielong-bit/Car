@@ -1,7 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import 'tailwindcss';
 @source './App.tsx';
 @theme{--font-sans:'Inter',ui-sans-serif,system-ui,sans-serif;--color-brand-gray:#1A1A1A;}
 @layer base{body{@apply font-sans bg-black text-white antialiased;margin:0}button,a,input{-webkit-tap-highlight-color:transparent}button,a{touch-action:manipulation}a:focus-visible,button:focus-visible{outline:2px solid white;outline-offset:5px}}
 .owner-wordmark span{font-size:28px;font-weight:700;letter-spacing:.12em;line-height:1}.owner-wordmark small{margin-top:6px;font-size:7px;font-weight:600;letter-spacing:.24em}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* Shared showroom typography and palette on the owner login screen. */
+@font-face{font-family:MountainSans;src:url('/assets/fonts/nimbus-sans-regular.woff') format('woff');font-weight:100 900;font-display:swap}
+.owner-login-page{font-family:var(--font);background:var(--page)!important;color:var(--ink)!important}.owner-login-page>section:last-child{background:var(--page)}.owner-login-page>section:last-child :is(h1,label,.owner-wordmark){color:var(--ink)!important}.owner-login-page>section:last-child :is(p,a){color:var(--muted)!important}.owner-login-page>section:last-child input{background:var(--surface-2)!important;color:var(--ink)!important;border:1px solid var(--line)!important}.owner-login-page>section:last-child input::placeholder{color:var(--muted);opacity:.75}.owner-login-page>section:last-child form>button{background:var(--blue)!important;color:var(--on-accent)!important}.owner-login-page>section:last-child form button[type=button]{color:var(--muted)}.owner-login-page>section:last-child :is(p,div){border-color:var(--line)}.owner-login-page>section:first-child :is(h2,p,a,small){color:#fff!important}.owner-login-page>section:last-child svg{color:var(--muted)}.owner-login-page>section:last-child form>button svg{color:inherit}
+
+.owner-login-language{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)}.owner-login-language select{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 2px}.owner-login-page>section:first-child video{filter:saturate(.45)}

@@ -1,11 +1,15 @@
-import {useState, type FormEvent, type ReactNode} from 'react';
+import {applyTheme,saveWorkbenchTheme} from '../public/site-theme.mjs';
+import {useState, useEffect, type FormEvent, type ReactNode} from 'react';
 import {createRoot} from 'react-dom/client';
 import {motion, useReducedMotion} from 'motion/react';
-import {ArrowLeft, ArrowRight, Eye, EyeOff, LockKeyhole, LoaderCircle, ShieldCheck} from 'lucide-react';
+import {ArrowLeft, ArrowRight, Eye, EyeOff, LockKeyhole, LoaderCircle, ShieldCheck, Sun, Moon, Globe} from 'lucide-react';
 
 export default function App(){
  const [visible,setVisible]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const [language,setLanguage]=useState(()=>{try{return localStorage.getItem('danny-language')||'en'}catch{return 'en'}});
+ const tr=(en:string,zh:string,ms:string)=>language==='zh'?zh:language==='ms'?ms:en;
  const reduced=useReducedMotion();
+ const [theme,setTheme]=useState(()=>applyTheme());useEffect(()=>{const sync=()=>setTheme(document.documentElement.dataset.theme||'light');document.addEventListener('danny-theme-change',sync);return()=>document.removeEventListener('danny-theme-change',sync);},[]);
  async function login(event:FormEvent<HTMLFormElement>){
   event.preventDefault();if(busy)return;setBusy(true);setError('');
   const form=new FormData(event.currentTarget);
@@ -17,9 +21,9 @@ export default function App(){
   }catch{setError('Unable to connect. Please try again.');}finally{setBusy(false);}
  }
  const reveal={hidden:{opacity:0,y:reduced?0:10},show:{opacity:1,y:0,transition:{duration:.5}}};
- return <main className="flex min-h-screen w-full bg-black selection:bg-white/30 p-2 transition-all duration-500 lg:h-screen lg:overflow-hidden lg:p-4">
+ return <main className="owner-login-page flex min-h-screen w-full bg-black selection:bg-white/30 p-2 transition-all duration-500 lg:h-screen lg:overflow-hidden lg:p-4">
   <section aria-label="Danny owner workspace" className="relative hidden h-full w-[52%] flex-col items-center justify-end overflow-hidden rounded-3xl px-12 pb-24 shadow-2xl lg:flex">
-   <video autoPlay={!reduced} muted loop playsInline className="absolute inset-0 h-full w-full object-cover" aria-hidden="true"><source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260506_081238_406ed0e3-5d83-436e-a512-0bbff7ec5b95.mp4" type="video/mp4"/></video>
+   <video preload="none" autoPlay={!reduced&&window.innerWidth>=1024} muted loop playsInline className="absolute inset-0 h-full w-full object-cover" aria-hidden="true"><source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260506_081238_406ed0e3-5d83-436e-a512-0bbff7ec5b95.mp4" type="video/mp4"/></video>
    <motion.div initial="hidden" animate="show" variants={{hidden:{opacity:0},show:{opacity:1,transition:{staggerChildren:reduced?0:.15,delayChildren:reduced?0:.2}}}} className="relative z-10 w-full max-w-xs space-y-8">
     <motion.a variants={reveal} href="/" className="owner-wordmark inline-flex flex-col text-white" aria-label="Danny Recon Select home"><span>DANNY</span><small>RECON SELECT</small></motion.a>
     <motion.div variants={reveal}><h2 className="text-4xl font-medium tracking-tight">Your showroom.<br/>Your space.</h2><p className="mt-4 text-sm leading-relaxed text-white/80">Manage your stock, deliveries and website in one place.</p></motion.div>
@@ -28,16 +32,16 @@ export default function App(){
   </section>
   <section className="flex flex-1 flex-col items-center justify-center overflow-y-auto px-5 py-12 sm:px-12 lg:overflow-hidden lg:px-14 lg:py-6 xl:px-20">
    <motion.div initial={{opacity:reduced?1:0}} animate={{opacity:1}} transition={{duration:.8,ease:'easeOut'}} className="w-full max-w-xl space-y-8 lg:space-y-7">
-    <a href="/" className="inline-flex items-center gap-2 text-xs text-white/50 transition-colors hover:text-white"><ArrowLeft size={14}/>Back to showroom</a>
+    <div className="flex items-center justify-between gap-4"><a href="/" className="inline-flex items-center gap-2 text-xs text-white/50 transition-colors hover:text-white"><ArrowLeft size={14}/>{tr('Back to showroom','返回展厅','Kembali ke showroom')}</a><button type="button" className="theme-control" aria-label={theme==='dark'?'Switch to light theme':'Switch to dark theme'} onClick={()=>setTheme(saveWorkbenchTheme(theme==='dark'?'light':'dark'))}>{theme==='dark'?<Moon size={15}/>:<Sun size={15}/>}<span>{theme==='dark'?'Night':'Day'}</span></button><label className="owner-login-language"><Globe size={14} aria-hidden="true"/><select aria-label="Language" value={language} onChange={e=>{setLanguage(e.target.value);try{localStorage.setItem('danny-language',e.target.value);localStorage.setItem('danny-site-language',e.target.value)}catch{}}}><option value="en">EN</option><option value="zh">中文</option><option value="ms">BM</option></select></label></div>
     <a href="/" className="owner-wordmark flex flex-col items-start lg:hidden"><span>DANNY</span><small>RECON SELECT</small></a>
-    <div><div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10"><LockKeyhole size={19} aria-hidden="true"/></div><h1 className="text-3xl font-medium tracking-tight sm:text-4xl">Owner Log In</h1><p className="mt-3 text-sm leading-relaxed text-white/45">Welcome back, Danny. Log in to your stock workbench.</p></div>
+    <div><div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10"><LockKeyhole size={19} aria-hidden="true"/></div><h1 className="text-3xl font-medium tracking-tight sm:text-4xl">{tr('Owner Log In','店主登录','Log Masuk Pemilik')}</h1><p className="mt-3 text-sm leading-relaxed text-white/45">{tr('Welcome back, Danny. Log in to your stock workbench.','欢迎回来，Danny。登录后即可管理网站。','Selamat kembali, Danny. Log masuk untuk mengurus laman.')}</p></div>
     <form onSubmit={login} className="space-y-5">
-     <InputGroup label="Owner name" placeholder="Enter your owner name" name="username" type="text" autoComplete="username"/>
-     <InputGroup label="Password" placeholder="Enter your password" name="password" type={visible?'text':'password'} autoComplete="current-password" suffix={<button type="button" onClick={()=>setVisible(!visible)} className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-white/45 hover:text-white" aria-label={visible?'Hide password':'Show password'} aria-pressed={visible}>{visible?<EyeOff size={18}/>:<Eye size={18}/>}</button>}/>
+     <InputGroup label={tr('Owner name','店主账号','Nama pemilik')} placeholder={tr('Enter your owner name','输入店主账号','Masukkan nama pemilik')} name="username" type="text" autoComplete="username"/>
+     <InputGroup label={tr('Password','密码','Kata laluan')} placeholder={tr('Enter your password','输入密码','Masukkan kata laluan')} name="password" type={visible?'text':'password'} autoComplete="current-password" suffix={<button type="button" onClick={()=>setVisible(!visible)} className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-white/45 hover:text-white" aria-label={visible?'Hide password':'Show password'} aria-pressed={visible}>{visible?<EyeOff size={18}/>:<Eye size={18}/>}</button>}/>
      {error&&<p role="alert" className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">{error}</p>}
-     <button disabled={busy} className="mt-4 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-white font-semibold text-black transition hover:bg-white/90 active:scale-[.98] disabled:cursor-wait disabled:opacity-60">{busy?<><LoaderCircle size={18} className="animate-spin"/>Logging in…</>:<>Log In<ArrowRight size={18}/></>}</button>
+     <button disabled={busy} className="mt-4 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-white font-semibold text-black transition hover:bg-white/90 active:scale-[.98] disabled:cursor-wait disabled:opacity-60">{busy?<><LoaderCircle size={18} className="animate-spin"/>{tr('Logging in…','正在登录…','Sedang log masuk…')}</>:<>{tr('Log In','登录','Log Masuk')}<ArrowRight size={18}/></>}</button>
     </form>
-    <p className="flex items-center gap-2 text-xs leading-relaxed text-white/40"><ShieldCheck size={16} className="shrink-0"/>Private access for the showroom owner.</p>
+    <p className="flex items-center gap-2 text-xs leading-relaxed text-white/40"><ShieldCheck size={16} className="shrink-0"/>{tr('Private access for the showroom owner.','仅限店主使用。','Akses peribadi untuk pemilik showroom.')}</p>
     <p className="border-t border-white/10 pt-6 text-[10px] tracking-wide text-white/30">© {new Date().getFullYear()} Danny Recon Select. All rights reserved.</p>
    </motion.div>
   </section>

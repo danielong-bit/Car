@@ -45,6 +45,7 @@ function rewriteMarkupPaths(source) {
 }
 
 function rewriteJavaScriptPaths(source) {
+  source=source.replace(/(from\s*['"])(\.\/[^'"]+\.mjs)(?:\?[^'"]*)?(['"])/g,(_m,a,p,q)=>a+p+'?v=refine-20261021b'+q);
   let result = rewriteMarkupPaths(source);
   result = result.replace(
     /(['"`])\/(?=(?:assets|vehicle|stock|calculator|audi(?:\.html)?|studio)(?:[/?#]|$)|#)([^'"`\s]*)/g,
@@ -101,7 +102,7 @@ async function copyPublicAssets() {
       // Native modules resolve against SITE_BASE themselves. Rewriting their path
       // comparisons would corrupt both photo URLs and canonical upload ZIP keys.
       else if (extension === '.js') content = rewriteJavaScriptPaths(content);
-      else if (extension === '.mjs') { /* Keep module asset keys canonical. */ }
+      else if (extension === '.mjs') {content=content.replace(/(from\s*['"])(\.\/[^'"]+\.mjs)(?:\?[^'"]*)?(['"])/g,(_m,a,p,q)=>a+p+'?v=refine-20261021b'+q);}
       else content = rewriteMarkupPaths(content);
       await writeFile(destination, content);
     } else {
@@ -152,13 +153,14 @@ const publicData = {
   revision: snapshot.revision || 0,
 };
 
-if (outputDirectory !== path.resolve(projectRoot, 'dist-preview') || process.env.CLEAN_OUTPUT === '1') {
+if (process.env.KEEP_OUTPUT !== '1' && (outputDirectory !== path.resolve(projectRoot, 'dist-preview') || process.env.CLEAN_OUTPUT === '1')) {
   await rm(outputDirectory, {recursive: true, force: true});
 }
 await mkdir(outputDirectory, {recursive: true});
 await prepareExhibition();
 await copyPublicAssets();
 const pages = [
+  {template:'tools.html',file:'tools/index.html',route:'tools',title:'Calculator & JPJ · Danny Recon Select'},
   {template: 'index.html', file: 'index.html', route: '', title: 'Danny Recond Select · Japan Recond by Danny'},
   {template: 'services.html', file: 'services/index.html', route: 'services', title: 'Services & XPEL / 3M Tinting · Danny Recond Select'},
   {template: 'calculator-redirect.html', file: 'calculator/index.html', route: 'calculator', title: 'Car payment calculator · Danny Recond Select'},
@@ -191,6 +193,7 @@ await writeFile(path.join(outputDirectory, 'audi.html'), audiAlias);
 const calculatorAlias = await readFile(path.join(outputDirectory, 'calculator', 'index.html'));
 await writeFile(path.join(outputDirectory, 'calculator.html'), calculatorAlias);
 await mkdir(path.join(outputDirectory, 'studio'), {recursive: true});
+if(process.env.OWNER_WORKER_BUILD!=='1')await writeFile(path.join(outputDirectory,'inventory-workbench.json'),JSON.stringify({document:publicData}));
 const dashboard = process.env.OWNER_WORKER_BUILD === '1' ? await dashboardPage() : `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=https://car-recond-japan.danielong2005.workers.dev/studio/"><title>Owner Log In - Danny Recon Select</title></head><body><a href="https://car-recond-japan.danielong2005.workers.dev/studio/">Continue to Owner Log In</a></body></html>`;
 await writeFile(path.join(outputDirectory, 'studio', 'index.html'), dashboard);
 await mkdir(path.join(outputDirectory, 'admin'), {recursive: true});
@@ -203,7 +206,7 @@ await writeFile(
 await writeFile(path.join(outputDirectory, '.nojekyll'), '');
 await writeFile(
   path.join(outputDirectory, '_headers'),
-  `# Cloudflare Pages edge cache & security headers\n/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n/*.css\n  Cache-Control: public, max-age=86400, stale-while-revalidate=604800\n/*.mjs\n  Cache-Control: public, max-age=86400, stale-while-revalidate=604800\n`,
+  `# Cloudflare Pages edge cache & security headers\n/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n/*.css\n  Cache-Control: no-cache\n/*.mjs\n  Cache-Control: no-cache\n`,
 );
 
 console.log(`Built ${pages.length + 1} static pages at ${outputDirectory} for ${basePath}`);

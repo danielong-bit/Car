@@ -23,5 +23,21 @@
         "period": 60
       }
     }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "CONTENT_STORE",
+        "class_name": "ShowroomContent"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "content-v1",
+      "new_sqlite_classes": [
+        "ShowroomContent"
+      ]
+    }
   ]
 }
