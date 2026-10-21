@@ -76,3 +76,5 @@ export async function prepareReportFile(file){
  const extension=file.type==='image/jpeg'&&/\.jpeg$/i.test(file.name||'')?'.jpeg':types[file.type];
  return {blob:new Blob([file],{type:file.type}),extension};
 }
+
+export async function uploadCloudMedia(blob){const response=await fetch('/api/owner/media',{method:'POST',credentials:'same-origin',headers:{'Content-Type':blob.type},body:blob});const result=await response.json();if(!response.ok)throw Error(result.error||'Upload failed');await writeLocal(result.url,blob);return result.url;}

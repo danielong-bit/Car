@@ -1,3 +1,4 @@
+export {ShowroomContent} from './content-store.mjs';
 const encoder=new TextEncoder();
 const COOKIE='__Host-danny-owner';
 const MAX_AGE=8*60*60;
@@ -31,7 +32,22 @@ export default{
  async fetch(request,env){
   const url=new URL(request.url);let path;
   try{path=decodeURIComponent(url.pathname).replace(/\/+/g,'/').toLowerCase();}catch{return new Response('Invalid path',{status:400});}
+  if(path==='/api/content/published'||path.startsWith('/assets/uploads/')){
+   if(!['GET','HEAD'].includes(request.method))return json({error:'Method not allowed.'},405);
+   if(!env.CONTENT_STORE)return path.startsWith('/assets/')?env.ASSETS.fetch(request):json({document:null,revision:0});
+   const headers=new Headers(request.headers);headers.delete('X-Owner-Media');if(path.startsWith('/assets/')&&await authenticated(request,env))headers.set('X-Owner-Media','1');
+   const response=await env.CONTENT_STORE.get(env.CONTENT_STORE.idFromName('showroom')).fetch(new Request(request,{headers}));
+   if(response.status===404&&path.startsWith('/assets/'))return env.ASSETS.fetch(request);
+   const result=new Response(request.method==='HEAD'?null:response.body,response);if(path==='/api/content/published')result.headers.set('Access-Control-Allow-Origin','*');return result;
+  }
   if(path.startsWith('/api/owner/')){
+   if(!['/api/owner/login','/api/owner/logout'].includes(path)){
+    if(!await authenticated(request,env))return json({error:'Please log in again.'},401);
+    if(!['GET','POST'].includes(request.method))return json({error:'Method not allowed.'},405);
+    if(request.method==='POST'&&request.headers.get('Origin')!==url.origin)return json({error:'Request not allowed.'},403);
+    if(!env.CONTENT_STORE)return json({error:'Publishing storage is unavailable.'},503);
+    return protectResponse(await env.CONTENT_STORE.get(env.CONTENT_STORE.idFromName('showroom')).fetch(request));
+   }
    if(request.method!=='POST')return json({error:'Method not allowed.'},405,{'Allow':'POST'});
    if(request.headers.get('Origin')!==url.origin)return json({error:'Request not allowed.'},403);
    if(path==='/api/owner/logout')return redirect('/owner-login/',{'Set-Cookie':`${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`});
@@ -49,6 +65,7 @@ export default{
    const signature=bytesToBase64(await crypto.subtle.sign('HMAC',await sessionKey(env),encoder.encode(payload)));
    return json({ok:true},200,{'Set-Cookie':`${COOKIE}=${payload}.${signature}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${MAX_AGE}`});
   }
+  if(path==='/inventory-workbench.json'){if(!await authenticated(request,env))return json({error:'Please log in.'},401);return protectResponse(await env.ASSETS.fetch(request));}
   const ownerPage=/^\/(studio|admin|workbench)(\/|\.html(?:\/|$)|$)/.test(path);
   const loginPage=/^\/owner-login(?:\/|$)/.test(path);
   if(ownerPage||loginPage){
@@ -57,6 +74,8 @@ export default{
    if(loginPage&&loggedIn)return redirect('/studio/');
    return protectResponse(await env.ASSETS.fetch(request));
   }
-  return env.ASSETS.fetch(request);
+  const response=await env.ASSETS.fetch(request);
+  if(response.status===404&&/^\/(vehicle|stock)\/[^/]+\/?$/.test(path))return env.ASSETS.fetch(new Request(new URL('/audi/',url),request));
+  return response;
  }
 };
