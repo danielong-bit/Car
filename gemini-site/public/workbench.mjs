@@ -417,11 +417,11 @@ async function uploadStoryPhoto(storyId,file){
  busy=true;
  try{
   const blob=await compressPhoto(file);
-  const url='/assets/uploads/story-'+crypto.randomUUID()+'.webp';
+  const url=cloudReady?await uploadCloudMedia(blob):'/assets/uploads/story-'+crypto.randomUUID()+'.webp';
   await writeLocal(url,blob);
   story.image=url;
   await persist();
-  toast('Delivery photo updated in this browser.');
+  toast(cloudReady?'Delivery photo saved to your cloud draft. Publish when ready.':'Delivery photo saved in this browser. Reconnect before publishing.');
  }catch(e){toast(e.message,true);}
  finally{busy=false;render();}
 }
@@ -526,7 +526,7 @@ async function exportUpdate(){
   files['data/public-site.json']=strToU8(JSON.stringify(snapshot,null,2));
   files['data/inventory-workbench.json']=strToU8(JSON.stringify({document:doc},null,2));
   files['README-UPDATE.txt']=strToU8('Danny Recond Select — Cloudflare Pages & GitHub Pages Update\n\n1. Extract this ZIP.\n2. For danielong-bit/Car-Recond-Japan, copy the data/ and public/ folders into gemini-site/ (preserving folder names) and commit. This is the active website source folder.\n3. Cloudflare Pages (build command: npm run build:cloudflare, output dir: dist-cloudflare) and GitHub Pages rebuild automatically.\n');
-  for(const url of new Set([...doc.vehicles.flatMap(v=>[...v.gallery.map(m=>m.url),v.auctionReport?.url].filter(Boolean)),...(doc.stories||[]).map(s=>s.image).filter(Boolean)].filter(p=>p.startsWith('/assets/uploads/')))){
+  for(const url of new Set([...doc.vehicles.flatMap(v=>[...v.gallery.map(m=>m.url),v.auctionReport?.url].filter(Boolean)),...(doc.stories||[]).map(s=>s.image),doc.homepage.heroImage].filter(p=>p?.startsWith('/assets/uploads/')))){
    const blob=await readLocal(url);
    if(blob instanceof Blob)files['public'+url]=new Uint8Array(await blob.arrayBuffer());
    else{const response=await fetch(base+url.slice(1));if(!response.ok)throw Error('Missing photo: '+url);files['public'+url]=new Uint8Array(await response.arrayBuffer());}
@@ -538,7 +538,7 @@ async function exportUpdate(){
   syncStatusBanner();
   toast('Export ZIP generated for Cloudflare Pages & GitHub Pages.');
  }catch(error){toast('Export failed: '+error.message,true);}
- finally{busy=false;b.disabled=false;b.innerHTML='Export site update ↓';}
+ finally{busy=false;b.disabled=false;b.textContent='Publish website';}
 }
 $('#exportUpdate').onclick=publishWebsite;$('#exportUpdate').textContent='Publish website';
 $('#exportHelp').onclick=()=>confirmAction('How publishing works (Local → Export ZIP → Cloudflare / GitHub Pages)','1. Auto-Saved in Browser: All edits to vehicles, XPEL/3M tint packages, and deliveries save immediately in your browser.\n2. Preview Anytime: Click “Preview showroom” to inspect your changes on the website.\n3. Publish to Cloudflare Pages or GitHub Pages: Click “Export site update” to download a ZIP containing data/public-site.json, data/inventory-workbench.json, and public/assets/uploads/*. In Car-Recond-Japan, copy those folders into gemini-site/ and commit to deploy.');

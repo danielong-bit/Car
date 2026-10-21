@@ -27,3 +27,36 @@ test('shared theme follows system by default and persistent manual selection win
 test('mobile comparison is enabled and protected snapshot has private response headers',async()=>{const source=readFileSync(new URL('../../public/showroom.mjs',import.meta.url),'utf8');assert.doesNotMatch(source,/if\(isMobileViewport\(\)\)\{el.checked=false/);const env=createEnv(),cookie=await signIn(env);const response=await worker.fetch(new Request(origin+'/inventory-workbench.json',{headers:{Cookie:cookie}}),env);assert.match(response.headers.get('Cache-Control'),/no-store/);});
 
 test('publication blocks missing public vehicle identity or cover without blocking private drafts',async()=>{const env=createEnv(),cookie=await signIn(env),d=documentFixture();d.vehicles[0].gallery=[];assert.equal((await worker.fetch(post('/api/owner/content',{document:d,baseRevision:0},cookie),env)).status,200);assert.equal((await worker.fetch(post('/api/owner/publish',{document:d,baseRevision:1},cookie),env)).status,400);});
+
+const workbenchSource=readFileSync(new URL('../../public/workbench.mjs',import.meta.url),'utf8').replace(/\r\n/g,'\n');
+test('delivery uploader stores cloud media before saving and can publish its photograph',async()=>{
+ const env=createEnv(),cookie=await signIn(env),doc=documentFixture();
+ doc.stories=[{id:'handover',published:true,consent:'approved'}];
+ const png=new Blob([Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jY1sAAAAASUVORK5CYII=','base64')],{type:'image/png'});
+ const messages=[],local=new Map();let revision=0,uploads=0;
+ const context={doc,busy:false,cloudReady:true,crypto:globalThis.crypto,compressPhoto:async()=>png,writeLocal:async(url,blob)=>local.set(url,blob),render:()=>{},toast:(message,error)=>{messages.push({message,error});},uploadCloudMedia:async blob=>{
+  uploads++;const response=await worker.fetch(new Request(origin+'/api/owner/media',{method:'POST',headers:{Origin:origin,Cookie:cookie,'Content-Type':blob.type},body:await blob.arrayBuffer()}),env);
+  assert.equal(response.status,200);return(await response.json()).url;
+ },persist:async()=>{const response=await worker.fetch(post('/api/owner/content',{document:doc,baseRevision:revision},cookie),env);assert.equal(response.status,200);revision=(await response.json()).revision;}};
+ vm.createContext(context);
+ vm.runInContext(workbenchSource.match(/async function uploadStoryPhoto\([\s\S]*?(?=\nfunction render\()/)[0],context);
+ await context.uploadStoryPhoto('handover',png);
+ assert.equal(messages.some(m=>m.error),false,JSON.stringify(messages));assert.equal(uploads,1);assert.equal(revision,1);assert.equal(local.has(doc.stories[0].image),true);
+ const published=await worker.fetch(post('/api/owner/publish',{document:doc,baseRevision:revision},cookie),env);
+ assert.equal(published.status,200,await published.text());
+ const photo=await worker.fetch(new Request(origin+doc.stories[0].image),env);assert.equal(photo.headers.get('Content-Type'),'image/png');
+});
+test('site backup includes uploaded homepage, vehicle, report and delivery media exactly once',async()=>{
+ const doc=documentFixture(),cover='/assets/uploads/cover.webp',report='/assets/uploads/report.pdf',story='/assets/uploads/delivery.webp',hero='/assets/uploads/banner.webp';
+ doc.vehicles[0].gallery=[{url:cover},{url:cover}];doc.vehicles[0].auctionReport={url:report};doc.stories=[{image:story}];doc.homepage.heroImage=hero;
+ const button={disabled:false,textContent:'Publish website'},messages=[],fetched=[];let files,downloaded;
+ const context={doc,busy:false,editorDirty:false,Blob,Date,Set,Uint8Array,structuredClone,draftMeta:{},base:origin+'/',
+  $:()=>button,publicSnapshot:d=>d,strToU8:s=>new TextEncoder().encode(s),readLocal:async url=>url===hero?null:new Blob([url]),
+  fetch:async url=>{fetched.push(url);return new Response('banner bytes');},zipSync:value=>{files=value;return new Uint8Array([1]);},
+  download:(name,blob)=>{downloaded={name,blob};},computeFingerprint:()=>42,writeLocal:async()=>{},syncStatusBanner:()=>{},toast:(message,error)=>messages.push({message,error})};
+ vm.createContext(context);vm.runInContext(workbenchSource.match(/async function exportUpdate\([\s\S]*?(?=\n\$\('#exportUpdate'\))/)[0],context);
+ await context.exportUpdate();
+ assert.equal(messages.some(m=>m.error),false,JSON.stringify(messages));assert.ok(downloaded);
+ assert.deepEqual(Object.keys(files).filter(k=>k.startsWith('public/')).sort(),[cover,report,story,hero].map(url=>'public'+url).sort());
+ assert.deepEqual(fetched,[origin+hero]);assert.equal(button.textContent,'Publish website');
+});

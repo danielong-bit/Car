@@ -8,7 +8,7 @@ The dashboard prioritizes real inventory and everyday tasks. It has Overview, Ve
 ## Automated checks
 `node --test gemini-site/tests/cms/*.test.mjs gemini-site/tests/refinement/*.test.mjs`
 
-Result: **45 passed, 0 failed**. Includes existing inventory/finance/gallery tests and new content-storage, theme, private-field projection, media access, publication/rollback, revision-conflict, session tampering, CSRF, failed-login and rate-limit checks.
+Result: **47 passed, 0 failed**. Includes existing inventory/finance/gallery tests and new content-storage, theme, private-field projection, media access, publication/rollback, revision-conflict, session tampering, CSRF, failed-login and rate-limit checks. Two regression tests exercise the actual delivery uploader through authenticated media storage, draft save, publication and public image retrieval, and confirm backup ZIPs contain uploaded homepage banners alongside vehicle, report and delivery media. Both tests failed before their fixes and pass afterward.
 
 Module syntax checks and static Cloudflare build passed. GitHub Pages output retains its mount path and redirects owner routes to Cloudflare.
 
@@ -47,4 +47,7 @@ The tool explicitly limits applicability to Peninsular private petrol/diesel veh
 - Original example photographs and grades remain explicitly marked until Danny supplies verified material. Automatic helpers no longer invent grades, equipment, condition claims or warranty promises.
 
 ## Deployment
-Cloudflare deployment succeeded: Worker version `b65991ed-42b0-4cd1-8b9e-728f62b19f59`. Live inventory rendered seven vehicles with original prices and photography. Light/Dark and the revised navigation were inspected on the live site. The original owner credentials still log in, and a same-content homepage draft was saved to the production content store and survived reload. Production public inventory was not republished from browser-local drafts; the owner retains that explicit review-and-publish step.
+Cloudflare deployment succeeded: Worker version `7ad5c422-0762-4755-94e8-59f2004d51ca`. Live inventory rendered seven vehicles with original prices and photography. Light/Dark and the revised navigation were inspected on the live site. The original owner credentials still log in, and a same-content homepage draft was saved to the production content store and survived reload. The owner overview loaded the cloud draft after the final deployment. Production public inventory was not republished from browser-local drafts; the owner retains that explicit review-and-publish step.
+
+## Independent code review
+A separate read-only review checked authentication, private drafts/media, publishing and recovery. It identified two important omissions: delivery uploads were still browser-only, and backup ZIPs omitted uploaded homepage banners. Both were fixed and reviewed again; no additional important findings remained in those changes. The review also found no concrete authentication, CSRF or private-draft access bypass in the inspected Worker routes. This is targeted code review, not a guarantee against every security issue.
