@@ -191,7 +191,7 @@ await writeFile(path.join(outputDirectory, 'audi.html'), audiAlias);
 const calculatorAlias = await readFile(path.join(outputDirectory, 'calculator', 'index.html'));
 await writeFile(path.join(outputDirectory, 'calculator.html'), calculatorAlias);
 await mkdir(path.join(outputDirectory, 'studio'), {recursive: true});
-const dashboard = await dashboardPage();
+const dashboard = process.env.OWNER_WORKER_BUILD === '1' ? await dashboardPage() : `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=https://car-recond-japan.danielong2005.workers.dev/studio/"><title>Owner Log In - Danny Recon Select</title></head><body><a href="https://car-recond-japan.danielong2005.workers.dev/studio/">Continue to Owner Log In</a></body></html>`;
 await writeFile(path.join(outputDirectory, 'studio', 'index.html'), dashboard);
 await mkdir(path.join(outputDirectory, 'admin'), {recursive: true});
 await writeFile(path.join(outputDirectory, 'admin', 'index.html'), dashboard);
