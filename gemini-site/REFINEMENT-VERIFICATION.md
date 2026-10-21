@@ -8,7 +8,7 @@ The dashboard prioritizes real inventory and everyday tasks. It has Overview, Ve
 ## Automated checks
 `node --test gemini-site/tests/cms/*.test.mjs gemini-site/tests/refinement/*.test.mjs`
 
-Result: **44 passed, 0 failed**. Includes existing inventory/finance/gallery tests and new content-storage, theme, private-field projection, media access, publication/rollback, revision-conflict, session tampering, CSRF, failed-login and rate-limit checks.
+Result: **45 passed, 0 failed**. Includes existing inventory/finance/gallery tests and new content-storage, theme, private-field projection, media access, publication/rollback, revision-conflict, session tampering, CSRF, failed-login and rate-limit checks.
 
 Module syntax checks and static Cloudflare build passed. GitHub Pages output retains its mount path and redirects owner routes to Cloudflare.
 

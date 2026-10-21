@@ -29,7 +29,7 @@ export class ShowroomContent{
     const old=await store.read('draft'),published=await store.read('published');
     if(body.baseRevision!==(old?.revision||0))return json({error:'A newer draft exists. Reload before saving to avoid overwriting it.'},409);
     const input=path.endsWith('/rollback')?(await store.read('previous'))?.document:body.document;
-    try{validateContent(input);}catch(e){return json({error:e.message},400);}
+    try{validateContent(input,path!=='/api/owner/content');}catch(e){return json({error:e.message},400);}
     const snapshot={document:input,revision:(old?.revision||0)+1,updatedAt:new Date().toISOString()};
     if(path!=='/api/owner/content'){
      const files=referencedMedia(publicContent(input));for(const file of files){if(!await store.storage.get('media:'+file)){const existing=await this.env.ASSETS.fetch(new URL(file,request.url));if(!existing.ok)return json({error:'An uploaded file is missing. Re-upload it before publishing.'},400);}}
