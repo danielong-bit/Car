@@ -600,3 +600,33 @@ body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1),body header#top:nth-of-
 body header#top:nth-of-type(1)>a.wordmark:nth-of-type(1):is(:hover,:focus-visible){text-shadow:0 0 12px #568bb75c,0 0 22px #568bb726}
 body #siteFooter .footer-brand .footer-title{font-weight:700;transition:text-shadow .2s ease}
 body #siteFooter .footer-brand .footer-title:is(:hover,:focus-visible){text-shadow:0 0 12px #b4dcff70}
+
+/* Theme-aware enquiry bar at the same breakpoint as its fixed positioning. */
+@media(max-width:800px){
+ html body #mobileDetailSticky.mobile-detail-sticky{background:var(--surface)!important;border-color:var(--line)!important;box-shadow:0 -5px 24px #10294512!important;color:var(--ink);padding-bottom:calc(11px + env(safe-area-inset-bottom,0px))!important}
+ html body #mobileDetailSticky .mobile-sticky-price{color:var(--price-accent)!important}
+ html body #mobileDetailSticky .mobile-sticky-sub{color:var(--muted)!important}
+}
+/* Keep all three vehicle facts together without clipping any value. */
+body #inventory .stock-info{container-type:inline-size}
+body #inventory .stock-info .spec-row{flex-wrap:nowrap;white-space:nowrap;gap:4px;font-size:clamp(8px,6.5cqi,11px);letter-spacing:-.025em}
+body #inventory .stock-info .spec-row strong,body #inventory .stock-info .spec-row .listing-grade{font-size:inherit;flex:none}
+body #inventory .stock-info .spec-row .listing-grade sup{font-size:.65em;margin-left:0}
+/* Video stays within the footer; existing brand and destination links are retained. */
+body footer#siteFooter.showroom-footer{position:relative;isolation:isolate;padding:82px 32px 32px;overflow:hidden;background:linear-gradient(125deg,#152b3c,#0b1821 60%,#284e58)!important;border:0;min-height:380px}
+body #siteFooter .footer-video{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;pointer-events:none;opacity:.65}
+body #siteFooter::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#09141b38,#09141b99);pointer-events:none}
+body #siteFooter .footer-glass{position:relative;max-width:1360px;margin:auto;padding:38px;border-radius:24px;background:#101c256b;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:inset 0 1px 1px #ffffff30,0 16px 48px #0002;overflow:hidden;color:#fff;--ink:#f6f9fc;--muted:#d0dae3;animation:footer-glass-enter 1s .4s ease-out both}
+body #siteFooter .footer-glass::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1.4px;background:linear-gradient(180deg,#ffffff73 0%,#ffffff26 20%,#fff0 40%,#fff0 60%,#ffffff26 80%,#ffffff73 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+body #siteFooter .footer-columns{grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.5fr);gap:32px}
+body #siteFooter .footer-column h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em}
+body #siteFooter .footer-brand p{max-width:260px;font-size:13px;line-height:1.7;margin-top:20px}
+body #siteFooter .footer-bottom{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:34px;padding-top:22px;border-top:1px solid #ffffff26}
+body #siteFooter .footer-bottom p,body #siteFooter .footer-bottom a{font-size:10px;color:var(--muted);line-height:1.6;margin:0;letter-spacing:.02em}
+body #siteFooter .footer-bottom a{white-space:nowrap;text-decoration:none}
+body #siteFooter .footer-bottom a:hover{color:#fff;text-decoration:underline}
+body #siteFooter .footer-column .footer-workbench-link{display:none}
+@keyframes footer-glass-enter{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){body #siteFooter .footer-glass{padding:30px}body #siteFooter .footer-columns{grid-template-columns:1.4fr .8fr .8fr 1.5fr;gap:22px}}
+@media(max-width:700px){body footer#siteFooter.showroom-footer{padding:48px 16px 20px;min-height:0}body #siteFooter .footer-glass{padding:26px 22px;border-radius:22px}body #siteFooter .footer-columns{grid-template-columns:1fr 1fr;gap:26px 20px}body #siteFooter .footer-brand,body #siteFooter .footer-column:last-child{grid-column:1/-1}body #siteFooter .footer-bottom{flex-direction:column;align-items:flex-start;gap:12px;margin-top:26px;padding-top:20px}}
+@media(prefers-reduced-motion:reduce){body #siteFooter .footer-glass{animation:none}body #siteFooter .footer-video{display:none}}
