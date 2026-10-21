@@ -1,0 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import 'tailwindcss';
+@source './App.tsx';
+@theme{--font-sans:'Inter',ui-sans-serif,system-ui,sans-serif;--color-brand-gray:#1A1A1A;}
+@layer base{body{@apply font-sans bg-black text-white antialiased;margin:0}button,a,input{-webkit-tap-highlight-color:transparent}button,a{touch-action:manipulation}a:focus-visible,button:focus-visible{outline:2px solid white;outline-offset:5px}}
+.owner-wordmark span{font-size:28px;font-weight:700;letter-spacing:.12em;line-height:1}.owner-wordmark small{margin-top:6px;font-size:7px;font-weight:600;letter-spacing:.24em}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

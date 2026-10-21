@@ -9,6 +9,19 @@
   "assets": {
     "directory": "./gemini-site/dist-cloudflare",
     "html_handling": "auto-trailing-slash",
-    "not_found_handling": "404-page"
-  }
+    "not_found_handling": "404-page",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "main": "gemini-site/owner-worker.mjs",
+  "ratelimits": [
+    {
+      "name": "LOGIN_LIMITER",
+      "namespace_id": "20261021",
+      "simple": {
+        "limit": 5,
+        "period": 60
+      }
+    }
+  ]
 }
