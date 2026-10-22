@@ -29,6 +29,35 @@ test('mobile comparison is enabled and protected snapshot has private response h
 test('publication blocks missing public vehicle identity or cover without blocking private drafts',async()=>{const env=createEnv(),cookie=await signIn(env),d=documentFixture();d.vehicles[0].gallery=[];assert.equal((await worker.fetch(post('/api/owner/content',{document:d,baseRevision:0},cookie),env)).status,200);assert.equal((await worker.fetch(post('/api/owner/publish',{document:d,baseRevision:1},cookie),env)).status,400);});
 
 const workbenchSource=readFileSync(new URL('../../public/workbench.mjs',import.meta.url),'utf8').replace(/\r\n/g,'\n');
+test('vehicle save locks navigation and retains the clicked target across a delayed save',async()=>{
+ const d=documentFixture(),target=d.vehicles[0],scopes=[];const context={busy:false,editing:structuredClone(target),doc:d,editorDirty:true,structuredClone,document:{querySelectorAll:()=>[]},captureForm:()=>{},vehicleIssues:()=>[],toast:()=>{},activate:()=>{},$:()=>({}),persist:async()=>{assert.equal(context.busy,true);context.editing={...target,id:'another-vehicle'};},publishItem:async scope=>scopes.push(scope)};
+ vm.createContext(context);vm.runInContext(workbenchSource.match(/async function saveVehicle\([\s\S]*?(?=\nasync function upload\()/)[0],context);await context.saveVehicle(false);assert.equal(scopes[0].id,'test-car');assert.equal(context.busy,false);
+});
+test('scoped publication changes one vehicle and retains unrelated private drafts',async()=>{
+ const env=createEnv(),cookie=await signIn(env),d=documentFixture();d.vehicles.push({...structuredClone(d.vehicles[0]),id:'second',stockId:'SECOND',priceRm:300000});
+ assert.equal((await worker.fetch(post('/api/owner/publish',{document:d,baseRevision:0},cookie),env)).status,200);
+ d.vehicles[0].priceRm=210000;d.vehicles[1].priceRm=399999;d.profile.name='Unreviewed profile';
+ assert.equal((await worker.fetch(post('/api/owner/content',{document:d,baseRevision:1},cookie),env)).status,200);
+ const response=await worker.fetch(post('/api/owner/publish',{document:d,baseRevision:2,scope:{collection:'vehicles',id:'test-car'}},cookie),env);assert.equal(response.status,200,await response.text());
+ const live=await(await worker.fetch(new Request(origin+'/api/content/published'),env)).json();assert.equal(live.document.vehicles[0].priceRm,210000);assert.equal(live.document.vehicles[1].priceRm,300000);assert.equal(live.document.profile.name,'Danny');
+ const owner=await(await worker.fetch(new Request(origin+'/api/owner/content',{headers:{Cookie:cookie}}),env)).json();assert.equal(owner.draft.document.vehicles[1].priceRm,399999);assert.equal(owner.draft.pendingChanges,true);
+ assert.equal((await worker.fetch(post('/api/owner/publish',{document:d,baseRevision:2,scope:{section:'profile'}},cookie),env)).status,409);
+ assert.equal((await worker.fetch(post('/api/owner/publish',{document:d,baseRevision:3,scope:{section:'unknown'}},cookie),env)).status,400);
+});
+test('first scoped save uses the committed public baseline, not other browser drafts',async()=>{
+ const env=createEnv(),cookie=await signIn(env),baseline=documentFixture(),draft=documentFixture();baseline.profile.name='Published Danny';baseline.stories=[{id:'existing-handover',title:'Existing public handover',image:'/assets/fixture.webp'}];draft.profile.name='Private change';draft.vehicles[0].priceRm=220000;
+ env.ASSETS.fetch=async()=>new Response(JSON.stringify({document:baseline}),{headers:{'Content-Type':'application/json'}});
+ assert.equal((await worker.fetch(post('/api/owner/publish',{document:draft,baseRevision:0,scope:{collection:'vehicles',id:'test-car'}},cookie),env)).status,200);
+ const live=await(await worker.fetch(new Request(origin+'/api/content/published'),env)).json();assert.equal(live.document.profile.name,'Published Danny');assert.equal(live.document.vehicles[0].priceRm,220000);assert.equal(live.document.stories[0].title,'Existing public handover');
+});
+test('delivery scoped save and unavailable baseline never expose unrelated edits',async()=>{
+ const env=createEnv(),cookie=await signIn(env),d=documentFixture();env.ASSETS.fetch=async()=>new Response('missing',{status:404});
+ assert.equal((await worker.fetch(post('/api/owner/publish',{document:d,baseRevision:0,scope:{section:'homepage'}},cookie),env)).status,400);
+ assert.equal((await worker.fetch(post('/api/owner/publish',{document:d,baseRevision:0},cookie),env)).status,200);
+ d.stories=[{id:'handover',title:'Real handover',consent:'approved',published:true,image:'/assets/fixture.webp'}];d.vehicles[0].priceRm=999999;
+ assert.equal((await worker.fetch(post('/api/owner/publish',{document:d,baseRevision:1,scope:{collection:'stories',id:'handover'}},cookie),env)).status,200);
+ const live=await(await worker.fetch(new Request(origin+'/api/content/published'),env)).json();assert.equal(live.document.stories[0].title,'Real handover');assert.equal(live.document.vehicles[0].priceRm,200000);
+});
 test('delivery uploader stores cloud media before saving and can publish its photograph',async()=>{
  const env=createEnv(),cookie=await signIn(env),doc=documentFixture();
  doc.stories=[{id:'handover',published:true,consent:'approved'}];
@@ -58,5 +87,5 @@ test('site backup includes uploaded homepage, vehicle, report and delivery media
  await context.exportUpdate();
  assert.equal(messages.some(m=>m.error),false,JSON.stringify(messages));assert.ok(downloaded);
  assert.deepEqual(Object.keys(files).filter(k=>k.startsWith('public/')).sort(),[cover,report,story,hero].map(url=>'public'+url).sort());
- assert.deepEqual(fetched,[origin+hero]);assert.equal(button.textContent,'Publish website');
+ assert.deepEqual(fetched,[origin+hero]);assert.equal(button.textContent,'Publish options');
 });
