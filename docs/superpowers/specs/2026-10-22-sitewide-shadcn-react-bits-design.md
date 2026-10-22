@@ -1,6 +1,6 @@
 # Danny Recond Select — Sitewide UI and Interaction Design
 
-**Status:** Design direction approved in chat; written specification pending owner review.
+**Status:** Approved by Danny in chat on 2026-10-22.
 **Date:** 2026-10-22
 
 ## Goal
