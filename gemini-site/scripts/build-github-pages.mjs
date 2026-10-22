@@ -17,6 +17,7 @@ const baseWithoutTrailingSlash = basePath.slice(0, -1);
 import {publicDocument} from '../lib/cms/contracts.mjs';
 import {normalizeDocument} from '../public/inventory-domain.mjs';
 import {prepareExhibition} from './prepare-exhibition.mjs';
+import {buildUiIslands} from './build-ui-islands.mjs';
 const publicDataPath = path.resolve(projectRoot, process.env.PAGES_SNAPSHOT_PATH || 'data/public-site.json');
 const publicAssetsPath = path.join(projectRoot, 'public');
 const templatesPath = path.join(projectRoot, 'out');
@@ -136,7 +137,10 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
 }
 
 async function dashboardPage() {
-  return renderTemplate('workbench.html', {route:'studio',title:'Inventory workbench · Danny Recond Select'});
+  const page = await renderTemplate('workbench.html', {route:'studio',title:'Inventory workbench · Danny Recond Select'});
+  return page
+    .replace('</head>', '<link rel="stylesheet" href="/assets/workbench-ui.css?v=owner-ui-20261022a"></head>')
+    .replace('</body>', '<div id="workbenchUiMount"></div><script type="module" src="/assets/workbench-ui.js?v=owner-ui-20261022a"></script></body>');
 }
 
 const snapshot = JSON.parse(await readFile(publicDataPath, 'utf8'));
@@ -159,6 +163,7 @@ if (process.env.KEEP_OUTPUT !== '1' && (outputDirectory !== path.resolve(project
 await mkdir(outputDirectory, {recursive: true});
 await prepareExhibition();
 await copyPublicAssets();
+await buildUiIslands(outputDirectory, {includeOwner: process.env.OWNER_WORKER_BUILD === '1'});
 await writeFile(path.join(outputDirectory,'published-baseline.json'),JSON.stringify({document:publicData}));
 const pages = [
   {template:'tools.html',file:'tools/index.html',route:'tools',title:'Calculator & JPJ · Danny Recon Select'},

@@ -1,0 +1,38 @@
+.owner-count-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0 24px}
+.owner-count-card{min-width:0;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:0 3px 12px #14233b08}
+.owner-count-card>span{display:block;color:var(--muted);font-size:12px;font-weight:600}
+.owner-count-card>strong{display:block;margin-top:8px;color:var(--ink);font-size:28px;font-variant-numeric:tabular-nums;font-weight:750;line-height:1}
+.owner-overview-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:8px 0 0}
+.owner-overview-heading>div{min-width:0}
+.owner-overview-heading h2{margin:0;color:var(--ink);font-size:30px;letter-spacing:-.035em}
+.owner-overview-heading>.button{min-height:48px;flex:none}
+.owner-live-status{display:grid;gap:4px;margin:12px 0 0;color:var(--muted);font-size:12px}
+.owner-live-status strong{color:var(--blue);font-size:13px}
+.owner-live-status[data-state="draft"] strong{color:#8a5a05}
+html[data-theme=dark] .owner-live-status[data-state="draft"] strong{color:#ffd28a}
+.owner-live-status[data-state="offline"] strong{color:#a43d49}
+html[data-theme=dark] .owner-live-status[data-state="offline"] strong{color:#ffadb7}
+.owner-overview>.owner-intro{max-width:64ch;color:var(--muted)}
+.owner-overview .owner-task-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}
+.owner-overview .owner-task-grid>.wb-panel{padding:20px}
+.owner-overview .owner-task-grid h3{margin:0 0 14px;color:var(--ink);font-size:17px}
+.owner-overview .owner-task-grid p{color:var(--muted);font-size:13px;line-height:1.55}
+.owner-overview .owner-task-list{gap:8px}
+.owner-overview .owner-task-list button{display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;min-height:48px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:var(--surface-2);color:var(--ink);font-size:13px;font-weight:600;cursor:pointer}
+.owner-overview .owner-task-list button:hover{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 8%,var(--surface))}
+.owner-recent-empty{grid-column:1/-1}
+.owner-recent-empty p{margin:0}
+.owner-alert-overlay{position:fixed;inset:0;z-index:200;background:#071326a6;backdrop-filter:blur(3px);animation:owner-dialog-fade-in .14s ease-out}
+.owner-alert-content{position:fixed;z-index:201;left:50%;top:50%;width:min(460px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;transform:translate(-50%,-50%);padding:24px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);box-shadow:0 24px 64px #07132640;animation:owner-dialog-rise-in .18s ease-out}
+.owner-alert-header{display:grid;gap:8px}
+.owner-alert-title{margin:0;color:var(--ink);font-size:20px;font-weight:700;line-height:1.25}
+.owner-alert-description{margin:0;color:var(--muted);font-size:14px;line-height:1.6;white-space:pre-line}
+.owner-alert-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:24px}
+.owner-alert-footer button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 16px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:650;cursor:pointer}
+.owner-alert-action{background:var(--blue)!important;border-color:var(--blue)!important;color:var(--on-accent)!important}
+.owner-alert-action.is-destructive{background:#b42d45!important;border-color:#b42d45!important;color:#fff!important}
+.owner-alert-footer button:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+@keyframes owner-dialog-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes owner-dialog-rise-in{from{opacity:0;transform:translate(-50%,-48%)}to{opacity:1;transform:translate(-50%,-50%)}}
+@media(max-width:700px){.owner-count-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.owner-count-card{padding:14px}.owner-alert-content{padding:20px}.owner-alert-footer button{flex:1}.owner-overview-heading{align-items:flex-start;flex-direction:column}.owner-overview-heading h2{font-size:26px}.owner-overview-heading>.button{width:100%}.owner-overview .owner-task-grid{grid-template-columns:minmax(0,1fr);gap:12px}.owner-recent-empty{grid-column:auto}}
+@media(prefers-reduced-motion:reduce){.owner-alert-overlay,.owner-alert-content{animation:none}}

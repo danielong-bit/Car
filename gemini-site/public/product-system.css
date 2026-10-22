@@ -22,6 +22,132 @@ html body.workbench{background:var(--page);color:var(--ink)}html body .wb-sideba
 html body .wb-topbar{display:flex;align-items:center;gap:20px}html body .wb-topbar>div:first-child{flex:1;min-width:180px}html body .wb-top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}html body .wb-top-actions .button{font-size:12px;min-height:40px;padding:9px 12px;white-space:nowrap}html body #saveState{font-size:11px;max-width:125px;line-height:1.4}html body .wb-sidebar-bottom{font-size:11px}html body .wb-sidebar-bottom .button{font-size:12px;min-height:36px}html body .wb-sidebar .theme-control{margin:10px 18px;width:max-content}html body .wb-sidebar nav{gap:4px}html body .wb-sidebar nav button{padding:10px 12px;min-height:42px}html body .wb-main .eyebrow{letter-spacing:.12em;font-size:10px}.photo-tile img{object-fit:cover}body[data-home-layout=compact] .mountain-hero{min-height:580px;height:70vh}html body .exhibition-tools{padding-top:0}
 @media(max-width:700px){html body .wb-topbar{align-items:flex-start;flex-direction:column;gap:12px}html body .wb-top-actions{justify-content:flex-start;width:100%}html body #saveState{max-width:none;flex-basis:100%}html body .wb-sidebar{position:relative!important;width:100%!important;height:auto!important;inset:auto!important;padding:14px}html body .wb-sidebar .wb-context,html body .wb-sidebar-bottom{display:none}html body .wb-sidebar nav{display:flex;overflow-x:auto;flex-wrap:nowrap;margin-top:15px;padding-bottom:6px}html body .wb-sidebar nav button{flex:none;width:auto;white-space:nowrap}html body .wb-sidebar .wordmark{display:inline-flex}html body .wb-sidebar .theme-control{position:absolute;top:13px;right:14px;margin:0}html body .wb-main{margin-left:0!important;padding-top:22px!important}.owner-overview h2{font-size:26px}}
 
+/* Danny showroom system v2: clear navigation, inventory feedback and grouped footer. */
+:root,html[data-theme=light]{--background:var(--page);--foreground:var(--ink);--surface-foreground:var(--ink);--primary:var(--blue);--primary-foreground:var(--on-accent);--border:var(--line);--ring:var(--blue);--footer:#10213a;--footer-foreground:#f7f9fc;--footer-muted:#c0cada}
+html[data-theme=dark]{--background:var(--page);--foreground:var(--ink);--surface-foreground:var(--ink);--primary:var(--blue);--primary-foreground:var(--on-accent);--border:var(--line);--ring:var(--blue);--footer:#081426;--footer-foreground:#f5f8fc;--footer-muted:#c2cee0}
+html body header#top.showroom-header{position:sticky;z-index:50;display:flex;top:10px!important;width:min(1320px,calc(100% - 48px));margin:10px auto 0;min-height:72px;padding:10px 20px;gap:24px;border:1px solid var(--line);border-radius:15px;background:color-mix(in srgb,var(--surface) 96%,transparent);box-shadow:0 8px 26px #101c3210;backdrop-filter:blur(14px)}
+html body #top .wordmark{display:flex;flex-direction:column;gap:0;color:var(--ink);font-size:26px;font-weight:800;letter-spacing:.105em;line-height:1.02;flex:none;text-decoration:none}
+html body #top .wordmark small{margin-top:5px;color:var(--muted)!important;font-size:7px!important;font-weight:750;letter-spacing:.25em}
+html body #top nav{display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-width:0}
+html body #top nav a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;border-radius:8px;color:var(--muted);font-size:13px;font-weight:600;text-decoration:none;transition:background .16s ease,color .16s ease}
+html body #top nav a:hover,html body #top nav a[aria-current=page]{background:var(--surface-2);color:var(--blue)}
+html body #top .header-actions{display:flex;align-items:center;gap:8px;flex:none}
+html body #top .theme-control,html body #top .language-trigger{min-height:44px;border-radius:9px;background:var(--surface);color:var(--ink);border-color:var(--line)}
+html body #top .theme-control{gap:6px;padding:8px 10px;font-size:11px}
+html body #top .nav-contact{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:9px 15px;border-radius:9px;font-size:12px;font-weight:650;text-decoration:none}
+html body #top .nav-contact .desktop-contact{display:inline!important}
+html body #top .nav-contact .mobile-contact{display:none!important}
+html body #top .mobile-menu-toggle{display:none}
+html body footer#siteFooter.showroom-footer{position:relative;isolation:isolate;margin:40px 0 0;padding:36px 24px calc(56px + env(safe-area-inset-bottom))!important;border:0;border-radius:0;background:var(--footer)!important;color:var(--footer-foreground);}
+html body #siteFooter .footer-glass{width:min(1160px,100%);margin:0 auto;padding:0;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;backdrop-filter:none!important;color:var(--footer-foreground)!important}
+html body #siteFooter .footer-columns{display:grid;grid-template-columns:minmax(230px,1.65fr) repeat(3,minmax(130px,1fr));align-items:start;gap:34px;padding:10px 0 28px}
+html body #siteFooter .footer-brand{display:flex;flex-direction:column;align-items:flex-start;gap:14px;min-width:0}
+html body #siteFooter .footer-title{display:flex;flex-direction:column;color:var(--footer-foreground)!important;font-size:23px;font-weight:800;letter-spacing:.12em;text-decoration:none}
+html body #siteFooter .footer-title small{margin-top:4px;color:var(--footer-muted)!important;font-size:8px;font-weight:650;letter-spacing:.24em}
+html body #siteFooter .footer-brand p,html body #siteFooter .footer-column a,html body #siteFooter .footer-bottom :is(p,span,a){color:var(--footer-muted)!important}
+html body #siteFooter .footer-brand p{max-width:30ch;margin:0;font-size:13px;line-height:1.65}
+html body #siteFooter .footer-column{display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-width:0}
+html body #siteFooter .footer-column h2{margin:2px 0 5px;color:var(--footer-foreground)!important;font-size:13px;font-weight:700;letter-spacing:.01em;text-transform:none}
+html body #siteFooter .footer-column a{display:inline-flex;align-items:center;min-height:32px;overflow-wrap:anywhere;font-size:12px;text-decoration:none;transition:color .15s ease}
+html body #siteFooter .footer-column a:hover{color:#fff!important;text-decoration:underline;text-underline-offset:3px}
+html body #siteFooter .footer-column .footer-contact-whatsapp{color:#b9d0ff!important}
+html body #siteFooter .footer-bottom{display:flex;justify-content:space-between;gap:16px;max-width:1160px;margin:0 auto;padding-top:18px;border-top:1px solid #ffffff28}
+html body #siteFooter .footer-bottom p,html body #siteFooter .footer-bottom span{margin:0;font-size:11px;line-height:1.6}
+html body #siteFooter .footer-group{display:contents}
+html body #siteFooter .footer-group summary{display:none}
+html body .inventory-count-mount{display:flex;align-items:center;min-height:44px}
+html body .inventory-count-summary{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+html body .inventory-count-summary>div{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:6px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);font-size:11px;font-weight:600}
+html body .inventory-count-summary .inventory-count-value{color:var(--blue);font-size:15px;font-variant-numeric:tabular-nums;font-weight:750;line-height:1}
+html body .mountain-hero .mountain-copy{max-width:650px}
+html body .mountain-hero .actions{display:flex;flex-wrap:wrap;gap:10px}
+html body .mountain-hero .actions .button{min-height:48px}
+html body .mountain-hero .actions .whatsapp-action{background:#087f4f;border-color:#087f4f;color:#fff}
+html body .about-section{display:grid;grid-template-columns:minmax(260px,.9fr) minmax(0,1.1fr);align-items:center;gap:clamp(24px,5vw,64px);max-width:1160px;margin-inline:auto;padding:clamp(28px,5vw,64px)}
+html body .about-section .about-image{position:relative;min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--surface-2)}
+html body .about-section .about-image img{display:block;width:100%;height:auto;max-height:520px;aspect-ratio:4/5;object-fit:cover}
+html body .about-section .about-copy{min-width:0}
+html body .about-section .contact-blocks{display:grid;gap:14px;margin-top:18px}
+html body .about-section .contact-block{min-width:0;padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+html body .about-section .social-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+html body .about-section .social-row a{min-height:44px}
+html body :is(.detail-purchase,.detail-info,.condition-panel,.vehicle-calculator,.tool-panel,.tint-card){background:var(--surface);color:var(--ink);border-color:var(--line)}
+html body :is(.detail-purchase,.detail-info,.condition-panel,.vehicle-calculator,.tool-panel,.tint-card) :is(h2,h3,label,strong){color:var(--ink)}
+html body :is(.detail-purchase,.detail-info,.condition-panel,.vehicle-calculator,.tool-panel,.tint-card) :is(p,small,.muted){color:var(--muted)}
+html body .exhibition-services .showroom-header a[aria-current=page]{color:var(--blue)}
+html body.exhibition-detail .section-wrap{width:min(1200px,calc(100% - 48px));margin-inline:auto}
+html body.exhibition-detail .detail-topline{margin-block:18px 22px}
+html body.exhibition-detail .detail-back-btn{min-height:44px;background:var(--surface);border-color:var(--line);color:var(--ink);box-shadow:none;backdrop-filter:none}
+html body.exhibition-detail .detail-back-btn .back-arrow{color:var(--blue)}
+html body.exhibition-detail .detail-back-btn:hover{background:var(--surface-2);border-color:var(--blue);color:var(--blue)}
+html body.exhibition-detail :is(.purchase-heading,.purchase-summary,.vehicle-specifications,.condition-panel,.vehicle-calculator,.detail-notes){min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);box-shadow:0 6px 22px #14233b08}
+html body.exhibition-detail .purchase-heading{padding:22px}
+html body.exhibition-detail .purchase-heading h1{color:var(--ink)}
+html body.exhibition-detail :is(.purchase-facts,.purchase-summary,.vehicle-specifications,.condition-panel,.vehicle-calculator){padding:20px}
+html body.exhibition-detail .vehicle-gallery{overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+html body.exhibition-detail .detail-thumbs button{border-color:var(--line)}
+html body.exhibition-detail .detail-section-nav{border-bottom:1px solid var(--line)}
+html body.exhibition-detail .detail-section-nav a{color:var(--muted);min-height:44px}
+html body.exhibition-detail .detail-section-nav a[aria-current=location],html body.exhibition-detail .detail-section-nav a:hover{color:var(--blue)}
+html body.exhibition-detail .specification-group{border-top:1px solid var(--line)}
+html body.exhibition-detail .specification-group summary{color:var(--ink)}
+html body.exhibition-detail .spec-row,html body.exhibition-detail .quick-specs{border-color:var(--line);color:var(--muted)}
+html body.exhibition-detail .condition-panel .condition-scores strong{color:var(--blue)}
+html body.exhibition-detail .condition-panel .example-note{color:#80500a}
+html[data-theme=dark] body.exhibition-detail .condition-panel .example-note{color:#ffd28a}
+html body.exhibition-detail .example-report-preview span{color:var(--blue)}
+html body.exhibition-detail .vehicle-calculator :is(label,p,small){color:var(--muted)}
+html body.exhibition-detail .vehicle-calculator :is(h2,h3,output,strong){color:var(--ink)}
+html body.exhibition-services .section-wrap{width:min(1200px,calc(100% - 48px));margin-inline:auto}
+html body.exhibition-services .care-section{color:var(--ink)}
+html body.exhibition-services .care-section :is(h1,h2,h3,strong){color:var(--ink)}
+html body.exhibition-services .care-section :is(p,small,.muted){color:var(--muted)}
+html body.exhibition-services .tint-toolbar,html body.exhibition-services .tint-card,html body.exhibition-services .tint-sheet-banner,html body.exhibition-services .tint-spec-grid>div{background:var(--surface);border-color:var(--line);color:var(--ink);box-shadow:none}
+html body.exhibition-services .tint-series,html body.exhibition-services .tint-process{background:var(--surface-2);color:var(--muted)}
+html body.exhibition-services .tint-brands button[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:var(--on-accent)}
+html body.exhibition-services .tint-dialog{background:var(--surface);color:var(--ink)}
+html body.exhibition-services .tint-sheet-banner button>span{background:#10213a;color:#f7f9fc}
+html body.workbench .wb-sidebar{background:var(--surface);color:var(--ink);border-color:var(--line)}
+html body.workbench .wb-sidebar .wordmark{font-size:25px;font-weight:800;letter-spacing:.12em;text-shadow:none!important}
+html body.workbench .wb-sidebar .wordmark small{color:var(--muted)}
+html body.workbench .wb-context{color:var(--muted)}
+html body.workbench .wb-sidebar nav button{color:var(--muted);min-height:46px}
+html body.workbench .wb-sidebar nav button:hover{background:var(--surface-2);color:var(--ink)}
+html body.workbench .wb-sidebar nav button[aria-current=page]{background:color-mix(in srgb,var(--blue) 10%,var(--surface));color:var(--blue);border-color:color-mix(in srgb,var(--blue) 28%,var(--surface));box-shadow:inset 3px 0 var(--blue)}
+html body.workbench .wb-sidebar nav button[aria-current=page] span{color:var(--blue)}
+html body.workbench .wb-topbar h1,html body.workbench .wb-section-head h2,html body.workbench .editor-heading h2,html body.workbench .stock-review h2,html body.workbench .form-section-title h3{color:var(--ink)}
+html body.workbench .wb-topbar .eyebrow,html body.workbench .editor-heading .eyebrow,html body.workbench .form-section-title>span:first-child{color:var(--blue)}
+html body.workbench .wb-panel,html body.workbench .form-section,html body.workbench .wb-row,html body.workbench .wb-kpis button{background:var(--surface);color:var(--ink);border-color:var(--line);box-shadow:none}
+html body.workbench .wb-row:hover,html body.workbench .wb-kpis button:hover{background:var(--surface-2)}
+html body.workbench .wb-kpis button span,html body.workbench .wb-vehicle small,html body.workbench .row-price small{color:var(--muted)}
+html body.workbench .wb-kpis button strong,html body.workbench .wb-vehicle strong{color:var(--ink)}
+html body.workbench .field input,html body.workbench .field select,html body.workbench .field textarea,html body.workbench .wb-toolbar .search-field,html body.workbench .wb-toolbar .compact-field select,html body.workbench .photo-category-field select{background:var(--surface);color:var(--ink);border-color:var(--line)}
+html body.workbench .wb-table-head{background:var(--surface-2);color:var(--muted);border-color:var(--line)}
+html body.workbench .wb-table-head input,html body.workbench .row-check input{accent-color:var(--blue)}
+html body.workbench .status-pill{color:#176b4a;background:#e8f5ef;border-color:#a5d5bd}
+html body.workbench .status-pill.reserved{color:#80500a;background:#fff4d9;border-color:#f0d390}
+html body.workbench .status-pill.sold{color:#9d3240;background:#fff0f1;border-color:#f3b9c0}
+html[data-theme=dark] body.workbench .status-pill{color:#8de0b7;background:#143927;border-color:#286747}
+html[data-theme=dark] body.workbench .status-pill.reserved{color:#ffd28a;background:#463416;border-color:#80612a}
+html[data-theme=dark] body.workbench .status-pill.sold{color:#ffadb7;background:#421e28;border-color:#733341}
+html body.workbench .wb-bottom-bar,html body.workbench .editor-save{background:var(--surface);color:var(--ink);border-color:var(--line);box-shadow:0 6px 24px #14233b18}
+html body.workbench .wb-sidebar-bottom a,html body.workbench .row-actions>button,html body.workbench .row-actions summary{color:var(--muted)}
+html body.workbench :is(.badge-picker-block,.upload-zone,.photo-tile,.wb-story-card,.wb-tint-card,.report-editor,.photo-actions){background:var(--surface-2);color:var(--ink);border-color:var(--line)}
+html body.workbench :is(.badge-picker-head strong,.photo-category-field,.wb-story-card label){color:var(--ink)}
+html body.workbench :is(.badge-picker-head small,.upload-zone>span,.editor-save>span,.wb-story-card p){color:var(--muted)}
+html body.workbench .wb-story-media,html body.workbench .photo-tile>div:first-child{background:var(--surface-2)}
+html body.workbench .owner-nav-group>p{color:var(--muted)}
+html body.workbench .owner-live-status{color:var(--muted)}
+html body.workbench .owner-kpi{background:var(--surface);border-color:var(--line)}
+html body.workbench .owner-kpi :is(span,strong){color:var(--ink)}
+html body.workbench .owner-task-list button{background:var(--surface-2);color:var(--ink);border-color:var(--line);min-height:48px}
+html body.workbench :is(.field-quick-btn,.wb-feature-chip,.button.quiet){color:var(--ink)}
+@media(min-width:1100px){html body.exhibition-home #inventoryGrid:not(.compact-view){grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}}
+@media(max-width:1099px){html body #top nav{gap:2px}html body #top nav a{padding-inline:8px}html body #top .theme-label,html body #top .theme-track{display:none}}
+@media(max-width:700px){html body header#top.showroom-header{width:calc(100% - 24px);top:6px!important;margin:6px auto 0;padding:8px 10px;gap:6px;min-height:62px;border-radius:13px}html body #top .wordmark{font-size:21px}html body #top .header-actions{gap:4px;margin-left:auto}html body #top .theme-control{width:44px;height:44px;min-height:44px;padding:0}.theme-control .theme-label,.theme-control .theme-track{display:none!important}html body #top .language-trigger{min-height:44px;padding:7px 9px;font-size:11px}html body #top .nav-contact{width:44px;height:44px;min-height:44px;padding:8px}html body #top .nav-contact>span{display:none!important}html body #top .nav-contact .wa-brand{display:block!important;width:20px;height:20px}html body #top .mobile-menu-toggle{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;min-height:44px;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink)}html body #top nav{display:none;position:absolute;top:calc(100% + 7px);left:0;right:0;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}html body #top.menu-open nav{display:grid;grid-template-columns:1fr 1fr;gap:3px}html body #top nav a{justify-content:flex-start;min-height:46px;padding:8px 10px}html body footer#siteFooter.showroom-footer{margin-top:28px;padding:28px 18px calc(82px + env(safe-area-inset-bottom))!important}html body #siteFooter .footer-columns{grid-template-columns:1fr 1fr;gap:24px 18px;padding-bottom:22px}html body #siteFooter .footer-brand{grid-column:1/-1;gap:10px}html body #siteFooter .footer-column{gap:7px}html body #siteFooter .footer-column h2{font-size:12px}html body #siteFooter .footer-column a{font-size:11px;line-height:1.5}html body #siteFooter .footer-bottom{flex-direction:column;gap:5px}html body .inventory-count-summary{gap:6px}html body .inventory-count-summary>div{min-height:40px;padding-inline:9px}html body .about-section{grid-template-columns:1fr;gap:20px;padding:28px 20px}html body .about-section .about-image{max-width:400px;margin-inline:auto}html body .about-section .about-image img{max-height:400px;aspect-ratio:4/3}html body .about-section .contact-block{padding:15px}html body.workbench .wb-main{padding-bottom:130px!important}html body.workbench .wb-top-actions .button{min-height:46px}}
+@media(max-width:700px){html body.exhibition-detail .section-wrap,html body.exhibition-services .section-wrap{width:calc(100% - 24px)}html body.exhibition-detail :is(.purchase-heading,.purchase-summary,.vehicle-specifications,.condition-panel,.vehicle-calculator){padding:16px}html body.exhibition-detail .detail-notes{padding:12px}html body.exhibition-detail .vehicle-gallery{border-radius:11px}}
+@media(prefers-reduced-motion:reduce){html body #top nav a,html body #siteFooter .footer-column a{transition:none}}
+
 .owner-helpers{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:16px;background:var(--surface)}.owner-helpers>summary{cursor:pointer;min-height:30px;font-size:13px;color:var(--muted)}.owner-helpers .wb-autofill-bar{margin-top:12px}html body #siteFooter .footer-group summary{min-height:44px}
 
 html body #mobileWaFab[id]{width:46px!important;height:46px!important;right:16px!important;bottom:calc(16px + env(safe-area-inset-bottom))!important}html body #top .nav-contact.whatsapp-action>.wa-brand{display:block!important;filter:brightness(0) invert(1)!important;flex:none}html body #inventory .stock-card-footer .compare-check{display:inline-flex!important}html body .stock-info .spec-row{background:transparent!important}html body .wb-main{font-family:var(--font)!important}html body .wb-main :is(h1,h2,h3,button,input,select,textarea){font-family:var(--font)!important}
