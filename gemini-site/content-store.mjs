@@ -28,14 +28,35 @@ export class ShowroomContent{
     const store=Object.create(this);store.storage=txn;
     const old=await store.read('draft'),published=await store.read('published');
     if(body.baseRevision!==(old?.revision||0))return json({error:'A newer draft exists. Reload before saving to avoid overwriting it.'},409);
-    const input=path.endsWith('/rollback')?(await store.read('previous'))?.document:body.document;
+    let input=path.endsWith('/rollback')?(await store.read('previous'))?.document:body.document;
+    const draftInput=input;
+    if(body.scope&&path==='/api/owner/publish'){
+     try{
+      validateContent(input);
+      let baseline=published?.document;
+      if(!baseline){const response=await this.env.ASSETS.fetch(new URL('/published-baseline.json',request.url));if(!response.ok)throw Error('The live baseline is unavailable. Review the full website before publishing.');baseline=(await response.json()).document;baseline.stories=(baseline.stories||[]).map(s=>({...s,consent:'approved',published:true}));validateContent(baseline,true);}
+      input=structuredClone(baseline);
+      const {collection,id,section}=body.scope;
+      if(['vehicles','stories','tintPackages'].includes(collection)&&typeof id==='string'){
+       const item=(draftInput[collection]||[]).find(x=>x.id===id);if(!item)throw Error('Save the item before publishing.');
+       const list=input[collection]||[];const index=list.findIndex(x=>x.id===id);if(index<0)list.push(structuredClone(item));else list[index]=structuredClone(item);input[collection]=list;
+      }else if(section==='settings'){
+       input.profile=structuredClone(draftInput.profile);input.finance=structuredClone(draftInput.finance);
+       for(const key of ['brandFilterMode','brandFilters','showSoldVehicles','hideAvailableBadge','autoLowKmBadge'])input.homepage[key]=draftInput.homepage[key];
+      }else if(['homepage','profile','finance'].includes(section)){
+       input[section]=structuredClone(draftInput[section]||{});
+       if(section==='homepage')for(const v of input.vehicles){const draft=draftInput.vehicles.find(x=>x.id===v.id);if(draft){v.featured=draft.featured;v.isFeatured=draft.isFeatured;}}
+      }else throw Error('Choose a valid item to publish.');
+     }catch(e){return json({error:e.message},400);}
+    }
     try{validateContent(input,path!=='/api/owner/content');}catch(e){return json({error:e.message},400);}
     const snapshot={document:input,revision:(old?.revision||0)+1,updatedAt:new Date().toISOString()};
     if(path!=='/api/owner/content'){
      const files=referencedMedia(publicContent(input));for(const file of files){if(!await store.storage.get('media:'+file)){const existing=await this.env.ASSETS.fetch(new URL(file,request.url));if(!existing.ok)return json({error:'An uploaded file is missing. Re-upload it before publishing.'},400);}}
      if(published)await store.write('previous',published);await store.write('published',snapshot);await store.storage.put('public-media',files);
     }
-    await store.write('draft',snapshot);return json({ok:true,revision:snapshot.revision,updatedAt:snapshot.updatedAt,published:path!=='/api/owner/content'});
+    const pendingChanges=body.scope?JSON.stringify(publicContent(draftInput))!==JSON.stringify(publicContent(input)):path==='/api/owner/content';
+    await store.write('draft',body.scope?{...snapshot,document:draftInput,pendingChanges}:{...snapshot,pendingChanges});return json({ok:true,revision:snapshot.revision,updatedAt:snapshot.updatedAt,pendingChanges,published:path!=='/api/owner/content'});
    });
   }
   return json({error:'Not found.'},404);

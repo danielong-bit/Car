@@ -45,7 +45,7 @@ function rewriteMarkupPaths(source) {
 }
 
 function rewriteJavaScriptPaths(source) {
-  source=source.replace(/(from\s*['"])(\.\/[^'"]+\.mjs)(?:\?[^'"]*)?(['"])/g,(_m,a,p,q)=>a+p+'?v=refine-20261021b'+q);
+  source=source.replace(/(from\s*['"])(\.\/[^'"]+\.mjs)(?:\?[^'"]*)?(['"])/g,(_m,a,p,q)=>a+p+'?v=owner-20261022c'+q);
   let result = rewriteMarkupPaths(source);
   result = result.replace(
     /(['"`])\/(?=(?:assets|vehicle|stock|calculator|audi(?:\.html)?|studio)(?:[/?#]|$)|#)([^'"`\s]*)/g,
@@ -102,7 +102,7 @@ async function copyPublicAssets() {
       // Native modules resolve against SITE_BASE themselves. Rewriting their path
       // comparisons would corrupt both photo URLs and canonical upload ZIP keys.
       else if (extension === '.js') content = rewriteJavaScriptPaths(content);
-      else if (extension === '.mjs') {content=content.replace(/(from\s*['"])(\.\/[^'"]+\.mjs)(?:\?[^'"]*)?(['"])/g,(_m,a,p,q)=>a+p+'?v=refine-20261021b'+q);}
+      else if (extension === '.mjs') {content=content.replace(/(from\s*['"])(\.\/[^'"]+\.mjs)(?:\?[^'"]*)?(['"])/g,(_m,a,p,q)=>a+p+'?v=owner-20261022c'+q);}
       else content = rewriteMarkupPaths(content);
       await writeFile(destination, content);
     } else {
@@ -127,7 +127,7 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
   const canonicalPath = route ? `${basePath}${route.replace(/^\/+|\/+$/g, '')}/` : basePath;
   const canonicalUrl = `https://danielong-bit.github.io${canonicalPath}`;
   const metadata = `<link rel="canonical" href="${canonicalUrl}"><meta property="og:site_name" content="Danny Recond Select"><meta property="og:type" content="website"><meta property="og:url" content="${canonicalUrl}">`;
-  const runtime = `<base href="${basePath}"><script>window.SITE_BASE=${safeInlineJson(basePath)};window.GITHUB_PAGES_STATIC=true;window.CMS_DATA=${safeInlineJson(publicData)};document.documentElement.dataset.theme=window.CMS_DATA.homepage?.theme==='dark'?'dark':'light';</script>`;
+  const runtime = `<base href="${basePath}"><script>window.SITE_BASE=${safeInlineJson(basePath)};window.GITHUB_PAGES_STATIC=true;window.CMS_DATA=${safeInlineJson(publicData)};</script>`;
   if (!/<head(?:\s[^>]*)?>/i.test(html) || !/<\/body>/i.test(html)) {
     throw new Error(`Template ${templateName} is missing its document head or body.`);
   }
@@ -159,6 +159,7 @@ if (process.env.KEEP_OUTPUT !== '1' && (outputDirectory !== path.resolve(project
 await mkdir(outputDirectory, {recursive: true});
 await prepareExhibition();
 await copyPublicAssets();
+await writeFile(path.join(outputDirectory,'published-baseline.json'),JSON.stringify({document:publicData}));
 const pages = [
   {template:'tools.html',file:'tools/index.html',route:'tools',title:'Calculator & JPJ · Danny Recon Select'},
   {template: 'index.html', file: 'index.html', route: '', title: 'Danny Recond Select · Japan Recond by Danny'},
