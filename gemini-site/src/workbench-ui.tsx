@@ -63,5 +63,6 @@ function mountCounts() {
   if (countRoot) countRoot.render(<WorkbenchCounts counts={window.dannyOwnerCounts ?? { available: 0, booked: 0, sold: 0, drafts: 0 }} />);
 }
 const workspace = document.getElementById("workspaceContent");
-if (workspace) new MutationObserver(mountCounts).observe(workspace, { childList: true, subtree: true });
+// Observe workspace replacements, not the count animation's own text updates.
+if (workspace) new MutationObserver(mountCounts).observe(workspace, { childList: true });
 mountCounts();

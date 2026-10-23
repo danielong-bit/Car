@@ -18,6 +18,7 @@ import {publicDocument} from '../lib/cms/contracts.mjs';
 import {normalizeDocument} from '../public/inventory-domain.mjs';
 import {prepareExhibition} from './prepare-exhibition.mjs';
 import {buildUiIslands} from './build-ui-islands.mjs';
+import {initialVehicleMarkup} from '../public/vehicle-initial.mjs';
 const publicDataPath = path.resolve(projectRoot, process.env.PAGES_SNAPSHOT_PATH || 'data/public-site.json');
 const publicAssetsPath = path.join(projectRoot, 'public');
 const templatesPath = path.join(projectRoot, 'out');
@@ -133,14 +134,19 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
     throw new Error(`Template ${templateName} is missing its document head or body.`);
   }
   html = html.replace(/<head(?:\s[^>]*)?>/i, match => `${match}${runtime}${metadata}`);
+  if (['cms-vehicle.html','audi.html'].includes(templateName)) {
+    const key=decodeURIComponent(route.split('/').at(-1)||'');
+    const vehicle=publicData.vehicles.find(v=>v.id===key||v.stockId===key||(key==='audi'&&v.id==='audi-s5'));
+    if(vehicle) html=html.replace(/(<main[^>]*id="vehicleContent"[^>]*>)[\s\S]*?(<\/main>)/,(_match,open,close)=>open+initialVehicleMarkup(vehicle,publicData,{base:basePath,pathname:canonicalPath})+close);
+  }
   return rewriteMarkupPaths(html);
 }
 
 async function dashboardPage() {
   const page = await renderTemplate('workbench.html', {route:'studio',title:'Inventory workbench · Danny Recond Select'});
   return page
-    .replace('</head>', '<link rel="stylesheet" href="/assets/workbench-ui.css?v=owner-ui-20261022a"></head>')
-    .replace('</body>', '<div id="workbenchUiMount"></div><script type="module" src="/assets/workbench-ui.js?v=owner-ui-20261022a"></script></body>');
+    .replace('</head>', '<link rel="stylesheet" href="/assets/workbench-ui.css?v=owner-ui-20261023a"></head>')
+    .replace('</body>', '<div id="workbenchUiMount"></div><script type="module" src="/assets/workbench-ui.js?v=owner-ui-20261023a"></script></body>');
 }
 
 const snapshot = JSON.parse(await readFile(publicDataPath, 'utf8'));

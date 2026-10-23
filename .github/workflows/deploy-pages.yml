@@ -26,6 +26,9 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22
+      - name: Install static component build dependencies
+        working-directory: gemini-site
+        run: npm ci --ignore-scripts
       - name: Build the static website
         working-directory: gemini-site
         run: npm run build:pages

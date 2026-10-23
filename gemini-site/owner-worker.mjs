@@ -1,4 +1,5 @@
 export {ShowroomContent} from './content-store.mjs';
+import {initialVehicleMarkup} from './public/vehicle-initial.mjs';
 const encoder=new TextEncoder();
 const COOKIE='__Host-danny-owner';
 const MAX_AGE=8*60*60;
@@ -74,8 +75,35 @@ export default{
    if(loginPage&&loggedIn)return redirect('/studio/');
    return protectResponse(await env.ASSETS.fetch(request));
   }
-  const response=await env.ASSETS.fetch(request);
-  if(response.status===404&&/^\/(vehicle|stock)\/[^/]+\/?$/.test(path))return env.ASSETS.fetch(new Request(new URL('/audi/',url),request));
+  const vehiclePage=/^\/(vehicle|stock)\/[^/]+\/?$/.test(path);
+  const assetHeaders=new Headers(request.headers);
+  // A static-file ETag cannot validate HTML containing a newer publication.
+  if(vehiclePage){assetHeaders.delete('If-None-Match');assetHeaders.delete('If-Modified-Since');}
+  const assetRequest=new Request(request,{headers:assetHeaders});
+  let response=await env.ASSETS.fetch(assetRequest);
+  const missingGeneratedPage=response.status===404;
+  const vehicleNotFound=async()=>{
+   const page=await env.ASSETS.fetch(new Request(new URL('/404',url),assetRequest));
+   const headers=new Headers(page.headers);headers.set('Cache-Control','no-store');
+   return new Response(page.body,{status:404,headers});
+  };
+  if(response.status===404&&vehiclePage)response=await env.ASSETS.fetch(new Request(new URL('/audi/',url),assetRequest));
+  if(vehiclePage&&response.ok&&env.CONTENT_STORE){
+   try{
+    const published=await env.CONTENT_STORE.get(env.CONTENT_STORE.idFromName('showroom')).fetch(new Request(new URL('/api/content/published',url)));
+    const {document}=await published.json();
+    const key=path.split('/').filter(Boolean).at(-1);
+    const vehicle=document?.vehicles?.find(v=>v.id?.toLowerCase()===key||v.stockId?.toLowerCase()===key);
+    if(document&&!vehicle)return vehicleNotFound();
+    if(vehicle){
+     const data=JSON.stringify(document).replaceAll('<','\\u003c').replaceAll('>','\\u003e');
+     response=new HTMLRewriter().on('#vehicleContent',{element(element){element.setInnerContent(initialVehicleMarkup(vehicle,document,{pathname:url.pathname}),{html:true});}}).on('head',{element(element){element.append(`<script>window.CMS_DATA=${data};window.CMS_CONTENT_CURRENT=true;</script>`,{html:true});}}).transform(response);
+     const headers=new Headers(response.headers);headers.set('Cache-Control','no-store');headers.delete('ETag');headers.delete('Last-Modified');
+     return new Response(response.body,{status:response.status,headers});
+    }
+   }catch{/* The generated vehicle view remains available if content storage is offline. */}
+  }
+  if(vehiclePage&&missingGeneratedPage)return vehicleNotFound();
   return response;
  }
 };

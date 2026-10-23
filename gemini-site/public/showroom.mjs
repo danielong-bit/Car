@@ -17,6 +17,13 @@ let viewMode='cards';try{viewMode=localStorage.getItem('danny-view-mode')||'card
 const t=input=>{const s=input==='Inventory'?'Stock':input;return lang==='en'?s:words[s]?.[lang==='zh'?0:1]||s;},tr=(en,zh,ms)=>lang==='zh'?zh:lang==='ms'?ms:en;
 const money=n=>n==null?t('Enquire'):'RM '+Number(n).toLocaleString('en-MY'),statusName=s=>t(s==='reserved'?'Booked':label(s));
 let d=normalizeDocument(window.CMS_DATA||{vehicles:[]}),compare=[],filters={search:'',make:'',status:'',sort:'price-up',featured:false},toastTimer;
+let customerInteracted=false;
+const rememberInteraction=()=>{customerInteracted=true;};
+document.addEventListener('input',rememberInteraction,{capture:true,once:true});
+document.addEventListener('change',rememberInteraction,{capture:true,once:true});
+document.addEventListener('click',event=>{
+ if(event.target instanceof Element&&event.target.closest('#vehicleGallery,#vehicleCalculator,#buyingTools,#viewingForm,#carFinder'))rememberInteraction();
+},{capture:true});
 const localPreview=new URLSearchParams(location.search).get('local-preview')==='1';
 const url=(route='')=>base+route.replace(/^\//,''),details=v=>localPreview?url('audi/?vehicle='+encodeURIComponent(v.id)+'&local-preview=1'):url('vehicle/'+encodeURIComponent(v.id)+'/'),wa=message=>'https://wa.me/'+(d.profile.phone||'60125686528')+'?text='+encodeURIComponent(message);
 const enquiry=v=>wa(`Hi Danny, ${v.status==='reserved'||v.status==='sold'?'please share similar available stock to':'I am interested in'} ${v.year||''} ${v.make} ${v.model} ${v.variant}, Stock #${v.stockId}, ${money(v.priceRm)}. Please share the details.\n${location.origin}${details(v)}`);
@@ -208,7 +215,7 @@ function syncFooter(){
  const p=d.profile||{},tr=translator(lang),phone=String(p.phone||'60125686528').replace(/\D/g,'');
  const displayPhone=phone.startsWith('60')?'+60 '+phone.slice(2,4)+'-'+phone.slice(4,7)+' '+phone.slice(7):phone;
  const socials=[['TikTok',p.tiktok],['小红书',p.rednote],['Facebook',p.facebook||'https://www.facebook.com/reel/1834658307548568']].filter(([,href])=>href);
- host.innerHTML=`<div class="footer-glass"><div class="footer-columns"><div class="footer-brand"><a href="${url()}" class="footer-title"><span>DANNY</span><small>RECON SELECT</small></a><p>${tr('Japanese reconditioned cars, personally selected by Danny.','Danny 为你亲自甄选日本进口车。','Kereta recond Jepun pilihan Danny.')}</p></div><nav class="footer-column" aria-label="${tr('Footer navigation','页脚导航','Navigasi footer')}"><h2>${tr('Navigate','网站导航','Navigasi')}</h2><a href="${url()}">${tr('Home','首页','Utama')}</a><a href="${url('#inventory')}">${tr('Inventory','现车','Inventori')}</a><a href="${url('services/')}">${tr('Services & Tint','服务与隔热膜','Servis & Tinted')}</a><a data-footer-tools href="${url('tools/')}">${tr('Calculator & JPJ','月供与路税','Kalkulator & JPJ')}</a><a href="${url('#contact')}">${tr('Contact','联系','Hubungi')}</a></nav><div class="footer-column"><h2>${tr('Social','社交平台','Sosial')}</h2>${socials.map(([name,href])=>`<a href="${esc(href)}" target="_blank" rel="noopener">${esc(name)} ↗</a>`).join('')}</div><div class="footer-column"><h2>${tr('Contact','联系','Hubungi')}</h2><a class="footer-contact-whatsapp" href="${esc(wa('Hi Danny, I would like to enquire about your recond cars.'))}" target="_blank" rel="noopener">WhatsApp · ${esc(displayPhone)} ↗</a>${p.email?`<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>`:''}<a class="footer-workbench-link" href="${url('studio/')}">${t('Stock workbench')} ↗</a></div></div><div class="footer-bottom"><p>© ${new Date().getFullYear()} Danny Recon Select. ${tr('All rights reserved.','保留所有权利。','Hak cipta terpelihara.')}</p><span>${tr('Japanese reconditioned cars · Malaysia','日本进口车 · 马来西亚','Kereta recond Jepun · Malaysia')}</span></div></div>`;
+ host.innerHTML=`<div class="footer-glass"><div class="footer-columns"><div class="footer-brand"><a href="${url()}" class="footer-title"><span>DANNY</span><small>RECON SELECT</small></a><p>${tr('Japanese reconditioned cars, personally selected by Danny.','Danny 为你亲自甄选日本进口车。','Kereta recond Jepun pilihan Danny.')}</p></div><nav class="footer-column" aria-label="${tr('Footer navigation','页脚导航','Navigasi footer')}"><h2>${tr('Navigate','网站导航','Navigasi')}</h2><a href="${url()}">${tr('Home','首页','Utama')}</a><a href="${url('#inventory')}">${tr('Inventory','现车','Inventori')}</a><a href="${url('services/')}">${tr('Services & Tint','服务与隔热膜','Servis & Tinted')}</a><a data-footer-tools href="${url('tools/')}">${tr('Calculator & JPJ','月供与路税','Kalkulator & JPJ')}</a><a href="${url('#contact')}">${tr('Contact','联系','Hubungi')}</a></nav><div class="footer-column"><h2>${tr('Social','社交平台','Sosial')}</h2>${socials.map(([name,href])=>`<a href="${esc(href)}" target="_blank" rel="noopener">${esc(name)} ↗</a>`).join('')}</div><div class="footer-column"><h2>${tr('Contact','联系','Hubungi')}</h2><a class="footer-contact-whatsapp" href="${esc(wa('Hi Danny, I would like to enquire about your recond cars.'))}" target="_blank" rel="noopener">WhatsApp · ${esc(displayPhone)} ↗</a>${p.email?`<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>`:''}</div></div><div class="footer-bottom"><p>© ${new Date().getFullYear()} Danny Recon Select. ${tr('All rights reserved.','保留所有权利。','Hak cipta terpelihara.')}</p><a class="footer-dashboard-link" href="${url('studio/')}">${tr('Owner dashboard','店主工作台','Dashboard pemilik')} ↗</a></div></div>`;
 }function renderHome(){
  const tr=translator(lang),featured=d.vehicles.find(v=>v.id==='audi-s5'&&v.status==='available')||d.vehicles.find(v=>v.status==='available')||d.vehicles[0];
  $('#findYourCar').onclick=()=>openCarFinder($('#carFinder'),{vehicles:d.vehicles,lang,details,wa,hydrate:()=>{hydrateImages();styleWhatsAppActions();}});
@@ -366,12 +373,33 @@ function initSmartHeader(){
  window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(update);ticking=true;}},{passive:true});
  update();
 }
+// Public pages render their embedded snapshot immediately; live refresh never blocks it.
+let publishedContentPromise=Promise.resolve(null);
 // Public pages never silently adopt browser edits. An explicit preview URL is required.
 if(new URLSearchParams(location.search).get('local-preview')==='1'){
  try{const saved=await readLocal('preview');if(saved){d=normalizeDocument(saved);const banner=document.createElement('div');banner.className='local-preview-banner';banner.innerHTML=`<span>${lang==='zh'?'此浏览器预览，尚未更新线上网站。':lang==='ms'?'Pratonton pelayar ini. Belum diterbitkan ke laman web.':'Local browser preview. Export from Workbench to publish live.'}</span><a id="exitPreview" href="${url()}">${lang==='zh'?'退出预览':'Exit preview'}</a>`;document.body.prepend(banner);$('#exitPreview').onclick=()=>deleteLocal('preview');}}catch{}
-}else if(location.hostname.endsWith('.github.io')||location.hostname.endsWith('.workers.dev')||location.hostname==='localhost'||location.hostname==='127.0.0.1'){try{const response=await fetch((location.hostname.endsWith('.github.io')?'https://car-recond-japan.danielong2005.workers.dev':'')+'/api/content/published',{cache:'no-store',signal:AbortSignal.timeout(4000)});if(response.ok){const saved=await response.json();if(saved?.document)d=normalizeDocument(saved.document);}}catch{}}else if(window.CMS_API_BASE){try{const response=await fetch(window.CMS_API_BASE.replace(/\/$/,'')+'/api/cms/public',{cache:'no-store',signal:AbortSignal.timeout(4000)});if(response.ok)d=normalizeDocument((await response.json()).document);}catch{/* Bundled snapshot is the exhibition source when no remote API is configured. */}}
+ }else if(!window.CMS_CONTENT_CURRENT){
+ publishedContentPromise=(async()=>{
+  const publicHost=location.hostname.endsWith('.github.io')||location.hostname.endsWith('.workers.dev')||['localhost','127.0.0.1'].includes(location.hostname);
+  const endpoint=publicHost?(location.hostname.endsWith('.github.io')?'https://car-recond-japan.danielong2005.workers.dev':'')+'/api/content/published':window.CMS_API_BASE?window.CMS_API_BASE.replace(/\/$/,'')+'/api/cms/public':null;
+  if(!endpoint)return null;
+  const response=await fetch(endpoint,{cache:'no-store',signal:AbortSignal.timeout(4000)});
+  return response.ok?(await response.json()).document:null;
+ })().catch(()=>null);
+}
+
 d.vehicles=d.vehicles.filter(v=>['available','reserved','sold'].includes(v.status)&&(v.status!=='sold'||d.homepage.showSoldVehicles));
 // Preserve the preview across detail and calculator links without affecting ordinary visitors.
 const render=()=>{applyTheme();document.body.dataset.homeLayout=d.homepage.layout||'showroom';const defaultCar=d.vehicles.find(v=>v.status==='available'&&v.priceRm!=null)||d.vehicles[0];document.querySelectorAll('[data-payment-link]').forEach(a=>a.href=(document.body.classList.contains('exhibition-home')||document.body.classList.contains('exhibition-services'))?(defaultCar?details(defaultCar)+'#vehicleCalculator':url('#inventory')):location.pathname+location.search+'#vehicleCalculator');renderShell(lang);syncFooter();if(document.body.classList.contains('exhibition-home'))renderHome();else if(document.body.classList.contains('exhibition-services')){renderServiceCare($('#service-care'),d.vehicles,lang,wa,d.tintPackages);observeScrollReveal();}else if(document.body.classList.contains('exhibition-tools'))renderBuyingTools($('#buyingTools'),d,lang);else renderDetail();translate();syncMobileWaFab();styleWhatsAppActions();if(new URLSearchParams(location.search).get('local-preview')==='1')document.querySelectorAll('a[href]').forEach(a=>{const parsed=new URL(a.href,location.origin);if(parsed.origin===location.origin&&(parsed.pathname===base||parsed.pathname===base.replace(/\/$/,'')||parsed.pathname.includes('/vehicle/')||parsed.pathname.endsWith('/calculator/')||parsed.pathname.endsWith('/services/'))){parsed.searchParams.set('local-preview','1');a.href=parsed.href;}});};
 document.querySelectorAll('a[href^="#"]').forEach(a=>a.href=location.pathname+location.search+a.getAttribute('href'));
 $('#languageSelect').onchange=e=>{lang=e.target.value;try{localStorage.setItem('danny-language',lang);localStorage.setItem('danny-site-language',lang);}catch{}render();};initSmartHeader();render();
+
+publishedContentPromise.then(snapshot=>{
+ if(!snapshot)return;
+ const next=normalizeDocument(snapshot);
+ next.vehicles=next.vehicles.filter(v=>['available','reserved','sold'].includes(v.status)&&(v.status!=='sold'||next.homepage.showSoldVehicles));
+ const contentKey=doc=>JSON.stringify([doc.vehicles,doc.stories,doc.homepage,doc.profile,doc.finance,doc.tintPackages,doc.articles]);
+ // Export metadata must not reset the gallery, filters or a form in progress.
+ const interacting=customerInteracted||document.activeElement?.matches('input,textarea,select')||document.activeElement?.closest('.vehicle-gallery')||document.querySelector('dialog[open]');
+ if(contentKey(next)!==contentKey(d)&&!interacting){d=next;render();}
+});
