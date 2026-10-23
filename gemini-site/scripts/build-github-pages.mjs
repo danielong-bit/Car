@@ -18,6 +18,7 @@ import {publicDocument} from '../lib/cms/contracts.mjs';
 import {normalizeDocument} from '../public/inventory-domain.mjs';
 import {prepareExhibition} from './prepare-exhibition.mjs';
 import {buildUiIslands} from './build-ui-islands.mjs';
+import {ownerSidebarMarkup} from '../public/workbench-navigation.mjs';
 import {initialVehicleMarkup} from '../public/vehicle-initial.mjs';
 const publicDataPath = path.resolve(projectRoot, process.env.PAGES_SNAPSHOT_PATH || 'data/public-site.json');
 const publicAssetsPath = path.join(projectRoot, 'public');
@@ -145,7 +146,8 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
 async function dashboardPage() {
   const page = await renderTemplate('workbench.html', {route:'studio',title:'Inventory workbench · Danny Recond Select'});
   return page
-    .replace('</head>', '<link rel="stylesheet" href="/assets/workbench-ui.css?v=owner-ui-20261023a"></head>')
+    .replace(/<aside class="wb-sidebar">[\s\S]*?<\/aside>/,()=>ownerSidebarMarkup('/'))
+    .replace('</head>', '<link rel="stylesheet" href="/assets/workbench-ui.css?v=owner-ui-20261023a"><link rel="stylesheet" href="/workbench-hierarchy.css?v=owner-nav-20261023b"></head>')
     .replace('</body>', '<div id="workbenchUiMount"></div><script type="module" src="/assets/workbench-ui.js?v=owner-ui-20261023a"></script></body>');
 }
 

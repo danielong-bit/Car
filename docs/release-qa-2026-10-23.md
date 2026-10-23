@@ -22,3 +22,12 @@
 - Independent review findings about dynamic caching, wrong fallback vehicles and reset forms were fixed and re-reviewed.
 
 Owner save/publish and rollback were not exercised against production data during this visual release.
+
+## Owner sidebar follow-up
+
+- Replaced overlapping primary/secondary labels with one icon and one task label; grouped tasks into Workspace, Website and Administration.
+- Shared initial HTML and runtime sidebar rendering; kept Vehicles selected while adding/editing a vehicle.
+- Reduced repeated overview copy and status messages, preserving the connection/draft banner and real publication timestamp.
+- Verified all eight sidebar destinations at 390×844, active states, no page overflow, and theme switching.
+- Verified the complete sidebar including theme/logout at 1280×720, with no sidebar overflow or clipped labels.
+- All 38 existing CMS tests and the Cloudflare build passed after the changes. No owner save/publish operations or production content changes were performed for this follow-up.
