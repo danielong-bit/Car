@@ -215,3 +215,23 @@ html body.workbench .wb-tint-prices{grid-template-columns:repeat(2,minmax(0,1fr)
 html body.workbench .wb-tint-card :is(.field,input,select){min-width:0;max-width:100%}
 html body.workbench .wb-tint-xpel-meta>span{min-width:0;overflow-wrap:anywhere}
 html body.workbench .wb-tint-foot{flex-wrap:wrap}
+
+/* Customer hierarchy: compact navigation space, readable facts, clear choices. */
+html body.exhibition-detail .detail-topline{margin-block:4px 12px;padding-block:4px;min-height:44px}
+html body.exhibition-services .tint-toolbar{padding:20px;border:1px solid var(--line);border-radius:12px;gap:24px;margin-bottom:24px}
+html body.exhibition-services .tint-body>span{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px}
+html body.exhibition-services .tint-body button[aria-pressed=true]{background:var(--surface-2);border-color:var(--blue);color:var(--blue);font-weight:700;box-shadow:inset 0 0 0 1px var(--blue)}
+html body.exhibition-services .tint-process{background:transparent;gap:12px 24px;flex-wrap:wrap;font-size:13px;padding-block:8px}
+@media(min-width:701px){html body.exhibition-home :is(#resultCount,#inventoryCountMount){display:none}}
+@media(max-width:700px){
+ html body #inventory .stock-info .spec-row{flex-wrap:nowrap;gap:4px;white-space:nowrap;align-items:baseline;padding-block:8px}
+ html body #inventory .stock-info .spec-row,html body #inventory .stock-info .spec-row strong{font-size:12px;font-weight:500;letter-spacing:-.025em}
+ html body #inventory .listing-grade-label{display:none}
+ html body #inventory .listing-grade{white-space:nowrap}
+ html body #inventory .stock-identifiers code{overflow-wrap:anywhere;white-space:normal;line-height:1.4}
+ html body #inventory .stock-card-footer{padding-top:10px}
+ html body #inventory .stock-card-footer :is(.view-link,.compare-check){font-size:11px;min-height:40px;align-items:center;display:inline-flex}
+ html body.exhibition-detail .detail-topline{margin:0;padding:0 16px;min-height:54px}
+ html body.exhibition-services .tint-toolbar{padding:16px;gap:20px}
+}
+@media(max-width:359px){html body #inventory .stock-info{padding-inline:6px}html body #inventory .stock-info .spec-row{gap:3px}html body #inventory .stock-info .spec-row,html body #inventory .stock-info .spec-row strong{font-size:12px;letter-spacing:-.04em}}

@@ -104,7 +104,7 @@ function photoMarkup(v,eager=false){
 }
 function listingFacts(v){
  const c=conditionValues(v),grade=[c.auctionGrade,c.interiorGrade].filter(Boolean).join('/');
- return `<strong>${v.year||'—'}</strong><strong>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</strong>${grade?`<span class="listing-grade">${t('Grade')} <strong>${esc(grade)}</strong>${c.example?`<sup title="${esc(t('Example'))}" aria-label="${esc(t('Example'))}">*</sup>`:''}</span>`:''}`;
+ return `<strong>${v.year||'—'}</strong><strong>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</strong>${grade?`<span class="listing-grade" aria-label="${esc(t('Grade')+' '+grade)}"><span class="listing-grade-label">${t('Grade')} </span><strong>${esc(grade)}</strong>${c.example?`<sup title="${esc(t('Example'))}" aria-label="${esc(t('Example'))}">*</sup>`:''}</span>`:''}`;
 }
 function listingPrice(v){
  if(v.status==='sold')return esc(t('SOLD'));
