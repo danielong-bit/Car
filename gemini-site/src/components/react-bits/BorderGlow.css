@@ -1,0 +1,24 @@
+.border-glow-card{--edge-proximity:0;--cursor-angle:45deg;--glow-opacity:clamp(0,calc((var(--edge-proximity) - var(--edge-sensitivity))/(1 - var(--edge-sensitivity))),1);position:relative;isolation:isolate;display:grid;border:1px solid var(--line,#30405a);border-radius:var(--border-radius);background:var(--card-bg);overflow:visible;box-shadow:0 6px 24px #14233b04}
+.border-glow-inner{position:relative;z-index:2;min-width:0;border-radius:inherit;background:var(--card-bg)}
+.border-glow-card::before,.border-glow-card>.edge-light{content:'';position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;opacity:calc(var(--glow-opacity)*var(--glow-intensity));transition:opacity .3s ease-out}
+.border-glow-card::before{z-index:3;padding:1px;background:conic-gradient(from var(--cursor-angle),var(--glow-one),var(--glow-two),var(--glow-three),var(--glow-one));mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+.border-glow-card>.edge-light{inset:calc(-1*var(--glow-padding));z-index:-1;mask-image:conic-gradient(from var(--cursor-angle),#000 2.5%,transparent var(--cone-spread),transparent 75%,#000 97.5%)}
+.border-glow-card>.edge-light::before{content:'';position:absolute;inset:var(--glow-padding);border-radius:inherit;box-shadow:0 0 3px var(--glow-one),0 0 12px color-mix(in srgb,var(--glow-two) 50%,transparent),0 0 25px color-mix(in srgb,var(--glow-three) 20%,transparent)}
+html body footer#siteFooter.showroom-footer.minimal-footer{--ink:var(--foreground);--muted:var(--ds-muted);margin:40px 0 0;padding:24px max(20px,calc((100% - 1160px)/2)) calc(72px + env(safe-area-inset-bottom))!important;min-height:0;overflow:visible;border:0;background:var(--page)!important;color:var(--foreground)}
+html body #siteFooter.minimal-footer::before{display:none}
+.minimal-footer-content{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:25px 30px;min-width:0}
+html body #siteFooter.minimal-footer .footer-title{display:inline-flex;flex-direction:column;flex:none;gap:0;color:var(--foreground)!important;text-decoration:none;font-size:24px;font-weight:800;letter-spacing:.11em;line-height:1}
+html body #siteFooter.minimal-footer .footer-title>span{color:var(--foreground)!important}
+html body #siteFooter.minimal-footer .footer-title small{margin-top:6px;color:var(--muted)!important;font-size:7px;font-weight:700;letter-spacing:.24em}
+html[data-theme=dark] #siteFooter.minimal-footer .footer-title>span{text-shadow:0 0 15px #81aaff38}
+.minimal-dashboard-link{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:9px;color:var(--muted);background:transparent;text-decoration:none;font-size:12px;font-weight:650;line-height:1.4}
+.minimal-dashboard-link svg{width:15px;height:15px;flex:none}.minimal-dashboard-link:hover{background:var(--surface-2);color:var(--blue);border-color:var(--blue)}
+/* A quiet blue fiber field belongs to the homepage closing section only. */
+html body.exhibition-home footer#siteFooter.minimal-footer{overflow:hidden;margin-top:24px;padding-top:68px!important;padding-bottom:calc(76px + env(safe-area-inset-bottom))!important}
+.home-footer-background{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse at 25% 70%,#8fd6ff20,transparent 65%),radial-gradient(ellipse at 80% 40%,#8b97fa16,transparent 60%)}
+.home-footer-background>.ghost-fibers-container{opacity:.72}
+html body.exhibition-home #siteFooter.minimal-footer .minimal-footer-glow{position:relative;z-index:1;background:color-mix(in srgb,var(--surface) 92%,transparent);box-shadow:0 8px 30px #14233b06}
+html body.exhibition-home #siteFooter.minimal-footer .border-glow-inner{background:transparent}
+@media(max-width:700px){html body.exhibition-home footer#siteFooter.minimal-footer{padding-top:50px!important}.home-footer-background>.ghost-fibers-container{opacity:.6}}
+@media(max-width:480px){.minimal-footer-content{gap:16px;padding:20px 16px}html body #siteFooter.minimal-footer .footer-title{font-size:21px}.minimal-dashboard-link{max-width:155px;padding:8px 10px;font-size:11px}}
+@media(hover:none),(prefers-reduced-motion:reduce){.border-glow-card::before,.border-glow-card>.edge-light{display:none}}

@@ -33,6 +33,21 @@ export default{
  async fetch(request,env){
   const url=new URL(request.url);let path;
   try{path=decodeURIComponent(url.pathname).replace(/\/+/g,'/').toLowerCase();}catch{return new Response('Invalid path',{status:400});}
+  if(path==='/api/analytics/visit'){
+   if(request.method!=='POST')return json({error:'Method not allowed.'},405);
+   if(request.headers.get('Origin')!==url.origin)return json({error:'Request not allowed.'},403);
+   if(!env.CONTENT_STORE)return json({error:'Statistics are unavailable.'},503);
+   if(await authenticated(request,env))return json({ok:true,excluded:true});
+   const agent=request.headers.get('User-Agent')||'';
+   if(/bot|crawler|spider|headless|preview/i.test(agent))return json({ok:true,excluded:true});
+   const ip=request.headers.get('CF-Connecting-IP');
+   if(ip&&env.LOGIN_LIMITER&&!(await env.LOGIN_LIMITER.limit({key:'visits:'+ip})).success)return json({error:'Please try later.'},429);
+   const text=await request.text();if(text.length>200)return json({error:'Invalid visit.'},400);
+   let data;try{data=JSON.parse(text);}catch{return json({error:'Invalid visit.'},400);}
+   if(!/^[a-f0-9-]{36}$/i.test(data?.id||''))return json({error:'Invalid visit.'},400);
+   const country=request.cf?.country||'Unknown',device=/iPad|Tablet|Android(?!.*Mobile)/i.test(agent)?'Tablet':/Mobi|Android|iPhone/i.test(agent)?'Mobile':'Desktop';
+   return env.CONTENT_STORE.get(env.CONTENT_STORE.idFromName('showroom')).fetch(new Request(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:data.id,country,device})}));
+  }
   if(path==='/api/content/published'||path.startsWith('/assets/uploads/')){
    if(!['GET','HEAD'].includes(request.method))return json({error:'Method not allowed.'},405);
    if(!env.CONTENT_STORE)return path.startsWith('/assets/')?env.ASSETS.fetch(request):json({document:null,revision:0});

@@ -1,7 +1,11 @@
+import {renderContactFaq} from './contact-faq.mjs';
+import {recordVisit} from './visitor-stats.mjs';
 import {renderShell} from './site-shell.mjs';
 import {renderBuyingTools} from './buying-tools.mjs';
 import {applyTheme} from './site-theme.mjs';
 import {openCarFinder} from './car-finder.mjs';
+import {loadSiteUi} from './site-ui-loader.mjs';
+import {mountContactLanyard} from './contact-lanyard.mjs';
 import {visibleBrandFilters,matchesInventorySelection} from './inventory-brand-filters.mjs?v=stock-20261019d';
 import {galleryMarkup,bindGallery} from './vehicle-gallery.mjs';
 import {renderServiceCare} from './service-care.mjs';
@@ -212,11 +216,13 @@ function comparisonBar(){
 }
 function syncFooter(){
  const host=$('#siteFooter');if(!host)return;
- const p=d.profile||{},tr=translator(lang),phone=String(p.phone||'60125686528').replace(/\D/g,'');
- const displayPhone=phone.startsWith('60')?'+60 '+phone.slice(2,4)+'-'+phone.slice(4,7)+' '+phone.slice(7):phone;
- const socials=[['TikTok',p.tiktok],['小红书',p.rednote],['Facebook',p.facebook||'https://www.facebook.com/reel/1834658307548568']].filter(([,href])=>href);
- host.innerHTML=`<div class="footer-glass"><div class="footer-columns"><div class="footer-brand"><a href="${url()}" class="footer-title"><span>DANNY</span><small>RECON SELECT</small></a><p>${tr('Japanese reconditioned cars, personally selected by Danny.','Danny 为你亲自甄选日本进口车。','Kereta recond Jepun pilihan Danny.')}</p></div><nav class="footer-column" aria-label="${tr('Footer navigation','页脚导航','Navigasi footer')}"><h2>${tr('Navigate','网站导航','Navigasi')}</h2><a href="${url()}">${tr('Home','首页','Utama')}</a><a href="${url('#inventory')}">${tr('Inventory','现车','Inventori')}</a><a href="${url('services/')}">${tr('Services & Tint','服务与隔热膜','Servis & Tinted')}</a><a data-footer-tools href="${url('tools/')}">${tr('Calculator & JPJ','月供与路税','Kalkulator & JPJ')}</a><a href="${url('#contact')}">${tr('Contact','联系','Hubungi')}</a></nav><div class="footer-column"><h2>${tr('Social','社交平台','Sosial')}</h2>${socials.map(([name,href])=>`<a href="${esc(href)}" target="_blank" rel="noopener">${esc(name)} ↗</a>`).join('')}</div><div class="footer-column"><h2>${tr('Contact','联系','Hubungi')}</h2><a class="footer-contact-whatsapp" href="${esc(wa('Hi Danny, I would like to enquire about your recond cars.'))}" target="_blank" rel="noopener">WhatsApp · ${esc(displayPhone)} ↗</a>${p.email?`<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>`:''}</div></div><div class="footer-bottom"><p>© ${new Date().getFullYear()} Danny Recon Select. ${tr('All rights reserved.','保留所有权利。','Hak cipta terpelihara.')}</p><a class="footer-dashboard-link" href="${url('studio/')}">${tr('Owner dashboard','店主工作台','Dashboard pemilik')} ↗</a></div></div>`;
-}function renderHome(){
+ const tr=translator(lang),dashboardHref=url('studio/');
+ host.dataset.iconBase=url('assets/icons/');for(const key of ['tiktok','rednote','facebook'])host.dataset[key]=d.profile?.[key]||(key==='facebook'?'https://www.facebook.com/reel/1834658307548568':'');host.dataset.language=lang;
+ host.classList.add('minimal-footer');host.dataset.homeHref=url();host.dataset.dashboardLabel=tr('Owner Dashboard','店主工作台','Dashboard pemilik');
+ if(!host.dataset.footerReady)host.innerHTML='<div class="minimal-footer-content"><a class="footer-title" href="'+esc(url())+'"><span>DANNY</span><small>RECON SELECT</small></a><a class="minimal-dashboard-link" href="'+esc(dashboardHref)+'">'+esc(host.dataset.dashboardLabel)+' ↗</a></div>';
+ loadSiteUi().then(ui=>{if(host.isConnected){host.dataset.footerReady='true';ui.renderMinimalFooter(host,dashboardHref);}}).catch(()=>{});
+}
+function renderHome(){
  const tr=translator(lang),featured=d.vehicles.find(v=>v.id==='audi-s5'&&v.status==='available')||d.vehicles.find(v=>v.status==='available')||d.vehicles[0];
  $('#findYourCar').onclick=()=>openCarFinder($('#carFinder'),{vehicles:d.vehicles,lang,details,wa,hydrate:()=>{hydrateImages();styleWhatsAppActions();}});
  $('#heroStock').innerHTML=`<span class="status-dot"></span>${d.vehicles.filter(v=>v.status==='available').length} ${t('Units available')}`;const heroWhatsApp=$('#heroWhatsApp');if(heroWhatsApp)heroWhatsApp.href=wa('Hi Danny, I would like to ask about your current Japanese reconditioned cars.');
@@ -230,7 +236,9 @@ function syncFooter(){
  document.querySelectorAll('[data-story]').forEach(b=>b.onclick=async()=>{const s=stories.find(s=>s.id===b.dataset.story);if(s)openPhoto(await photoUrl(s.image,base),s.title);});
  for(const [id,step] of [['deliveryPrev',-1],['deliveryNext',1]]){const btn=$('#'+id);if(btn){btn.hidden=stories.length<=2;btn.onclick=()=>$('#deliveryRail').scrollBy({left:step*$('#deliveryRail').clientWidth*.8,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});}}
  $('#heroTitle').removeAttribute('data-i18n');$('#heroTitle').textContent=d.homepage.heroTitles?.[lang]||tr('Japanese recond cars. Selected by Danny.','日本进口车，Danny 为你精选。','Kereta recond Jepun. Pilihan Danny.');const hero=document.querySelector('.mountain-scene img');if(hero&&d.homepage.heroImage)hero.src=d.homepage.heroImage;for(const [id,key] of [['customer-stories','showDeliveries'],['contact','showContact']]){const section=document.getElementById(id);if(section)section.hidden=d.homepage[key]===false;}if(d.homepage.sectionOrder==='deliveries-first'){const rail=$('#customer-stories');if(rail)$('#inventory').before(rail);}else{const rail=$('#customer-stories');if(rail)$('#inventory').after(rail);}
- const p=d.profile;$('#profileIntro').textContent='';if(p.portrait){const pSrc=staticImgSrc(p.portrait);if(pSrc)$('#profilePhoto').src=pSrc;$('#profilePhoto').dataset.source=p.portrait;}
+ const p=d.profile;$('#profileIntro').textContent='';
+ mountContactLanyard($('#contact .about-image'),{portrait:url('assets/danny-lanyard-front.png'),language:lang,base});
+ renderContactFaq(document.getElementById('contactFaq'),lang,d.homepage.showContact!==false);
  const locationUrl='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(p.location||'Bukit Jelutong Glenmarie Shah Alam');
  $('#contactBlocks').innerHTML=`<div class="contact-block contact-primary"><div class="contact-section-label">${icon('car')}<span>${tr('CAR ENQUIRIES','买车咨询','PERTANYAAN KERETA')}</span></div><a class="button whatsapp-action" href="${wa('Hi Danny, I am interested in a Japanese recond car.')}" target="_blank" rel="noopener">${whatsappMark()}${tr('WhatsApp Danny','WhatsApp 联系 Danny','WhatsApp Danny')} ↗</a><div class="contact-secondary"><a href="tel:+${esc(p.phone||'60125686528')}">${icon('phone')}<span>${esc(String(p.phone||'60125686528').replace(/^60(\d{2})(\d{3})(\d{4})$/,'+60 $1-$2 $3'))}</span></a>${p.email?`<a href="mailto:${esc(p.email)}">${icon('mail')}<span>${tr('Email Danny','发邮件','E-mel Danny')}</span></a>`:''}</div></div><div class="contact-block location-block"><div class="contact-section-label">${icon('pin')}<span>${tr('VIEW THE CARS','到店看车','LIHAT KERETA')}</span></div><a class="contact-location" href="${locationUrl}" target="_blank" rel="noopener"><span>${esc(p.location)}</span></a><div class="location-actions"><a class="location-directions" href="${locationUrl}" target="_blank" rel="noopener">${tr('Get directions','打开导航','Dapatkan arah')} ↗</a><button id="copyLocation">${t('Copy location')}</button></div></div>`;
  $('#copyLocation').onclick=async()=>{try{await navigator.clipboard.writeText(p.location);toast(t('Copied'));}catch{toast(p.location);}};
@@ -256,7 +264,7 @@ async function renderDetail(){
  detailObserver?.disconnect();
  const parts=location.pathname.split('/').filter(Boolean),id=new URLSearchParams(location.search).get('vehicle')||decodeURIComponent(parts.at(-1)||''),v=d.vehicles.find(v=>v.id===id||v.stockId===id||((id==='audi'||id==='audi.html')&&v.id==='audi-s5')),tr=translator(lang);
  if(!v){$('#vehicleContent').innerHTML=`<div class="empty-state"><h1>${t('Vehicle not found')}</h1><p>${t('The car may no longer be listed. Browse current stock or contact Danny.')}</p><a class="button" href="${url('#inventory')}">${t('Back to stock')}</a></div>`;translate();return;}
- const title=[v.year,v.make,v.model,v.variant].filter(Boolean).join(' '),photos=v.gallery.filter(m=>m.visible!==false&&!m.video),anchor=location.pathname+location.search;
+ const title=[v.year,v.make,v.model,v.variant].filter(Boolean).join(' '),photos=v.gallery.filter(m=>m.visible!==false&&!m.video),anchor=location.pathname+location.search,showroomAddress=d.profile?.location||v.location||'Shah Alam';
  const monthly=estimate(v,d.finance);
  const videoId=v.presenter?.url?.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/)?.[1];
  const ask=topic=>wa(`Hi Danny, I have a question about ${title}.\nStock #${v.stockId} · ${money(v.priceRm)}\nQuestion: ${topic}\n${location.origin+details(v)}`);
@@ -287,17 +295,17 @@ async function renderDetail(){
  <section class="purchase-summary" aria-labelledby="quickFactsTitle"><h2 class="detail-card-title" id="quickFactsTitle">${tr('At a glance','车辆概览','Sekilas pandang')}</h2><div class="purchase-facts">${[['calendar','Year',String(v.year||'—')],['mileage','Mileage',v.mileage],['gear','Transmission',t(v.transmission)],['grid','Body',t(v.body)],['photo','Colour',v.exteriorColor]].map(([ico,name,value])=>`<div>${icon(ico)}<span><small>${t(name)}</small><strong>${esc(value||t('Not provided'))}</strong></span></div>`).join('')}</div></section>
  <section class="vehicle-contact" id="vehicleContact" aria-labelledby="vehicleContactTitle"><div class="contact-card-heading"><h2 class="detail-card-title" id="vehicleContactTitle">${tr('Talk to Danny','联系 Danny','Hubungi Danny')}</h2>${whatsappMark()}</div><p class="contact-card-copy">${tr('Ask a question or arrange to see this car.','询问车辆详情，或安排到店看车。','Tanya tentang kereta ini atau atur lawatan.')}</p>
  <a class="button vehicle-primary-enquiry" href="${esc(enquiry(v))}" target="_blank" rel="noopener">${whatsappMark()}<span>${['sold','reserved'].includes(v.status)?t('Enquire about similar stock'):t('Enquire')}</span>${icon('arrow')}</a>
- <div class="context-enquiries" aria-label="${tr('Ask about this car','询问这辆车','Tanya tentang kereta ini')}"><a href="${esc(ask('Please explain the vehicle condition and inspection report.'))}" target="_blank" rel="noopener">${icon('check')}${tr('Ask about condition','询问车况','Tanya keadaan')}</a><a href="${esc(ask('What warranty options are available for this car?'))}" target="_blank" rel="noopener">${icon('gear')}${tr('Ask about warranty','询问保修','Tanya waranti')}</a></div>
- <div class="vehicle-showroom"><span>${icon('pin')}<span><small>${tr('Showroom','看车地点','Showroom')}</small><strong>${esc(v.location||'Shah Alam')}</strong></span></span><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((v.location||'Glenmarie')+' Shah Alam')}" target="_blank" rel="noopener">${tr('Directions','导航','Arah')} ↗</a></div>
+ <div class="context-enquiries" aria-label="${tr('Ask about this car','询问这辆车','Tanya tentang kereta ini')}"><a href="${esc(ask('Please explain the vehicle condition and inspection report.'))}" target="_blank" rel="noopener">${icon('check')}${tr('Ask about condition','询问车况','Tanya keadaan')}</a><a href="${esc(ask('What warranty options are available for this car?'))}" target="_blank" rel="noopener">${icon('gear')}${tr('Ask about warranty','询问保修','Tanya waranti')}</a></div><a class="finance-documents-link" id="financeDocumentsLink" href="${esc(anchor)}#financingDocuments">${tr('Planning to finance? View documents to prepare','准备申请贷款？查看所需文件','Merancang pembiayaan? Lihat dokumen yang perlu disediakan')} ↓</a>
+ <div class="vehicle-showroom"><span>${icon('pin')}<span><small>${tr('Showroom','看车地点','Showroom')}</small><strong>${esc(showroomAddress)}</strong></span></span><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(showroomAddress)}" target="_blank" rel="noopener">${tr('Directions','导航','Arah')} ↗</a></div>
  ${v.status==='available'?`<details class="viewing-disclosure"><summary>${icon('calendar')}${t('Book a showroom viewing')}<span aria-hidden="true">+</span></summary><form id="viewingForm" class="viewing-fields"><label class="field">${t('Your name')}<input name="name" required maxlength="100" autocomplete="name"></label><label class="field">${t('Phone / WhatsApp')}<input name="phone" type="tel" required pattern="[+0-9 ()-]{8,30}" autocomplete="tel"></label><label class="field">${t('Preferred date')}<input name="date" type="date" required min="${new Date().toLocaleDateString('en-CA')}"></label><label class="field">${t('Your question (optional)')}<textarea name="note" maxlength="2000"></textarea></label><button class="button">${t('Continue in WhatsApp')} ${icon('arrow')}</button></form></details>`:''}</section>
  ${calculatorMarkup(v,d.finance,lang)}
- <div class="detail-notes"><p class="detail-disclaimer">${tr('Confirm current availability, condition and final pricing with Danny.','实际库存、车况和最终价格请向 Danny 确认。','Sahkan stok, keadaan dan harga akhir dengan Danny.')}</p>${v.sample?`<p class="detail-disclaimer">${tr('Example listing or photography. Confirm the actual details with Danny.','示例车辆或图片，请向 Danny 确认实际资料。','Senarai atau foto contoh. Sahkan butiran dengan Danny.')}</p>`:''}</div>
- </aside>
+</aside>
  </div>
  <div id="presenterSlot"></div>
  <section class="detail-info other-stock" id="otherStockSection"><p class="eyebrow">${tr('OTHER CARS IN STOCK','其他在售现车','KERETA LAIN DALAM STOK')}</p><h2>${t('Explore other cars')}</h2><div class="other-stock-grid">${otherCars.map(x=>{const xTitle=[x.year,x.make,x.model,x.variant].filter(Boolean).join(' '),xSrc=staticImgSrc(x.coverImageUrl);return `<a class="other-car-card" href="${details(x)}"><div class="other-car-photo">${x.coverImageUrl?`<img ${xSrc?`src="${esc(xSrc)}" `:''}data-source="${esc(x.coverImageUrl)}" alt="${esc(xTitle)}" loading="lazy" decoding="async" width="480" height="300">`:`<div class="photo-placeholder">${icon('photo')}</div>`}</div><div class="other-car-body"><h3>${esc(xTitle)}</h3><p class="other-car-price">${x.status==='sold'?t('SOLD'):money(x.priceRm)}</p></div></a>`;}).join('')}</div></section>
  <div class="mobile-detail-sticky" id="mobileDetailSticky" role="region" aria-label="${tr('Quick vehicle enquiry','快捷询价栏','Bar pertanyaan pantas')}"><div class="mobile-sticky-meta"><div class="mobile-sticky-price">${v.status==='sold'?t('SOLD'):money(v.priceRm)}</div><div class="mobile-sticky-sub">Stock #${esc(v.stockId)}</div></div><a class="button mobile-sticky-enquire" href="${esc(enquiry(v))}" target="_blank" rel="noopener">${whatsappMark()}<span>${t('Enquire')}</span></a></div>`;
  bindGallery(photos,title,lang,base,openPhoto);
+ $('#financeDocumentsLink')?.addEventListener('click',()=>{const details=$('#financingDocuments');if(details)details.open=true;});
  const backBtn=$('#detailBackBtn');
  if(backBtn){
   backBtn.onclick=(e)=>{
@@ -403,3 +411,5 @@ publishedContentPromise.then(snapshot=>{
  const interacting=customerInteracted||document.activeElement?.matches('input,textarea,select')||document.activeElement?.closest('.vehicle-gallery')||document.querySelector('dialog[open]');
  if(contentKey(next)!==contentKey(d)&&!interacting){d=next;render();}
 });
+
+void recordVisit();

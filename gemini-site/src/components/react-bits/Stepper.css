@@ -1,0 +1,17 @@
+.stepper{--stepper-accent:var(--blue,#245bc7);width:min(100%,var(--stepper-width,440px));min-width:0;box-sizing:border-box;color:var(--ink);font-family:inherit}
+.stepper--framed{padding:8px;border:1px solid var(--line);border-radius:18px;background:var(--surface)}
+.stepper__track{position:relative;display:flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:13px;background:var(--surface-2)}
+.stepper__glider{position:absolute;top:0;left:0;border-radius:9px;background:var(--surface);box-shadow:0 1px 4px #14233b0d,inset 0 0 0 1px var(--line);pointer-events:none;opacity:0}
+.stepper__segment{position:relative;display:flex;flex:1 1 0;min-width:0;align-items:center;justify-content:center;gap:7px;padding:10px 8px;border:0;border-radius:9px;background:none;color:var(--muted);font:inherit;cursor:pointer}
+.stepper__segment:disabled{cursor:default;opacity:1}
+.stepper__badge{display:grid;place-items:center;flex:none;width:23px;height:23px;border-radius:50%;border:1px solid var(--line);font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.stepper__segment[data-status=active]{color:var(--stepper-accent)}
+.stepper__segment[data-status=active] .stepper__badge{border-color:var(--stepper-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--stepper-accent) 9%,transparent)}
+.stepper__segment[data-status=complete] .stepper__badge{background:var(--stepper-accent);border-color:var(--stepper-accent);color:var(--on-accent)}
+.stepper__title{font-size:12px;font-weight:650;line-height:1.25;overflow-wrap:anywhere}
+.stepper__body{padding:20px 12px 12px}.stepper__footer{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
+.stepper__button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:9px;background:var(--surface-2);color:var(--ink);font:inherit;font-size:13px;font-weight:650;cursor:pointer}
+.stepper__button--next{margin-left:auto;background:var(--stepper-accent);border-color:var(--stepper-accent);color:var(--on-accent)}.stepper__button:disabled{visibility:hidden}
+.finder-stepper{--stepper-width:100%;margin:6px 0 22px}.finder-stepper .stepper__body{display:none}
+@media(max-width:480px){.stepper__segment{flex-direction:column;gap:7px;padding:10px 3px}.stepper__title{font-size:10px;line-height:1.3}.stepper__badge{width:22px;height:22px}}
+@media(prefers-reduced-motion:reduce){.stepper__glider{transition:none!important}}

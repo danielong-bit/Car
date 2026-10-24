@@ -1,4 +1,5 @@
 import {validateContent,publicContent,referencedMedia} from './content-contracts.mjs';
+import {visitorAnalytics} from './visitor-analytics.mjs';
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
 const CHUNK=60000;
 export class ShowroomContent{
@@ -7,6 +8,7 @@ export class ShowroomContent{
  async write(key,value){const text=JSON.stringify(value),old=await this.storage.get(key),count=Math.ceil(text.length/CHUNK);for(let i=0;i<count;i++)await this.storage.put(key+':'+i,text.slice(i*CHUNK,(i+1)*CHUNK));await this.storage.put(key,{chunks:count});for(let i=count;i<(old?.chunks||0);i++)await this.storage.delete(key+':'+i);}
  async fetch(request){
   const url=new URL(request.url),path=url.pathname;
+  if((path==='/api/analytics/visit'&&request.method==='POST')||(path==='/api/owner/analytics'&&request.method==='GET'))return visitorAnalytics(this.storage,request);
   if(path==='/api/content/published'){const p=await this.read('published');return json(p?{...p,document:publicContent(p.document,url.origin)}:{document:null,revision:0});}
   if(path.startsWith('/assets/uploads/')){
    const key='media:'+path,meta=await this.storage.get(key);const allowed=await this.storage.get('public-media')||[];

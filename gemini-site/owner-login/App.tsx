@@ -1,53 +1,71 @@
 import {applyTheme,saveWorkbenchTheme} from '../public/site-theme.mjs';
-import {useState, useEffect, type FormEvent, type ReactNode} from 'react';
+import {useState,useEffect,type FormEvent,type ReactNode} from 'react';
 import {createRoot} from 'react-dom/client';
-import {motion, useReducedMotion} from 'motion/react';
-import {ArrowLeft, ArrowRight, Eye, EyeOff, LockKeyhole, LoaderCircle, ShieldCheck, Sun, Moon, Globe} from 'lucide-react';
+import {ArrowLeft,ArrowRight,Eye,EyeOff,LockKeyhole,LoaderCircle,ShieldCheck} from 'lucide-react';
+import Galaxy from '../src/components/react-bits/Galaxy';
 
 export default function App(){
  const [visible,setVisible]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
  const [language,setLanguage]=useState(()=>{try{return localStorage.getItem('danny-language')||'en'}catch{return 'en'}});
  const tr=(en:string,zh:string,ms:string)=>language==='zh'?zh:language==='ms'?ms:en;
- const reduced=useReducedMotion();
- const [theme,setTheme]=useState(()=>applyTheme());useEffect(()=>{const sync=()=>setTheme(document.documentElement.dataset.theme||'light');document.addEventListener('danny-theme-change',sync);return()=>document.removeEventListener('danny-theme-change',sync);},[]);
+ const [theme,setTheme]=useState(()=>applyTheme());
+ const reduced=useMediaQuery('(prefers-reduced-motion: reduce)'),compact=useMediaQuery('(max-width: 700px)'),dark=theme==='dark';
+ useEffect(()=>{const sync=()=>setTheme(document.documentElement.dataset.theme||'light');document.addEventListener('danny-theme-change',sync);return()=>document.removeEventListener('danny-theme-change',sync);},[]);
  async function login(event:FormEvent<HTMLFormElement>){
   event.preventDefault();if(busy)return;setBusy(true);setError('');
   const form=new FormData(event.currentTarget);
   try{
    const response=await fetch('/api/owner/login',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:form.get('username'),password:form.get('password')})});
    const result=await response.json();
-   if(!response.ok){setError(result.error||'Unable to log in. Please try again.');return;}
+   if(!response.ok){setError(result.error||tr('Unable to log in. Please try again.','无法登录，请重试。','Tidak dapat log masuk. Cuba lagi.'));return;}
+   try{sessionStorage.setItem('danny-dashboard-welcome',String(Date.now()));}catch{}
    window.location.assign('/studio/');
-  }catch{setError('Unable to connect. Please try again.');}finally{setBusy(false);}
+  }catch{setError(tr('Unable to connect. Please try again.','无法连接，请重试。','Tidak dapat menyambung. Cuba lagi.'));}finally{setBusy(false);}
  }
- const reveal={hidden:{opacity:0,y:reduced?0:10},show:{opacity:1,y:0,transition:{duration:.5}}};
- return <main className="owner-login-page flex min-h-screen w-full bg-black selection:bg-white/30 p-2 transition-all duration-500 lg:h-screen lg:overflow-hidden lg:p-4">
-  <section aria-label="Danny owner workspace" className="relative hidden h-full w-[52%] flex-col items-center justify-end overflow-hidden rounded-3xl px-12 pb-24 shadow-2xl lg:flex">
-   <video preload="none" autoPlay={!reduced&&window.innerWidth>=1024} muted loop playsInline className="absolute inset-0 h-full w-full object-cover" aria-hidden="true"><source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260506_081238_406ed0e3-5d83-436e-a512-0bbff7ec5b95.mp4" type="video/mp4"/></video>
-   <motion.div initial="hidden" animate="show" variants={{hidden:{opacity:0},show:{opacity:1,transition:{staggerChildren:reduced?0:.15,delayChildren:reduced?0:.2}}}} className="relative z-10 w-full max-w-xs space-y-8">
-    <motion.a variants={reveal} href="/" className="owner-wordmark inline-flex flex-col text-white" aria-label="Danny Recon Select home"><span>DANNY</span><small>RECON SELECT</small></motion.a>
-    <motion.div variants={reveal}><h2 className="text-4xl font-medium tracking-tight">Your showroom.<br/>Your space.</h2><p className="mt-4 text-sm leading-relaxed text-white/80">Manage your stock, deliveries and website in one place.</p></motion.div>
-    <motion.div variants={reveal} className="space-y-3"><StepItem number={1} text="Owner log in" active/><StepItem number={2} text="Open your workbench"/><StepItem number={3} text="Keep your showroom current"/></motion.div>
-   </motion.div>
-  </section>
-  <section className="flex flex-1 flex-col items-center justify-center overflow-y-auto px-5 py-12 sm:px-12 lg:overflow-hidden lg:px-14 lg:py-6 xl:px-20">
-   <motion.div initial={{opacity:reduced?1:0}} animate={{opacity:1}} transition={{duration:.8,ease:'easeOut'}} className="w-full max-w-xl space-y-8 lg:space-y-7">
-    <div className="flex items-center justify-between gap-4"><a href="/" className="inline-flex items-center gap-2 text-xs text-white/50 transition-colors hover:text-white"><ArrowLeft size={14}/>{tr('Back to showroom','返回展厅','Kembali ke showroom')}</a><button type="button" className="theme-control" aria-label={theme==='dark'?'Switch to light theme':'Switch to dark theme'} onClick={()=>setTheme(saveWorkbenchTheme(theme==='dark'?'light':'dark'))}>{theme==='dark'?<Moon size={15}/>:<Sun size={15}/>}<span>{theme==='dark'?'Night':'Day'}</span></button><label className="owner-login-language"><Globe size={14} aria-hidden="true"/><select aria-label="Language" value={language} onChange={e=>{setLanguage(e.target.value);try{localStorage.setItem('danny-language',e.target.value);localStorage.setItem('danny-site-language',e.target.value)}catch{}}}><option value="en">EN</option><option value="zh">中文</option><option value="ms">BM</option></select></label></div>
-    <a href="/" className="owner-wordmark flex flex-col items-start lg:hidden"><span>DANNY</span><small>RECON SELECT</small></a>
-    <div><div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10"><LockKeyhole size={19} aria-hidden="true"/></div><h1 className="text-3xl font-medium tracking-tight sm:text-4xl">{tr('Owner Log In','店主登录','Log Masuk Pemilik')}</h1><p className="mt-3 text-sm leading-relaxed text-white/45">{tr('Welcome back, Danny. Log in to your stock workbench.','欢迎回来，Danny。登录后即可管理网站。','Selamat kembali, Danny. Log masuk untuk mengurus laman.')}</p></div>
-    <form onSubmit={login} className="space-y-5">
-     <InputGroup label={tr('Owner name','店主账号','Nama pemilik')} placeholder={tr('Enter your owner name','输入店主账号','Masukkan nama pemilik')} name="username" type="text" autoComplete="username"/>
-     <InputGroup label={tr('Password','密码','Kata laluan')} placeholder={tr('Enter your password','输入密码','Masukkan kata laluan')} name="password" type={visible?'text':'password'} autoComplete="current-password" suffix={<button type="button" onClick={()=>setVisible(!visible)} className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-white/45 hover:text-white" aria-label={visible?'Hide password':'Show password'} aria-pressed={visible}>{visible?<EyeOff size={18}/>:<Eye size={18}/>}</button>}/>
-     {error&&<p role="alert" className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">{error}</p>}
-     <button disabled={busy} className="mt-4 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-white font-semibold text-black transition hover:bg-white/90 active:scale-[.98] disabled:cursor-wait disabled:opacity-60">{busy?<><LoaderCircle size={18} className="animate-spin"/>{tr('Logging in…','正在登录…','Sedang log masuk…')}</>:<>{tr('Log In','登录','Log Masuk')}<ArrowRight size={18}/></>}</button>
-    </form>
-    <p className="flex items-center gap-2 text-xs leading-relaxed text-white/40"><ShieldCheck size={16} className="shrink-0"/>{tr('Private access for the showroom owner.','仅限店主使用。','Akses peribadi untuk pemilik showroom.')}</p>
-    <p className="border-t border-white/10 pt-6 text-[10px] tracking-wide text-white/30">© {new Date().getFullYear()} Danny Recon Select. All rights reserved.</p>
-   </motion.div>
-  </section>
+ return <main className="owner-login-page">
+  <div className="owner-login-background" aria-hidden="true"><Galaxy key={reduced?'still':'moving'}
+   starColors={dark?['#8fd6ff','#b6c7ff','#d8edff']:['#245bc7','#4779c9','#6c70b8']}
+   density={.85} glowIntensity={.25} flareIntensity={.4} starSize={.85} twinkleIntensity={.2}
+   starSpeed={.2} speed={.55} rotationSpeed={.025} layers={compact?2:3}
+   mouseInteraction={!compact&&!reduced} mouseRepulsion clickWarp={false} intro={false}
+   lightMode={!dark} backgroundColor={dark?'#0b1423':'#faf9f6'} transparent opacity={dark ? 0.8 : 0.55}
+   disableAnimation={reduced} dpr={compact?1:1.25} style={{}}/>
+  </div>
+  <div className="owner-login-shell">
+   <div className="owner-login-toolbar">
+    <a href="/" className="login-back"><ArrowLeft size={15} aria-hidden="true"/>{tr('Showroom','返回展厅','Showroom')}</a>
+    <div className="login-preferences">
+     <button type="button" className="theme-control theme-control--simple" role="switch" aria-label={theme==='dark'?'Switch to light theme':'Switch to dark theme'} aria-checked={theme==='dark'} onClick={()=>setTheme(saveWorkbenchTheme(theme==='dark'?'light':'dark'))}>
+      <svg className="theme-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></svg><svg className="theme-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.1A8.5 8.5 0 0 1 8.9 3.8 8.6 8.6 0 1 0 20.2 15.1Z"/></svg><span className="theme-label">{theme==='dark'?'Night':'Day'}</span><span className="theme-track" aria-hidden="true"></span>
+     </button>
+     <label className="owner-login-language"><span className="sr-only">{tr('Language','语言','Bahasa')}</span><select aria-label={tr('Language','语言','Bahasa')} value={language} onChange={event=>{setLanguage(event.target.value);try{localStorage.setItem('danny-language',event.target.value);localStorage.setItem('danny-site-language',event.target.value)}catch{}}}><option value="en">EN</option><option value="zh">中文</option><option value="ms">BM</option></select></label>
+    </div>
+   </div>
+   <section className="login-wrapper" aria-labelledby="ownerLoginTitle">
+    <div className="login-card">
+     <span className="login-glow" aria-hidden="true"/>
+     <div className="login-card-content">
+      <a href="/" className="owner-wordmark" aria-label="Danny Recon Select home"><span>DANNY</span><small>RECON SELECT</small></a>
+      <div className="login-heading"><span className="login-lock" aria-hidden="true"><LockKeyhole size={20}/></span><h1 id="ownerLoginTitle">{tr('Owner Log In','店主登录','Log Masuk Pemilik')}</h1><p>{tr('Welcome back, Danny. Your showroom is ready.','欢迎回来，Danny。开始管理你的展厅。','Selamat kembali, Danny. Showroom anda sedia.')}</p></div>
+      <form onSubmit={login} className="owner-login-form" aria-busy={busy}>
+       <InputGroup label={tr('Owner name','店主账号','Nama pemilik')} placeholder={tr('Enter your owner name','输入店主账号','Masukkan nama pemilik')} name="username" type="text" autoComplete="username"/>
+       <InputGroup label={tr('Password','密码','Kata laluan')} placeholder={tr('Enter your password','输入密码','Masukkan kata laluan')} name="password" type={visible?'text':'password'} autoComplete="current-password" suffix={<button type="button" className="login-password-toggle" onClick={()=>setVisible(!visible)} aria-label={visible?tr('Hide password','隐藏密码','Sembunyikan kata laluan'):tr('Show password','显示密码','Tunjuk kata laluan')} aria-pressed={visible}>{visible?<EyeOff size={18}/>:<Eye size={18}/>}</button>}/>
+       {error&&<p role="alert" className="login-error">{error}</p>}
+       <button disabled={busy} type="submit" className="login-submit">{busy?<><LoaderCircle size={18} className="login-spinner" aria-hidden="true"/>{tr('Logging in…','正在登录…','Sedang log masuk…')}</>:<>{tr('Log In','登录','Log Masuk')}<ArrowRight size={18} aria-hidden="true"/></>}</button>
+      </form>
+      <p className="login-private"><ShieldCheck size={15} aria-hidden="true"/>{tr('Private access for the showroom owner.','仅限店主使用。','Akses peribadi untuk pemilik showroom.')}</p>
+     </div>
+    </div>
+   </section>
+  </div>
  </main>;
 }
-function StepItem({number,text,active=false}:{number:number;text:string;active?:boolean}){return <div className={`flex items-center gap-3 rounded-xl px-4 py-3 text-xs ${active?'border border-white bg-white text-black':'border border-transparent bg-brand-gray text-white'}`}><span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] ${active?'bg-black text-white':'bg-white/10 text-white/40'}`}>{number}</span><span>{text}</span></div>;}
-function SocialButton({icon,label}:{icon:ReactNode;label:string}){return <button type="button" className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black py-3 hover:bg-white/5">{icon}{label}</button>;}
-function InputGroup({label,placeholder,type,name,autoComplete,suffix}:{label:string;placeholder:string;type:string;name:string;autoComplete:string;suffix?:ReactNode}){return <div className="space-y-2"><label htmlFor={name} className="text-sm font-medium text-white">{label}</label><div className="relative"><input id={name} name={name} type={type} placeholder={placeholder} autoComplete={autoComplete} required maxLength={128} spellCheck={false} autoCapitalize="none" className="h-12 w-full rounded-xl border-0 bg-brand-gray px-4 pr-12 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/30"/>{suffix}</div></div>;}
+function useMediaQuery(query:string){
+ const [matches,setMatches]=useState(()=>window.matchMedia(query).matches);
+ useEffect(()=>{const media=window.matchMedia(query),sync=()=>setMatches(media.matches);media.addEventListener('change',sync);sync();return()=>media.removeEventListener('change',sync);},[query]);
+ return matches;
+}
+function InputGroup({label,placeholder,type,name,autoComplete,suffix}:{label:string;placeholder:string;type:string;name:string;autoComplete:string;suffix?:ReactNode}){
+ return <div className="login-input-group"><label htmlFor={name}>{label}</label><div className="login-input-wrap"><input id={name} name={name} type={type} placeholder={placeholder} autoComplete={autoComplete} required maxLength={128} spellCheck={false} autoCapitalize="none"/>{suffix}</div></div>;
+}
 createRoot(document.getElementById('root')!).render(<App/>);

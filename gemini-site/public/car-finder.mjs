@@ -1,3 +1,4 @@
+import {loadSiteUi} from './site-ui-loader.mjs';
 /* Deterministic matching uses published available stock only. Missing evidence never earns a condition score. */
 export function verifiedGrade(car){
  if(car.conditionExample||!car.gradeVerified)return null;
@@ -24,7 +25,7 @@ export function openCarFinder(dialog,{vehicles,lang='en',details,wa,hydrate}){
  const e=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const money=n=>n==null?tr('Ask Danny','联系 Danny','Tanya Danny'):'RM '+Number(n).toLocaleString('en-MY');
  const answer={min:0,max:0,body:'any',transmission:'any',priority:'price'};
- let step=0,budgetText=tr('No fixed budget','不限预算','Tiada bajet tetap');
+ let step=0,budgetText=tr('No fixed budget','不限预算','Tiada bajet tetap'),progressHost,disposeProgress;
  const bodies=[...new Set(vehicles.filter(v=>v.status==='available'&&v.body).map(v=>v.body))];
  const nameBody=v=>({MPV:tr('Family MPV','家庭 MPV','MPV keluarga'),SUV:'SUV',Sedan:tr('Sedan','轿车','Sedan'),Wagon:tr('Wagon','旅行车','Wagon'),Coupe:tr('Coupe','双门轿跑','Coupe')})[v]||v;
  const priorityLabel=()=>({price:tr('Best price','价格优先','Harga terbaik'),mileage:tr('Lowest mileage','低里程优先','Perbatuan rendah'),condition:tr('Verified condition','已核实车况优先','Keadaan disahkan'),newest:tr('Newest year','年份较新优先','Tahun terkini')})[answer.priority];
@@ -32,7 +33,15 @@ export function openCarFinder(dialog,{vehicles,lang='en',details,wa,hydrate}){
  const chip=(value,title,description='')=>`<button type="button" class="finder-choice" data-answer="${e(value)}"><strong>${e(title)}</strong>${description?`<span>${e(description)}</span>`:''}<span class="finder-choice-arrow" aria-hidden="true">↗</span></button>`;
  const close=()=>dialog.close();
  function shell(content,result=false){
-  dialog.innerHTML=`<div class="finder-head"><span class="eyebrow">${tr('FIND YOUR CAR','找到适合你的车','CARI KERETA ANDA')}</span><button type="button" data-finder-close aria-label="${tr('Close','关闭','Tutup')}">×</button></div>${!result?`<div class="finder-progress" aria-label="${tr('Question','问题','Soalan')} ${step+1} / 4">${[0,1,2,3].map(i=>`<span class="${i<=step?'complete':''}"></span>`).join('')}</div><p class="finder-step">${step+1} / 4</p>`:''}${content}<div class="finder-footer">${step>0&&!result?`<button type="button" data-finder-back>${tr('← Back','← 上一步','← Kembali')}</button>`:''}<button type="button" data-finder-close>${tr('Cancel','取消','Batal')}</button></div>`;
+  if(result){disposeProgress?.();disposeProgress=undefined;progressHost=undefined;}else progressHost?.remove();
+  dialog.innerHTML=`<div class="finder-head"><span class="eyebrow">${tr('FIND YOUR CAR','找到适合你的车','CARI KERETA ANDA')}</span><button type="button" data-finder-close aria-label="${tr('Close','关闭','Tutup')}">×</button></div>${!result?`<div data-finder-progress><div class="finder-progress" aria-hidden="true">${[0,1,2,3].map(i=>`<span class="${i<=step?'complete':''}"></span>`).join('')}</div></div><p class="finder-step">${tr('Step','第','Langkah')} ${step+1} / 4</p>`:''}${content}<div class="finder-footer">${step>0&&!result?`<button type="button" data-finder-back>${tr('← Back','← 上一步','← Kembali')}</button>`:''}<button type="button" data-finder-close>${tr('Cancel','取消','Batal')}</button></div>`;
+  if(!result){
+   const placeholder=dialog.querySelector('[data-finder-progress]');
+   if(progressHost)placeholder.replaceWith(progressHost);else progressHost=placeholder;
+   const host=progressHost,current=step+1;
+   host.setAttribute('aria-label',`${tr('Step','步骤','Langkah')} ${current} / 4`);
+   loadSiteUi().then(ui=>{if(dialog.open&&host.isConnected)disposeProgress=ui.renderFinderStepper(host,current,lang);}).catch(()=>{});
+  }
   dialog.querySelectorAll('[data-finder-close]').forEach(b=>b.onclick=close);
   dialog.querySelector('[data-finder-back]')?.addEventListener('click',()=>{step--;render();});
   dialog.querySelector('h2')?.focus({preventScroll:true});
@@ -73,6 +82,6 @@ export function openCarFinder(dialog,{vehicles,lang='en',details,wa,hydrate}){
   dialog.querySelector('#finderAgain').onclick=()=>{step=0;render();};hydrate();
  }
  const trigger=document.activeElement;
- dialog.onclose=()=>{document.body.classList.remove('finder-open');trigger?.focus?.({preventScroll:true});};
+ dialog.onclose=()=>{disposeProgress?.();disposeProgress=undefined;document.body.classList.remove('finder-open');trigger?.focus?.({preventScroll:true});};
  document.body.classList.add('finder-open');render();dialog.showModal();dialog.querySelector('h2')?.focus();
 }

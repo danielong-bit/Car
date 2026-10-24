@@ -1,0 +1,15 @@
+html body footer#siteFooter.showroom-footer.minimal-footer {padding:56px max(24px,calc((100% - 1160px)/2)) 32px;isolation:isolate}
+.footer-layout{position:relative;z-index:1}
+.footer-center{display:flex;flex-direction:column;align-items:center;gap:22px;padding:16px 0 36px}
+html body #siteFooter.minimal-footer .footer-title{display:flex;flex-direction:column;align-items:center;text-decoration:none}
+.footer-owner-link{font-size:13px;color:var(--muted);text-decoration:none}
+.footer-owner-link:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+.footer-baseline{display:flex;justify-content:space-between;align-items:center;gap:24px;padding-top:26px;border-top:1px dashed var(--line);color:var(--muted)}
+.footer-baseline small{font-size:12px}
+.footer-socials{display:flex;gap:12px;align-items:center}
+.footer-socials a{display:grid;place-items:center;width:40px;height:40px;border-radius:8px;color:inherit}
+.footer-socials img{object-fit:contain;filter:grayscale(1) brightness(.55);opacity:.8}
+.footer-socials a:hover{background:color-mix(in srgb,var(--blue) 9%,transparent)}
+.footer-socials a:hover img{filter:none;opacity:1}
+[data-theme=dark] .footer-socials img{filter:grayscale(1) brightness(0) invert(1);opacity:.7}
+@media(max-width:480px){.footer-baseline{gap:12px;flex-wrap:wrap}.footer-socials{gap:6px}}

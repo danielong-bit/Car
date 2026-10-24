@@ -304,7 +304,7 @@ body .detail-purchase>.purchase-summary{background:linear-gradient(120deg,#fcfdf
 body .inventory-result label{color:var(--muted)}
 @media(min-width:1500px){body .inventory-sort{display:block}}
 /* Small SVG displacement is confined to the glass rim; type remains sharp. */
-@supports (mask-composite:exclude){body .mountain-feature::before,body header#top::before{content:'';position:absolute;inset:0;padding:3px;border-radius:inherit;pointer-events:none;background:linear-gradient(125deg,#ffffff75,#ffffff05 45%,#6b91ac30 70%,#ffffff60);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);filter:url('assets/glass-refraction.svg#rim');mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude}}
+@supports (mask-composite:exclude){body .mountain-feature::before{content:'';position:absolute;inset:0;padding:3px;border-radius:inherit;pointer-events:none;background:linear-gradient(125deg,#ffffff75,#ffffff05 45%,#6b91ac30 70%,#ffffff60);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);filter:url('assets/glass-refraction.svg#rim');mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude}}
 /* finesse · owner-approved warm white / navy / clear blue · 2026-10-19 */
 :root{--page:#faf9f6;--surface:#ffffff;--surface-2:#edf4fc;--line:#dbe4ee;--ink:#102945;--muted:#52657c;--navy:#173e67;--blue:#1f65ad;--blue-hover:#164b83;--mint:#1f65ad;--sky:#1f65ad;--gold:#8b672b;--green:#087c46;--wa:#087c46;--ds-text:var(--ink);--ds-muted:var(--muted);--ds-surface:var(--surface);--ds-border:var(--line)}
 body{font-size:16px;color:var(--ink)}

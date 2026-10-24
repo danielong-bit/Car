@@ -1,0 +1,6 @@
+html body #contact{align-items:start}
+html body #contact .about-image.contact-lanyard-host{position:relative;width:100%;max-width:none;min-height:540px;height:auto;margin-top:calc(-1 * clamp(28px,5vw,64px));overflow:visible;border:0;border-radius:0;background:transparent;box-shadow:none;mask-image:none}
+.contact-lanyard{width:100%}.contact-lanyard-stage{position:relative;height:540px;width:100%;margin-top:7px;color:#fff;outline:none}.contact-lanyard-stage:focus-visible{outline:2px solid var(--price-accent);outline-offset:3px;border-radius:10px}.contact-lanyard-stage>.lanyard{position:absolute;inset:0}
+html body #contact .contact-lanyard-host #profilePhoto{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:block;width:calc(100% - 48px);max-width:300px;height:auto;max-height:none;aspect-ratio:3/4;object-fit:contain;object-position:center;border-radius:12px}
+html body #contact .contact-lanyard-host #profilePhoto[hidden]{display:none!important}
+@media(max-width:700px){html body #contact .about-image.contact-lanyard-host{min-height:430px;max-width:440px;margin-top:-28px}.contact-lanyard-stage{height:430px}html body #contact .contact-lanyard-host #profilePhoto{max-width:250px}}
