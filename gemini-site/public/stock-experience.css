@@ -630,3 +630,47 @@ body #siteFooter .footer-column .footer-workbench-link{display:none}
 @media(max-width:900px){body #siteFooter .footer-glass{padding:30px}body #siteFooter .footer-columns{grid-template-columns:1.4fr .8fr .8fr 1.5fr;gap:22px}}
 @media(max-width:700px){body footer#siteFooter.showroom-footer{padding:48px 16px 20px;min-height:0}body #siteFooter .footer-glass{padding:26px 22px;border-radius:22px}body #siteFooter .footer-columns{grid-template-columns:1fr 1fr;gap:26px 20px}body #siteFooter .footer-brand,body #siteFooter .footer-column:last-child{grid-column:1/-1}body #siteFooter .footer-bottom{flex-direction:column;align-items:flex-start;gap:12px;margin-top:26px;padding-top:20px}}
 @media(prefers-reduced-motion:reduce){body #siteFooter .footer-glass{animation:none}body #siteFooter .footer-video{display:none}}
+
+/* Uniform typography overrides for .eyebrow and <h2> across site stylesheets */
+body .eyebrow,
+html body .eyebrow{
+ font-size:11px!important;
+ font-weight:700!important;
+ letter-spacing:.14em!important;
+ line-height:1.4!important;
+ text-transform:uppercase!important;
+ color:var(--gold,#f6dfa4)!important;
+ margin-bottom:8px!important;
+}
+
+body h2,
+html body h2,
+body .section-heading h2,
+body .about-copy>h2{
+ font-size:clamp(26px,2.8vw,36px)!important;
+ font-weight:700!important;
+ line-height:1.22!important;
+ letter-spacing:-.025em!important;
+ margin-top:0!important;
+ margin-bottom:6px!important;
+}
+
+/* Subtle, thin horizontal rule segmenting main sections with breathing room */
+.section-separator{
+ display:block;
+ border:0!important;
+ height:1px!important;
+ background:linear-gradient(90deg,transparent 0%,var(--line,#232b38) 12%,var(--line,#232b38) 88%,transparent 100%)!important;
+ width:min(1320px,calc(100% - 48px));
+ margin:0 auto!important;
+ opacity:.85;
+ clear:both;
+}
+html[data-theme=dark] .section-separator{
+ background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.1) 12%,rgba(255,255,255,.1) 88%,transparent 100%)!important;
+}
+@media(max-width:768px){
+ .section-separator{
+  width:calc(100% - 32px);
+ }
+}

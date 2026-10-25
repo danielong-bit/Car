@@ -168,11 +168,6 @@ function MobileFilterSheet() {
               {config.sorts.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </section>
-
-          <label className="mobile-filter-featured">
-            <input type="checkbox" checked={draft.featured} onChange={(event) => setDraft((current) => ({ ...current, featured: event.target.checked }))} />
-            <span>{config.labels.featured}</span>
-          </label>
         </div>
 
         <SheetFooter>

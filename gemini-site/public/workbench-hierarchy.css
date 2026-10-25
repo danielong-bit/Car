@@ -1,8 +1,28 @@
 /* Owner navigation: one label per task, a quiet group title, one active row. */
-html body.workbench .wb-sidebar{display:flex!important;flex-direction:column;gap:0;width:244px!important;height:100dvh;padding:28px 18px 20px!important;overflow-y:auto;scrollbar-width:thin}
-html body.workbench .owner-sidebar-brand{padding:0 12px 28px}
-html body.workbench .owner-sidebar-brand .wordmark{font-size:26px;font-weight:800}
-html body.workbench .owner-sidebar-brand .wb-context{margin:13px 0 0;font-size:11px;font-weight:400;letter-spacing:.025em;text-transform:none;color:var(--muted)}
+html body.workbench .wb-sidebar{display:flex!important;flex-direction:column;gap:0;width:244px!important;height:100dvh;padding:26px 18px 20px!important;overflow-y:auto;scrollbar-width:thin;backdrop-filter:blur(16px) saturate(140%)!important;-webkit-backdrop-filter:blur(16px) saturate(140%)!important;background:color-mix(in srgb,var(--surface) 88%,transparent)!important;border-right:1px solid color-mix(in srgb,var(--price-accent) 16%,var(--line))!important;transition:width .24s cubic-bezier(.22,1,.36,1),padding .24s ease,background-color .24s ease}
+html body.workbench .owner-sidebar-brand{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;column-gap:10px!important;row-gap:6px!important;padding:0 6px 22px!important;position:relative!important}
+html body.workbench .owner-sidebar-brand .wordmark{grid-column:1;grid-row:1;display:inline-flex!important;align-items:center!important;gap:10px!important;text-decoration:none!important;font-size:21px!important;font-weight:800!important;color:var(--ink)!important;letter-spacing:-.02em!important;margin:0!important;min-width:0}
+html body.workbench .owner-sidebar-brand .wordmark small{display:block!important;font-size:9px!important;letter-spacing:.16em!important;font-weight:600!important;color:var(--muted)!important;text-transform:uppercase!important}
+html body.workbench .owner-sidebar-brand .wb-context{grid-column:1/-1;grid-row:2;margin:2px 0 0!important;font-size:11px!important;font-weight:400;letter-spacing:.025em;text-transform:none;color:var(--muted)!important}
+html body.workbench .owner-sidebar-toggle{grid-column:2;grid-row:1;display:inline-grid!important;place-items:center!important;width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;max-height:34px!important;padding:0!important;margin:0!important;box-sizing:border-box!important;border-radius:10px!important;border:1px solid var(--line)!important;background:color-mix(in srgb,var(--surface) 90%,transparent)!important;color:var(--ink)!important;cursor:pointer!important;flex-shrink:0!important;line-height:1!important;box-shadow:0 1px 3px rgba(15,23,42,.05)!important;transition:transform .22s cubic-bezier(.22,1,.36,1),background-color .22s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease!important}
+html body.workbench .owner-sidebar-toggle:hover{background:color-mix(in srgb,var(--price-accent) 13%,var(--surface-2))!important;border-color:color-mix(in srgb,var(--price-accent) 55%,var(--line))!important;color:var(--price-accent)!important;transform:scale(1.07)!important;box-shadow:0 6px 16px rgba(15,23,42,.12)!important}
+html body.workbench .owner-sidebar-toggle:active{transform:scale(.95)!important}
+html body.workbench .owner-sidebar-toggle svg{display:block!important;width:16px!important;height:16px!important;margin:0!important;pointer-events:none;transition:transform .25s cubic-bezier(.22,1,.36,1)!important}
+html body.workbench.sidebar-collapsed .owner-sidebar-toggle svg{transform:rotate(180deg)!important}
+html body.workbench.sidebar-collapsed .owner-sidebar-brand{display:flex!important;flex-direction:column!important;align-items:center!important;gap:10px!important;padding:0 0 18px!important}
+html body.workbench.sidebar-collapsed .owner-sidebar-brand .wordmark:before{content:none!important}
+html body.workbench.sidebar-collapsed .owner-sidebar-brand .wordmark>span:not(.brand-logo){display:none!important}
+html body.workbench.sidebar-collapsed .owner-sidebar-brand .brand-logo{display:inline-flex!important}
+html body.workbench.sidebar-collapsed .owner-sidebar-brand .owner-sidebar-toggle{margin:0 auto!important}
+
+/* Dual Logo Switcher for Workbench */
+html body.workbench .brand-logo{display:inline-flex!important;align-items:center!important;flex-shrink:0!important}
+html body.workbench .brand-logo-img{width:28px!important;height:20px!important;object-fit:contain!important}
+html body.workbench .brand-logo-img.logo-dark{display:block!important}
+html body.workbench .brand-logo-img.logo-light{display:none!important}
+html[data-theme="dark"] body.workbench .brand-logo-img.logo-dark{display:none!important}
+html[data-theme="dark"] body.workbench .brand-logo-img.logo-light{display:block!important}
+
 html body.workbench .wb-sidebar nav{display:flex!important;flex:1;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:24px;margin:0;padding:0;overflow:visible}
 html body.workbench .wb-sidebar .owner-nav-group{display:flex;flex-direction:column;gap:4px}
 html body.workbench .wb-sidebar nav .owner-nav-heading{margin:0 0 6px!important;padding:0 12px;font-size:11px!important;font-weight:600;letter-spacing:.075em;line-height:1.4;text-transform:uppercase;color:var(--muted)}
@@ -21,52 +41,170 @@ html body.workbench .owner-sidebar-controls .theme-control{position:static!impor
 html body.workbench .owner-sidebar-controls form,html body.workbench .owner-mobile-controls form{margin:0}
 html body.workbench .owner-logout{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:8px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);font-size:12px;font-weight:500;cursor:pointer}
 html body.workbench .owner-mobile-controls{display:none}
-html body.workbench .wb-main{margin-left:244px!important;width:calc(100% - 244px)!important;max-width:none;padding:32px 36px 80px!important}
-html body.workbench .wb-topbar{align-items:center;padding-bottom:22px}
+
+/* Dynamic Padding/Margin Management, Smooth Anchor Scrolling & Centered CSS Grid Layout on main.wb-main (CSS selector 2) */
+html:has(body.workbench),
+html body.workbench main:nth-of-type(1),
+html body.workbench .wb-main{
+  scroll-behavior:smooth!important;
+}
+html body.workbench .wb-main{
+  --wb-main-pad-top:clamp(24px,3.2vw,44px);
+  --wb-main-pad-x:clamp(18px,3.8vw,48px);
+  --wb-main-pad-bottom:clamp(72px,8vw,104px);
+  --wb-section-gap:clamp(20px,2.4vw,30px);
+  --wb-content-max:1380px;
+  display:grid!important;
+  grid-template-columns:minmax(0,var(--wb-content-max))!important;
+  justify-content:center!important;
+  align-content:start!important;
+  row-gap:var(--wb-section-gap)!important;
+  margin-left:244px!important;
+  width:calc(100% - 244px)!important;
+  max-width:none!important;
+  padding:var(--wb-main-pad-top) var(--wb-main-pad-x) var(--wb-main-pad-bottom)!important;
+  box-sizing:border-box!important;
+  position:relative;
+  z-index:1;
+}
+html body.workbench.sidebar-collapsed .wb-main{
+  margin-left:80px!important;
+  width:calc(100% - 80px)!important;
+}
+html body.workbench .wb-main>*{
+  width:100%;
+  min-width:0;
+  margin-inline:auto;
+}
+html body.workbench #workspaceContent{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  row-gap:var(--wb-section-gap,clamp(20px,2.4vw,30px));
+  width:100%;
+  min-width:0;
+}
+
+/* High-Contrast Form & Checkbox Labels in Bright (Light) and Dark Themes (CSS selector 1) */
+html body.workbench main:nth-of-type(1)>div#workspaceContent:nth-of-type(2)>form#ownerHomepageForm:nth-of-type(1)>div:nth-of-type(3)>label:nth-of-type(2),
+html body.workbench #ownerHomepageForm label.check-field,
+html body.workbench .check-field,
+html body.workbench label.field{
+  color:var(--ink)!important;
+  font-weight:600!important;
+}
+html[data-theme="light"] body.workbench main:nth-of-type(1)>div#workspaceContent:nth-of-type(2)>form#ownerHomepageForm:nth-of-type(1)>div:nth-of-type(3)>label:nth-of-type(2),
+html[data-theme="light"] body.workbench #ownerHomepageForm label.check-field,
+html[data-theme="light"] body.workbench .check-field,
+html[data-theme="light"] body.workbench label.field{
+  color:#0f172a!important;
+}
+html[data-theme="dark"] body.workbench main:nth-of-type(1)>div#workspaceContent:nth-of-type(2)>form#ownerHomepageForm:nth-of-type(1)>div:nth-of-type(3)>label:nth-of-type(2),
+html[data-theme="dark"] body.workbench #ownerHomepageForm label.check-field,
+html[data-theme="dark"] body.workbench .check-field,
+html[data-theme="dark"] body.workbench label.field{
+  color:#f8fafc!important;
+}
+html body.workbench .owner-section-tabs label.check-field,
+html body.workbench .settings-checks label.check-field{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  min-height:42px!important;
+  padding:8px 14px!important;
+  border-radius:10px!important;
+  border:1px solid var(--line)!important;
+  background:var(--surface-2)!important;
+  cursor:pointer!important;
+  transition:border-color .18s ease,background-color .18s ease,transform .18s ease,box-shadow .18s ease!important;
+}
+html body.workbench .owner-section-tabs label.check-field:hover,
+html body.workbench .settings-checks label.check-field:hover{
+  border-color:var(--price-accent)!important;
+  background:var(--surface)!important;
+  transform:translateY(-1px);
+}
+html body.workbench .owner-section-tabs label.check-field:has(input:checked),
+html body.workbench .settings-checks label.check-field:has(input:checked){
+  border-color:var(--mint)!important;
+  background:color-mix(in srgb,var(--mint) 10%,var(--surface))!important;
+  box-shadow:0 2px 10px rgba(16,185,129,.08)!important;
+}
+
+html body.workbench .wb-topbar{align-items:center;padding-bottom:6px;margin:0}
 html body.workbench .wb-topbar .eyebrow,html body.workbench #saveState{display:none}
-html body.workbench .wb-topbar h1{margin:0;font-size:28px;line-height:1.2}
+html body.workbench .wb-topbar h1{margin:0;font-size:clamp(24px,2.4vw,30px);line-height:1.2}
 html body.workbench #exportUpdate{background:var(--surface);color:var(--ink);border-color:var(--line)}
-html body.workbench #wbLocalBanner[data-state=clean]{margin:18px 0 28px;padding:0 2px;min-height:28px;border:0;border-radius:0;background:transparent;color:var(--muted)}
-html body.workbench #wbLocalBanner[data-state=clean] #exportHelp{font-size:12px}
+
+/* Completely hide the Local Save/Export Banner */
+html body.workbench #wbLocalBanner{display:none!important}
+
+/* Executive Command Center Eyebrow & Subtitle Day/Night Theme Visibility (CSS selector 4) */
+html body.workbench .owner-overview-heading .eyebrow,
+html body.workbench .wb-widget-eyebrow,
+html body.workbench .wb-panel .eyebrow,
+html body.workbench .eyebrow{font-size:11px!important;font-weight:750!important;letter-spacing:.14em!important;text-transform:uppercase!important}
+html[data-theme="light"] body.workbench .owner-overview-heading .eyebrow,
+html[data-theme="light"] body.workbench .wb-widget-eyebrow,
+html[data-theme="light"] body.workbench .wb-panel .eyebrow,
+html[data-theme="light"] body.workbench .eyebrow{color:#92400e!important}
+html[data-theme="light"] body.workbench .owner-last-published{color:#475569!important;font-weight:500!important}
+html[data-theme="dark"] body.workbench .owner-overview-heading .eyebrow,
+html[data-theme="dark"] body.workbench .wb-widget-eyebrow,
+html[data-theme="dark"] body.workbench .wb-panel .eyebrow,
+html[data-theme="dark"] body.workbench .eyebrow{color:#fbbf24!important}
+html[data-theme="dark"] body.workbench .owner-last-published{color:#cbd5e1!important}
 html body.workbench .owner-overview-heading{padding:0;gap:16px;align-items:center}
-html body.workbench .wb-main .owner-overview-heading h2{font-size:20px;line-height:1.3;font-weight:700;letter-spacing:-.02em}
+html body.workbench .wb-main .owner-overview-heading h2{font-size:clamp(19px,2vw,22px);line-height:1.3;font-weight:750;letter-spacing:-.02em}
 html body.workbench .owner-last-published{margin:7px 0 0;font-size:12px;color:var(--muted)}
 html body.workbench .owner-overview-heading>.button{min-height:40px;font-size:12px}
-html body.workbench .owner-count-grid{margin:18px 0 26px}
+html body.workbench .owner-count-grid{margin:var(--wb-section-gap,20px) 0}
 html body.workbench .owner-overview .owner-task-grid h3{font-size:16px;margin-bottom:16px}
 html body.workbench .owner-overview .owner-task-list button{font-size:13px;font-weight:500}
 @media(min-width:1001px) and (max-height:800px){
  html body.workbench .wb-sidebar{padding-top:20px!important;padding-bottom:16px!important}
- html body.workbench .owner-sidebar-brand{padding-bottom:20px}
- html body.workbench .owner-sidebar-brand .wb-context{margin-top:8px}
+ html body.workbench .owner-sidebar-brand{padding-bottom:18px!important}
+ html body.workbench .owner-sidebar-brand .wb-context{margin-top:4px!important}
  html body.workbench .wb-sidebar nav{gap:16px}
  html body.workbench .wb-sidebar .owner-nav-group{gap:2px}
  html body.workbench .wb-sidebar nav .owner-nav-heading{margin-bottom:4px!important}
  html body.workbench .wb-sidebar-bottom{margin-top:16px;padding-top:12px;gap:8px}
 }
 @media(max-width:1000px){
- html body.workbench .wb-sidebar{position:relative!important;width:100%!important;max-width:100%;height:auto;padding:18px!important;overflow:visible}
- html body.workbench .owner-sidebar-brand{padding:0}.owner-sidebar-brand .wb-context{display:none}
- html body.workbench .owner-sidebar-brand .wordmark{font-size:23px}
- html body.workbench .wb-sidebar nav{display:flex!important;flex:initial;flex-direction:row!important;flex-wrap:nowrap!important;gap:6px;margin:18px 0 0;padding:0 0 3px;overflow-x:auto;overflow-y:hidden}
+ html body.workbench .wb-sidebar{position:relative!important;width:100%!important;max-width:100%;height:auto;padding:16px 18px!important;overflow:visible;border-right:0!important;border-bottom:1px solid color-mix(in srgb,var(--price-accent) 16%,var(--line))!important}
+ html body.workbench .owner-sidebar-brand{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;padding:0 108px 0 0!important;gap:10px!important}
+ html body.workbench .owner-sidebar-brand .wb-context{display:none!important}
+ /* Hide the desktop rail collapse button on phones/tablets so it never wastes vertical or horizontal space */
+ html body.workbench .owner-sidebar-toggle{display:none!important}
+ html body.workbench .owner-sidebar-brand .wordmark{font-size:21px!important}
+ html body.workbench .wb-sidebar nav{display:flex!important;flex:initial;flex-direction:row!important;flex-wrap:nowrap!important;gap:6px;margin:14px 0 0;padding:0 0 3px;overflow-x:auto;overflow-y:hidden}
  html body.workbench .wb-sidebar .owner-nav-group{display:contents}
  html body.workbench .wb-sidebar nav .owner-nav-heading{display:none}
- html body.workbench .wb-sidebar nav button{flex:0 0 auto;width:auto;min-height:44px;padding:9px 12px;gap:8px}
+ html body.workbench .wb-sidebar nav button{flex:0 0 auto;width:auto;min-height:42px;padding:8px 12px;gap:8px}
  html body.workbench .wb-sidebar nav button .owner-nav-label{display:block!important;font-size:13px}
  html body.workbench .wb-sidebar nav button>.icon{width:16px;height:16px}
  html body.workbench .wb-sidebar-bottom{display:none!important}
- html body.workbench .owner-mobile-controls{display:flex;align-items:center;gap:8px;position:absolute;right:18px;top:16px}
- html body.workbench .owner-mobile-controls .theme-control{position:static!important;margin:0!important;width:44px;height:44px;min-height:44px;padding:10px}
+ html body.workbench .owner-mobile-controls{display:flex;align-items:center;gap:8px;position:absolute;right:18px;top:14px}
+ html body.workbench .owner-mobile-controls .theme-control{position:static!important;margin:0!important;width:40px;height:40px;min-height:40px;padding:8px}
  html body.workbench .owner-mobile-controls .theme-control :is(.theme-label,.theme-track){display:none!important}
- html body.workbench .owner-mobile-controls .owner-logout{min-height:44px}
- html body.workbench .wb-main{margin-left:0!important;width:100%!important;padding:24px 18px 100px!important}
+ html body.workbench .owner-mobile-controls .owner-logout{min-height:40px;padding:6px 12px}
+ html body.workbench .wb-main,
+ html body.workbench.sidebar-collapsed .wb-main{
+   --wb-main-pad-top:clamp(18px,3vw,26px);
+   --wb-main-pad-x:clamp(14px,3.5vw,24px);
+   --wb-main-pad-bottom:clamp(80px,10vw,108px);
+   --wb-section-gap:clamp(16px,2.5vw,22px);
+   margin-left:0!important;
+   width:100%!important;
+   grid-template-columns:minmax(0,1fr)!important;
+   padding:var(--wb-main-pad-top) var(--wb-main-pad-x) var(--wb-main-pad-bottom)!important;
+ }
 }
 @media(max-width:700px){
- html body.workbench .wb-topbar{align-items:stretch;gap:16px}.wb-topbar h1{padding-right:75px}
- html body.workbench .wb-topbar h1{font-size:26px}
+ html body.workbench .wb-topbar{align-items:stretch;gap:14px}
+ html body.workbench .wb-topbar h1{padding-right:0;font-size:24px}
  html body.workbench .owner-overview-heading{align-items:flex-start;flex-direction:row}
- html body.workbench .owner-overview-heading>.button{width:auto;min-height:40px;flex:none;padding:7px 10px}
+ html body.workbench .owner-overview-heading>.button{width:auto;min-height:40px;flex:none;padding:7px 12px}
  html body.workbench .wb-main .owner-overview-heading h2{font-size:18px}
- html body.workbench .owner-sidebar-brand .wordmark{max-width:130px}
+ html body.workbench .owner-sidebar-brand .wordmark{max-width:170px}
  html body.workbench #wbLocalBanner[data-state=clean]{align-items:center;gap:12px;margin:18px 0 24px}
 }

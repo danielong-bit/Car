@@ -150,3 +150,250 @@
 }
 @media(max-width:380px){.purchase-heading .purchase-price-row{align-items:flex-start;flex-direction:column}.context-enquiries{grid-template-columns:1fr}.detail-section-heading h2{font-size:20px}}
 
+/* Same-Window Vehicle Detail Modal · Subtle Backdrop-Blur & Smooth Slide-Up Entrance Animation */
+@keyframes vehicleDetailSlideUp{
+  0%{
+    opacity:0;
+    transform:translate3d(0,28px,0) scale(.985);
+  }
+  100%{
+    opacity:1;
+    transform:translate3d(0,0,0) scale(1);
+  }
+}
+@keyframes vehicleDetailBackdropFade{
+  0%{opacity:0}
+  100%{opacity:1}
+}
+body.vehicle-modal-open{overflow:hidden}
+#vehicleDetailModal,
+dialog#vehicleDetailModal,
+.vehicle-detail-modal{
+  position:fixed;
+  inset:0;
+  width:min(1220px,calc(100vw - 32px));
+  max-width:none;
+  height:calc(100dvh - 28px);
+  max-height:calc(100dvh - 28px);
+  margin:auto;
+  padding:0;
+  border:1px solid var(--line,rgba(255,255,255,.16));
+  border-radius:20px;
+  background:color-mix(in srgb,var(--page,#0b0c0e) 90%,transparent);
+  backdrop-filter:blur(14px) saturate(135%);
+  -webkit-backdrop-filter:blur(14px) saturate(135%);
+  color:var(--ink,#f4f5f7);
+  box-shadow:0 28px 80px rgba(6,12,24,.46),inset 0 1px 0 rgba(255,255,255,.14);
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  z-index:60;
+  opacity:0;
+  transform:translate3d(0,28px,0) scale(.985);
+  transform-origin:center bottom;
+  will-change:transform,opacity;
+  transition:opacity .34s cubic-bezier(.22,1,.36,1),transform .34s cubic-bezier(.22,1,.36,1),overlay .34s cubic-bezier(.22,1,.36,1) allow-discrete,display .34s cubic-bezier(.22,1,.36,1) allow-discrete;
+}
+dialog#vehicleDetailModal:not([open]),
+.vehicle-detail-modal:not([open]){
+  display:none!important;
+  opacity:0;
+  transform:translate3d(0,28px,0) scale(.985);
+}
+dialog#vehicleDetailModal[open],
+.vehicle-detail-modal[open],
+dialog#vehicleDetailModal.is-open,
+.vehicle-detail-modal.is-open{
+  display:block!important;
+  opacity:1;
+  transform:translate3d(0,0,0) scale(1);
+  animation:vehicleDetailSlideUp .36s cubic-bezier(.22,1,.36,1) both;
+}
+@starting-style{
+  dialog#vehicleDetailModal[open],
+  .vehicle-detail-modal[open]{
+    opacity:0;
+    transform:translate3d(0,28px,0) scale(.985);
+  }
+}
+dialog#vehicleDetailModal.is-opening,
+.vehicle-detail-modal.is-opening{
+  opacity:0!important;
+  transform:translate3d(0,28px,0) scale(.985)!important;
+}
+dialog#vehicleDetailModal.is-closing,
+.vehicle-detail-modal.is-closing{
+  opacity:0!important;
+  transform:translate3d(0,20px,0) scale(.988)!important;
+  pointer-events:none;
+  animation:none!important;
+  transition:opacity .22s cubic-bezier(.4,0,.2,1),transform .22s cubic-bezier(.4,0,.2,1)!important;
+}
+#vehicleDetailModal::backdrop,
+dialog#vehicleDetailModal::backdrop,
+.vehicle-detail-modal::backdrop{
+  background:rgba(6,12,22,.58);
+  backdrop-filter:blur(10px) saturate(125%);
+  -webkit-backdrop-filter:blur(10px) saturate(125%);
+  opacity:0;
+  transition:opacity .3s cubic-bezier(.22,1,.36,1),overlay .3s allow-discrete,display .3s allow-discrete;
+}
+dialog#vehicleDetailModal[open]:not(.is-opening):not(.is-closing)::backdrop,
+.vehicle-detail-modal[open]:not(.is-opening):not(.is-closing)::backdrop{
+  opacity:1;
+  animation:vehicleDetailBackdropFade .3s cubic-bezier(.22,1,.36,1) both;
+}
+@starting-style{
+  dialog#vehicleDetailModal[open]::backdrop,
+  .vehicle-detail-modal[open]::backdrop{
+    opacity:0;
+  }
+}
+dialog#vehicleDetailModal.is-closing::backdrop,
+.vehicle-detail-modal.is-closing::backdrop{
+  opacity:0!important;
+  animation:none!important;
+  transition:opacity .2s ease!important;
+}
+#vehicleDetailModal .vehicle-modal-content{
+  width:min(1140px,calc(100% - 48px));
+  margin:0 auto;
+  padding:14px 0 64px;
+  opacity:1;
+  transform:translate3d(0,0,0);
+  transition:opacity .26s cubic-bezier(.22,1,.36,1),transform .26s cubic-bezier(.22,1,.36,1);
+}
+#vehicleDetailModal .vehicle-modal-content.is-transitioning,
+#vehicleDetailModal .vehicle-modal-content.is-loading{
+  opacity:0;
+  transform:translate3d(0,14px,0);
+}
+@media(max-width:800px){
+  dialog#vehicleDetailModal,
+  .vehicle-detail-modal{
+    width:100vw;
+    height:calc(100dvh - 10px);
+    max-height:calc(100dvh - 10px);
+    margin:auto 0 0 0;
+    inset:auto 0 0 0;
+    border-radius:18px 18px 0 0;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  dialog#vehicleDetailModal,
+  .vehicle-detail-modal,
+  dialog#vehicleDetailModal::backdrop,
+  .vehicle-detail-modal::backdrop,
+  #vehicleDetailModal .vehicle-modal-content{
+    animation:none!important;
+    transition:none!important;
+    transform:none!important;
+  }
+}
+
+/* High-Contrast Gallery Left/Right Arrows & Clean Scrollbar-Free Thumbnail Strip */
+html body .gallery-stage .gallery-arrow,
+html body .lightbox-stage .gallery-arrow,
+html body button.gallery-arrow{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:46px!important;
+  height:46px!important;
+  min-width:46px!important;
+  min-height:46px!important;
+  padding:0!important;
+  border-radius:50%!important;
+  background:rgba(10,14,20,.84)!important;
+  border:1.5px solid rgba(255,255,255,.42)!important;
+  color:#ffffff!important;
+  box-shadow:0 6px 20px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.22)!important;
+  backdrop-filter:blur(10px)!important;
+  -webkit-backdrop-filter:blur(10px)!important;
+  font-size:26px!important;
+  font-weight:700!important;
+  line-height:1!important;
+  cursor:pointer;
+  z-index:4;
+  transition:transform .18s cubic-bezier(.22,1,.36,1),background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease!important;
+}
+html body .gallery-arrow svg.gallery-arrow-svg{
+  width:22px;
+  height:22px;
+  stroke:#ffffff!important;
+  stroke-width:2.6;
+  flex-shrink:0;
+  pointer-events:none;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.45));
+}
+html body .gallery-arrow:not(:disabled):hover,
+html body .gallery-arrow:not(:disabled):focus-visible{
+  background:rgba(15,20,28,.96)!important;
+  border-color:var(--champagne,#c8a97e)!important;
+  color:var(--champagne,#c8a97e)!important;
+  transform:translateY(-50%) scale(1.07)!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.7),0 0 0 2px rgba(200,169,126,.28)!important;
+}
+html body .gallery-arrow:not(:disabled):hover svg.gallery-arrow-svg,
+html body .gallery-arrow:not(:disabled):focus-visible svg.gallery-arrow-svg{
+  stroke:var(--champagne,#c8a97e)!important;
+}
+html body .gallery-arrow:not(:disabled):active{
+  transform:translateY(-50%) scale(.96)!important;
+}
+html body .gallery-arrow[hidden]{
+  display:none!important;
+}
+
+/* Hide ugly native horizontal scrollbar under gallery thumbnails & categories while keeping smooth drag/touch scroll */
+html body .detail-thumbs,
+html body .vehicle-gallery .detail-thumbs,
+html body #galleryThumbnails,
+html body .gallery-categories,
+html body .detail-section-nav{
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+  overflow-x:auto;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+}
+html body .detail-thumbs::-webkit-scrollbar,
+html body .vehicle-gallery .detail-thumbs::-webkit-scrollbar,
+html body #galleryThumbnails::-webkit-scrollbar,
+html body .gallery-categories::-webkit-scrollbar,
+html body .detail-section-nav::-webkit-scrollbar{
+  display:none!important;
+  width:0!important;
+  height:0!important;
+  background:transparent!important;
+}
+html body #galleryThumbnails{
+  display:flex;
+  gap:10px;
+  padding:12px 2px 4px!important;
+  cursor:grab;
+  user-select:none;
+}
+html body #galleryThumbnails.is-dragging{
+  cursor:grabbing;
+  scroll-behavior:auto;
+}
+html body .vehicle-gallery .detail-thumbs button{
+  flex:0 0 86px;
+  border-radius:9px;
+  border:2px solid var(--line);
+  opacity:.72;
+  transition:opacity .18s ease,transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+html body .vehicle-gallery .detail-thumbs button:hover{
+  opacity:.95;
+  transform:translateY(-1px);
+}
+html body .vehicle-gallery .detail-thumbs button[aria-pressed=true]{
+  opacity:1;
+  border-color:var(--mint,#36b37e)!important;
+  box-shadow:0 0 0 1.5px var(--mint,#36b37e),0 4px 12px rgba(0,0,0,.25)!important;
+}

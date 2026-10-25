@@ -1,4 +1,5 @@
 import ClickSpark from "./components/react-bits/ClickSpark";
+import GhostFibers from "./components/react-bits/GhostFibers";
 import {DashboardWelcome} from './dashboard-welcome';
 import * as React from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -26,6 +27,25 @@ declare global {
     dannyOwnerCounts?: OwnerCounts;
     dannyWorkbenchShowToast?: (options: ToastOptions) => void;
   }
+}
+
+function useWorkbenchTheme(): "light" | "dark" {
+  const [theme, setTheme] = React.useState<"light" | "dark">(() =>
+    document.documentElement.dataset.theme === "dark" ? "dark" : "light"
+  );
+  React.useEffect(() => {
+    const sync = () => {
+      setTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+    };
+    const observer = new MutationObserver(sync);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    window.addEventListener("danny:theme", sync);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("danny:theme", sync);
+    };
+  }, []);
+  return theme;
 }
 
 function SwipeableVehicle({ host, row, mount }: { host: HTMLElement; row: HTMLElement; mount: HTMLElement }) {
@@ -58,15 +78,15 @@ function SwipeableVehicle({ host, row, mount }: { host: HTMLElement; row: HTMLEl
   return <SwipeRow
     label={`Actions for vehicle ${row.querySelector(".wb-vehicle code")?.textContent || ""}`}
     actions={[
-      { id: "photos", label: "Photos", color: "#245bc7" },
-      { id: "edit", label: "Edit", color: "#17365d" },
+      { id: "photos", label: "Photos", color: "#8a683b" },
+      { id: "edit", label: "Edit", color: "#176b4a" },
     ]}
     fullSwipe={false}
     height={height}
     radius={10}
     actionWidth={78}
-    drawerColor="#17365d"
-    actionColor="#245bc7"
+    drawerColor="#176b4a"
+    actionColor="#8a683b"
     rowColor="var(--surface)"
     textColor="var(--ink)"
     onAction={(action: { id: string }) => dispatchAction(action.id === "photos" ? "photos" : "edit")}
@@ -111,6 +131,8 @@ function ToastStack() {
 function WorkbenchUI() {
   const [pending, setPending] = React.useState<PendingConfirm | null>(null);
   const resolver = React.useRef<((confirmed: boolean) => void) | null>(null);
+  const theme = useWorkbenchTheme();
+  const isLight = theme === "light";
 
   React.useEffect(() => {
     window.dannyConfirmAction = (options) => new Promise((resolve) => {
@@ -201,7 +223,36 @@ function WorkbenchUI() {
   };
 
   return <>
-    <ClickSpark sparkColor={["#245bc7","#81aaff"]} sparkCount={7} sparkSize={9} sparkRadius={24} duration={420} style={{position:"fixed",inset:0,zIndex:10000,pointerEvents:"none"}}>{null}</ClickSpark>
+    <div className="wb-ambient-bg" aria-hidden="true">
+      <GhostFibers
+        dpr={1}
+        lightMode={isLight}
+        glowColor={isLight ? "#8a683b" : "#c8a97e"}
+        lineColor={isLight ? "#176b4a" : "#e2c8a0"}
+        secondaryColor={isLight ? "#176b4a" : "#36b37e"}
+        speed={0.32}
+        threads={48}
+        density={0.65}
+        particles={0.35}
+        sparkle={0.4}
+        glow={isLight ? 0.25 : 0.65}
+        brightness={isLight ? 0.28 : 0.48}
+        vignette={0.45}
+        grain={0.03}
+        mouseInteraction={true}
+        hoverEffect="focus"
+        mouseStrength={0.55}
+        pulseOnClick={true}
+      />
+    </div>
+    <ClickSpark
+      sparkColor={isLight ? ["#8a683b", "#176b4a"] : ["#c8a97e", "#36b37e"]}
+      sparkCount={7}
+      sparkSize={9}
+      sparkRadius={24}
+      duration={420}
+      style={{position:"fixed",inset:0,zIndex:10000,pointerEvents:"none"}}
+    >{null}</ClickSpark>
     <DashboardWelcome/>
     <ToastStack />
     <AlertDialog open={Boolean(pending)} onOpenChange={(open) => { if (!open) close(false); }}>

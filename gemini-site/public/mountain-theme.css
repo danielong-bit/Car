@@ -457,3 +457,46 @@ body .contact-block.location-block .location-actions a,body .contact-block.locat
 body .contact-block.location-block .location-actions a.location-directions{background:#1f65ad;color:white;border-color:#1f65ad}
 body .compare-table img.wa-brand{width:22px;height:22px;aspect-ratio:1;object-fit:contain;margin:0;padding:2px;display:inline-block;max-width:none;border-radius:50%}
 body .compare-table .compare-head-actions .button{display:inline-flex;gap:7px;min-height:40px;height:auto;overflow:visible;white-space:nowrap}
+
+/* Uniform typography overrides for .eyebrow and <h2> */
+body .eyebrow,
+html body .eyebrow{
+ font-size:11px!important;
+ font-weight:700!important;
+ letter-spacing:.14em!important;
+ line-height:1.4!important;
+ text-transform:uppercase!important;
+ margin-bottom:8px!important;
+}
+
+body h2,
+html body h2,
+body .section-heading h2,
+body .about-copy>h2{
+ font-size:clamp(26px,2.8vw,36px)!important;
+ font-weight:700!important;
+ line-height:1.22!important;
+ letter-spacing:-.025em!important;
+ margin-top:0!important;
+ margin-bottom:6px!important;
+}
+
+/* Subtle, thin horizontal rule segmenting main sections with breathing room */
+.section-separator{
+ display:block;
+ border:0!important;
+ height:1px!important;
+ background:linear-gradient(90deg,transparent 0%,var(--line,#d3dfe7) 12%,var(--line,#d3dfe7) 88%,transparent 100%)!important;
+ width:min(1320px,calc(100% - 48px));
+ margin:0 auto!important;
+ opacity:.85;
+ clear:both;
+}
+html[data-theme=dark] .section-separator{
+ background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.1) 12%,rgba(255,255,255,.1) 88%,transparent 100%)!important;
+}
+@media(max-width:768px){
+ .section-separator{
+  width:calc(100% - 32px);
+ }
+}

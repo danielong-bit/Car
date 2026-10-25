@@ -19,8 +19,78 @@ const PRIMARY_KPIS=['available','reserved','sold','draft'];
 let saveQueue=Promise.resolve();
 let serverRevision=0,cloudReady=false,publishedRevision=0,cloudStatus='',lastPublishedAt=null,pendingDraftChanges=true;
 let doc,editing,view='overview',filter='all',issueFilter='',query='',make='',year='',sort='newest',cards=false,moreFilters=false,selection=new Set(),busy=false,toastTimer,editorDirty=false;
+let overviewChartTab='brands';
+let overviewActivityFilter='all';
+let overviewSpotlightId='';
 let draftMeta={updatedAt:null,exportFingerprint:null,exportGeneratedAt:null};
 const content=$('#workspaceContent');
+const ACTIVITY_STORAGE_KEY='danny-wb-activity-log';
+function readActivityLog(){
+ try{
+  const raw=JSON.parse(localStorage.getItem(ACTIVITY_STORAGE_KEY)||'[]');
+  return Array.isArray(raw)?raw:[];
+ }catch{return [];}
+}
+function recordActivityLog(entry){
+ try{
+  const current=readActivityLog();
+  const item={
+   id:'act-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),
+   at:new Date().toISOString(),
+   ...entry
+  };
+  const updated=[item,...current].slice(0,24);
+  localStorage.setItem(ACTIVITY_STORAGE_KEY,JSON.stringify(updated));
+  return item;
+ }catch{return null;}
+}
+function buildRecentActivities(vehicles){
+ const logged=readActivityLog();
+ const seeded=[];
+ const activeCars=(vehicles||[]).filter(v=>v&&v.status!=='archived');
+ activeCars.slice(0,6).forEach((v,idx)=>{
+  const price=Number(v.priceRm)||0;
+  const title=`${v.year||v.manufactureYear||''} ${v.make||''} ${v.model||''}`.trim();
+  if(idx%2===0&&price>0){
+   const delta=idx===0?-3000:idx===2?2500:-2000;
+   const prevPrice=price-delta;
+   seeded.push({
+    id:'seed-price-'+v.id,
+    vehicleId:v.id,
+    stockId:v.stockId||'DRS',
+    title,
+    cover:v.coverImageUrl||v.gallery?.[0]?.url||'',
+    kind:'price',
+    prevPrice,
+    nextPrice:price,
+    delta,
+    status:v.status,
+    timeLabel:idx===0?'Just updated':'Earlier today'
+   });
+  }else{
+   const prevStatus=v.status==='reserved'?'available':v.status==='sold'?'reserved':'draft';
+   seeded.push({
+    id:'seed-status-'+v.id,
+    vehicleId:v.id,
+    stockId:v.stockId||'DRS',
+    title,
+    cover:v.coverImageUrl||v.gallery?.[0]?.url||'',
+    kind:'status',
+    prevStatus,
+    nextStatus:v.status,
+    priceRm:price,
+    status:v.status,
+    timeLabel:idx===1?'2 hrs ago':'Recent sync'
+   });
+  }
+ });
+ const formattedLogged=logged.map(item=>{
+  const mins=Math.max(0,Math.round((Date.now()-new Date(item.at).getTime())/60000));
+  const timeLabel=mins<1?'Just now':mins<60?`${mins}m ago`:`${Math.round(mins/60)}h ago`;
+  return {...item,timeLabel};
+ });
+ return [...formattedLogged,...seeded].slice(0,10);
+}
 function staticWbSrc(u){
  const p=String(u||'');
  if(!p)return '';if(p.startsWith('/assets/uploads/'))return p;
@@ -99,6 +169,7 @@ async function changeVehicleStatus(select){const vehicle=doc?.vehicles.find(item
 async function archiveVehicle(vehicleId){if(busy)return toast('Please wait until the current file operation finishes.');const vehicle=doc?.vehicles.find(item=>item.id===vehicleId);if(!vehicle||vehicle.status==='archived')return;const previous=vehicle.status;vehicle.status='archived';try{await persist();render();toast(vehicle.stockId+' archived.');}catch(error){await saveStatusRollback(vehicleId,previous);render();toast(error.message,true);}}
 document.addEventListener('danny:workbench-row-action',event=>{const {id,action}=event.detail||{};if(id&&(action==='edit'||action==='photos'))openVehicleEditor(id,action==='photos');});
 document.addEventListener('danny:workbench-archive-request',event=>{const id=event.detail?.id;if(id)void archiveVehicle(id);});
+document.addEventListener('danny:workbench-filter-status',event=>{const status=event.detail?.status;if(status&&!busy){filter=status;issueFilter='';make='';year='';query='';activate('inventory');}});
 document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=async()=>{if(busy)return;if(editorDirty&&!await confirmAction('Leave unsaved changes?','Save this vehicle first to keep your edits. Leave the editor anyway?'))return;if(b.dataset.nav==='edit')newVehicle();else activate(b.dataset.nav);});
 const FIELD_GUIDES={
  stockId:{placeholder:'e.g. H89451 or DRS-2026-09',hint:'Unique stock code (letters, numbers, - or _). Click “⚡ Auto ID” to generate automatically.'},
@@ -231,7 +302,7 @@ function inventory(){
  <div class="wb-toolbar ${moreFilters?'expanded':''}"><label class="search-field">${icon('search')}<input id="stockSearch" type="search" placeholder="Search stock ID, make, model, RS / RF…" value="${esc(query)}" aria-label="Search inventory"></label><label class="compact-field"><span>Make</span><select id="makeFilter"><option value="">All makes</option>${[...new Set(doc.vehicles.map(v=>v.make).filter(Boolean))].sort().map(v=>`<option ${make===v?'selected':''}>${esc(v)}</option>`).join('')}</select></label><label class="compact-field"><span>Sort</span><select id="stockSort">${[['price-up','Price: low to high'],['price-down','Price: high to low'],['mileage','Lowest mileage'],['newest','Newest year']].map(([v,t])=>`<option value="${v}" ${sort===v?'selected':''}>${t}</option>`).join('')}</select></label><button type="button" class="button quiet" data-action="toggle-filters" aria-expanded="${moreFilters}">More Filters ${moreFilters?'▴':'▾'}</button><button type="button" class="button quiet view-toggle" data-action="toggle-view">${cards?'Table view':'Card view'}</button></div>
  ${moreFilters?`<div class="wb-more-filters"><label class="compact-field"><span>All Statuses (incl. Archived / Unavailable)</span><select id="statusSelectFilter"><option value="all" ${filter==='all'?'selected':''}>All active (excl. Archived)</option>${STATUSES.map(s=>`<option value="${s}" ${filter===s?'selected':''}>${statusName(s)} (${totals[s]||0})</option>`).join('')}</select></label><label class="compact-field"><span>Year</span><select id="yearFilter"><option value="">All years</option>${years.map(y=>`<option value="${y}" ${String(year)===String(y)?'selected':''}>${y}</option>`).join('')}</select></label><label class="compact-field"><span>Stock Check Filter</span><select id="issueSelectFilter"><option value="" ${!issueFilter?'selected':''}>All vehicles</option><option value="missing-photo" ${issueFilter==='missing-photo'?'selected':''}>Missing cover photo (${missingPhotoCars.length})</option><option value="example-grade" ${issueFilter==='example-grade'?'selected':''}>Using example grade/report (${exampleCars.length})</option></select></label><button type="button" class="button quiet" data-action="reset-filters">Reset all filters</button></div>`:''}
  ${selection.size?`<div class="bulk-bar"><strong>${selection.size} selected</strong><label>Change status <select id="bulkStatus"><option value="">Choose…</option>${STATUSES.map(s=>`<option value="${s}">${statusName(s)}</option>`).join('')}</select></label><button type="button" class="text-button" data-action="bulk-clear">Clear</button></div>`:''}
- <div class="wb-inventory ${cards?'card-layout':''}"><div class="wb-table-head"><label><input type="checkbox" id="selectAll" ${filtered.length&&filtered.every(v=>selection.has(v.id))?'checked':''} aria-label="Select all shown vehicles"></label><span>VEHICLE / STOCK ID</span><span>STATUS & BADGES</span><span>PRICE / LOCATION</span><span>PHOTOS</span><span>ACTIONS</span></div>${filtered.map(v=>{const sp=vehicleSpecialBadges(v,doc.homepage),cSrc=staticWbSrc(v.coverImageUrl);return `<div class="wb-swipe-host" data-swipe-host><article class="wb-row" data-id="${esc(v.id)}"><label class="row-check"><input data-select="${esc(v.id)}" type="checkbox" ${selection.has(v.id)?'checked':''} aria-label="Select ${esc(v.stockId)}"></label><button type="button" class="wb-vehicle" data-edit="${esc(v.id)}">${v.coverImageUrl?`<img ${cSrc?`src="${esc(cSrc)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="lazy" decoding="async">`:`<span class="wb-photo-placeholder">${icon('photo')}</span>`}<span><strong>${v.year||''} ${esc(v.make)} ${esc(v.model)}</strong><small>${esc(v.variant||v.body)} · ${esc(v.transmission)}</small><code>${esc(v.stockId)}</code></span></button><div class="row-status-group"><label class="row-status"><span class="sr-only">Status for ${esc(v.stockId)}</span><select class="status-pill ${v.status}" data-status="${esc(v.id)}">${STATUSES.map(s=>`<option value="${s}" ${v.status===s?'selected':''}>${statusName(s)}</option>`).join('')}</select></label>${sp.length?`<div class="wb-badge-chips">${sp.map(b=>`<span class="wb-mini-badge">${esc(b)}</span>`).join('')}</div>`:''}</div><div class="row-price"><strong>${money(v.priceRm)}</strong><small>${esc(v.location||'Location not set')}</small></div><button type="button" class="photo-count" data-photos="${esc(v.id)}">${icon('photo')} ${v.gallery.length}</button><div class="row-actions"><button type="button" data-edit="${esc(v.id)}">Edit</button><details><summary aria-label="More actions for ${esc(v.stockId)}">•••</summary><div class="row-menu"><button type="button" data-duplicate="${esc(v.id)}">Duplicate as draft</button><div class="archive-fuse-mount" data-archive-mount="${esc(v.id)}"></div><button type="button" data-delete="${esc(v.id)}" class="danger-text">Delete</button></div></details></div></article></div>`;}).join('')||`<div class="empty-state"><h3>${doc.vehicles.length?'No matching vehicles':'No vehicles in inventory yet'}</h3><p>${doc.vehicles.length?'Try another search or clear the active filter to see your collection.':'Add your first vehicle or restore a JSON backup from Website Settings.'}</p><button type="button" class="button quiet" data-action="${doc.vehicles.length?'reset-filters':'new'}">${doc.vehicles.length?'Reset filters':'+ Add first vehicle'}</button></div>`}</div></section>`;
+ <div class="wb-inventory ${cards?'card-layout':''}"><div class="wb-table-head"><label><input type="checkbox" id="selectAll" ${filtered.length&&filtered.every(v=>selection.has(v.id))?'checked':''} aria-label="Select all shown vehicles"></label><span>VEHICLE / STOCK ID</span><span>STATUS &amp; QUICK SWITCH</span><span>PRICE (RM) / LOCATION</span><span>PHOTOS</span><span>ACTIONS</span></div>${filtered.map(v=>{const sp=vehicleSpecialBadges(v,doc.homepage),cSrc=staticWbSrc(v.coverImageUrl);return `<div class="wb-swipe-host" data-swipe-host><article class="wb-row" data-id="${esc(v.id)}"><label class="row-check"><input data-select="${esc(v.id)}" type="checkbox" ${selection.has(v.id)?'checked':''} aria-label="Select ${esc(v.stockId)}"></label><button type="button" class="wb-vehicle" data-edit="${esc(v.id)}">${v.coverImageUrl?`<img ${cSrc?`src="${esc(cSrc)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="lazy" decoding="async">`:`<span class="wb-photo-placeholder">${icon('photo')}</span>`}<span><strong>${v.year||''} ${esc(v.make)} ${esc(v.model)}</strong><small>${esc(v.variant||v.body)} · ${esc(v.transmission)}${v.auctionGrade?` · Grade ${esc(v.auctionGrade)}${esc(v.interiorGrade||'')}`:''}</small><code>${esc(v.stockId)}</code></span></button><div class="row-status-group"><div class="quick-status-pills" role="group" aria-label="Quick status for ${esc(v.stockId)}">${[['available','Available'],['reserved','Booked'],['sold','Sold']].map(([st,lbl])=>`<button type="button" class="quick-status-btn ${v.status===st?'is-active '+st:''}" data-quick-status="${esc(v.id)}" data-status-val="${st}">${lbl}</button>`).join('')}</div><label class="row-status"><span class="sr-only">Status for ${esc(v.stockId)}</span><select class="status-pill ${v.status}" data-status="${esc(v.id)}">${STATUSES.map(s=>`<option value="${s}" ${v.status===s?'selected':''}>${statusName(s)}</option>`).join('')}</select></label>${sp.length?`<div class="wb-badge-chips">${sp.map(b=>`<span class="wb-mini-badge">${esc(b)}</span>`).join('')}</div>`:''}</div><div class="row-price"><label class="quick-price-field" aria-label="Price RM for ${esc(v.stockId)}"><span class="quick-price-prefix">RM</span><input type="number" min="0" step="1000" class="quick-price-input" data-quick-price="${esc(v.id)}" value="${v.priceRm??''}" placeholder="Enquire"></label><small>${esc(v.location||'Glenmarie')}</small></div><button type="button" class="photo-count" data-photos="${esc(v.id)}">${icon('photo')} ${v.gallery.length}</button><div class="row-actions"><button type="button" data-edit="${esc(v.id)}">Edit</button><details><summary aria-label="More actions for ${esc(v.stockId)}">•••</summary><div class="row-menu"><button type="button" data-duplicate="${esc(v.id)}">Duplicate as draft</button><div class="archive-fuse-mount" data-archive-mount="${esc(v.id)}"></div><button type="button" data-delete="${esc(v.id)}" class="danger-text">Delete</button></div></details></div></article></div>`;}).join('')||`<div class="empty-state"><h3>${doc.vehicles.length?'No matching vehicles':'No vehicles in inventory yet'}</h3><p>${doc.vehicles.length?'Try another search or clear the active filter to see your collection.':'Add your first vehicle or restore a JSON backup from Website Settings.'}</p><button type="button" class="button quiet" data-action="${doc.vehicles.length?'reset-filters':'new'}">${doc.vehicles.length?'Reset filters':'+ Add first vehicle'}</button></div>`}</div></section>`;
 }
 function editor(){
  const activeTags=new Set((editing.specialBadges||[]).map(t=>String(t).toUpperCase()));
@@ -264,11 +335,10 @@ function editor(){
    </div>
   </details>
  </section>
- <section class="wb-panel form-section"><div class="form-section-title"><span>01</span><div><h3>Basic Information</h3><p>Core vehicle identity, pricing, status, and optional RS / RF / LOW KM card badges.</p></div></div><div class="form-grid">${field('Stock ID','stockId','text',null,true,`<button type="button" class="field-quick-btn" data-action="auto-stock-id">⚡ Auto ID</button>`)}${field('Make','make','text',null,true)}${field('Model','model','text',null,true)}${field('Variant (e.g. RS, RF, Type R)','variant')}${field('Manufacture year','manufactureYear','number')}${field('Price (RM)','priceRm','number')}${field('Mileage (km)','mileageKm','number')}${field('Status','status','select',STATUSES,true)}${field('Showroom location','location')}${field('Transmission','transmission','select',['Auto','Manual'])}${field('Body type','body','select',['','MPV','SUV','Sedan','Wagon','Coupe','Hatchback','Convertible','Pickup'])}${field('Condition','conditionType','select',['Recond','Pre-owned','Consignment'])}</div>
- <div class="badge-picker-block"><div class="badge-picker-head"><strong>Card Highlight Badges (RS, RF, LOW KM)</strong><small>Shown on homepage vehicle cards replacing the generic “Available” badge.</small></div><div class="badge-tag-grid">${SPECIAL_TAGS.map(tag=>`<label class="badge-tag-option"><input type="checkbox" name="specialBadgeTag" value="${esc(tag)}" ${activeTags.has(tag)||(tag==='LOW KM'&&editing.lowKm)?'checked':''}><span>${esc(tag)}</span></label>`).join('')}</div><div class="form-grid" style="margin-top:12px">${field('Custom badge label (optional, e.g. MUGEN / EDITION 1)','badgeLabel')}<label class="check-field" style="align-self:end"><input type="checkbox" name="lowKm" ${editing.lowKm||(editing.mileageKm!=null&&editing.mileageKm<=25000)?'checked':''}> Highlight as Low Mileage (LOW KM badge)</label></div></div>
- <p class="muted">Leave Price blank to display “Enquire” (valid business state). Booked vehicles invite enquiries about similar stock.</p></section>
+ <section class="wb-panel form-section"><div class="form-section-title"><span>01</span><div><h3>Core Vehicle Identity &amp; Pricing</h3><p>Essential showroom details: Stock ID, Make, Model, Year, Price, Mileage, Status, and Grade.</p></div></div><div class="form-grid">${field('Stock ID','stockId','text',null,true,`<button type="button" class="field-quick-btn" data-action="auto-stock-id">⚡ Auto ID</button>`)}${field('Make','make','text',null,true)}${field('Model','model','text',null,true)}${field('Variant (e.g. RS, RF, Type R, Z Premier)','variant')}${field('Manufacture year','manufactureYear','number')}${field('Price (RM)','priceRm','number')}${field('Mileage (km)','mileageKm','number')}${field('Status','status','select',STATUSES,true)}${field('Auction grade','auctionGrade','select',GRADES)}${field('Interior grade','interiorGrade','select',INTERIORS)}${field('Exterior colour','exteriorColor')}${field('Showroom location','location')}</div>
+ <p class="muted">Leave Price blank to display “Enquire”. Booked vehicles invite enquiries about similar stock.</p></section>
  <section class="wb-panel form-section" id="photosSection"><div class="form-section-title"><span>02</span><div><h3>Vehicle Photos (Cover &amp; 1/N Gallery)</h3><p>Photo #1 is the cover image. Buyers swipe 1/12 → 12/12 on mobile and tap to enlarge.</p></div><span class="count">${editing.gallery.length} photos</span></div><label class="upload-zone" id="photoDrop">${icon('photo')}<strong>Drop photos here, or choose files</strong><span>JPG, PNG, WebP · compressed to 1920px WebP · saved to your media library</span><input id="photoFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple></label><div id="uploadProgress" aria-live="polite"></div><div class="photo-editor-grid">${editing.gallery.map((m,i)=>{const mSrc=staticWbSrc(m.url);return `<article class="photo-tile"><div><img ${mSrc?`src="${esc(mSrc)}" `:''}data-source="${esc(m.url)}" alt="Photo ${i+1}" loading="lazy" decoding="async">${i===0?'<span class="cover-label">Cover photo</span>':`<span class="cover-label" style="background:#080b10cc;color:#f8fafc">${i+1}/${editing.gallery.length}</span>`}</div><label class="photo-category-field">Photo category<select data-media-category="${i}">${[['exterior','Exterior'],['interior','Interior'],['engine','Engine'],['details','Details']].map(([key,name])=>`<option value="${name}" ${photoCategory(m.category)===key?'selected':''}>${name}</option>`).join('')}</select></label><div class="photo-actions"><button type="button" data-cover="${i}" ${i===0?'disabled':''}>Set cover</button><button type="button" data-move="${i}" data-step="-1" ${i===0?'disabled':''} aria-label="Move photo ${i+1} left">←</button><button type="button" data-move="${i}" data-step="1" ${i===editing.gallery.length-1?'disabled':''} aria-label="Move photo ${i+1} right">→</button><label class="replace-photo">Replace<input type="file" accept="image/jpeg,image/png,image/webp" data-replace="${i}"></label><button type="button" data-remove="${i}" class="danger-text">Remove</button></div></article>`;}).join('')}</div></section>
- <details class="wb-panel form-section" open><summary><span class="form-section-title"><span>03</span><span><strong>Grades, Specs, Auto-Copy &amp; Walkthrough Video</strong><small>Auction &amp; interior grades, engine specs, 1-click feature chips, and auto-generated showroom copy.</small></span></span></summary><div class="form-grid">${field('Auction grade','auctionGrade','select',GRADES)}${field('Interior grade','interiorGrade','select',INTERIORS)}${field('Auction house','auctionHouse')}${field('Registration year','registrationYear','number')}${field('Engine capacity (cc)','engineCc','number')}${field('Engine description','engine')}${field('Fuel type','fuelType','select',['','Petrol','Diesel','Hybrid','Electric'])}${field('Exterior colour','exteriorColor')}${field('Interior colour','interiorColor')}${field('Chassis / Frame No. / VIN (real vehicle number)','chassisNumber')}${field('Chassis model code (e.g. FL5)','chassisCode')}${field('Warranty','warrantyInfo','text',null,false,`<span class="field-quick-group"><button type="button" class="field-quick-btn" data-warranty-preset="Up to 5-Year Warranty (Engine, Gearbox, ECU &amp; Steering Rack)">5-Yr</button><button type="button" class="field-quick-btn" data-warranty-preset="Up to 7-Year / Unlimited Mileage Warranty Available">7-Yr</button></span>`)}</div><label class="check-field"><input type="checkbox" name="conditionExample" ${editing.conditionExample?'checked':''}> Show example grade &amp; demonstration report notice</label><p class="muted">New vehicles default to off. Legacy demo cars keep this enabled until a real grade or auction sheet is attached.</p><label class="check-field"><input type="checkbox" name="gradeVerified" ${editing.gradeVerified?'checked':''}> Auction grade checked against the original report</label><label class="check-field"><input type="checkbox" name="isFeatured" ${editing.isFeatured?'checked':''}> Feature on the homepage</label><div class="form-grid wide">${field('Condition notes','conditionNotes','textarea',null,false,`<button type="button" class="field-quick-btn" data-action="auto-copy">✨ Auto-Write</button>`)}${field('Description','description','textarea',null,false,`<button type="button" class="field-quick-btn" data-action="auto-copy">✨ Auto-Write</button>`)}<div class="field"><span class="field-label-row"><span>Features / options (one per line — click chips below to add/remove)</span></span><div class="wb-feature-chips">${QUICK_FEATURES.map(f=>`<button type="button" class="wb-feature-chip ${currentFeatures.has(f)?'is-active':''}" data-toggle-feature="${esc(f)}">${currentFeatures.has(f)?'✓ ':'+ '}${esc(f)}</button>`).join('')}</div><textarea name="features" rows="5" placeholder="e.g.&#10;Sunroof / Panoramic Roof&#10;360° Surround Camera&#10;Apple CarPlay &amp; Android Auto">${esc(editing.features.join('\n'))}</textarea><small class="field-hint">Click any chip above to toggle common recond features, or type one feature per line.</small></div><div class="field-stack"><label class="field">Danny's TikTok explanation<input name="presenterUrl" type="url" value="${esc(editing.presenter?.url||'')}" placeholder="https://www.tiktok.com/@dannyongg/video/…"><small class="field-hint">Optional — embeds Danny's TikTok walkthrough video on the car detail page.</small></label><label class="field" style="margin-top:14px">Facebook video fallback<input name="presenterFacebook" type="url" value="${esc(editing.presenter?.facebook||'')}" placeholder="https://www.facebook.com/reel/…"><small class="field-hint">Optional Facebook Reel link shown alongside TikTok.</small></label></div></div></details><div class="editor-save"><span id="editorError" role="alert">Save and go live updates this vehicle only. Other drafts stay private.</span><div><button type="button" class="button quiet" data-action="preview-card">Preview card</button><button type="button" class="button quiet" data-action="save-draft">Save as draft</button><button type="submit" class="button" id="saveVehicle">Save and go live ${icon('check')}</button></div></div></form>`;
+ <details class="wb-panel form-section"><summary><span class="form-section-title"><span>03</span><span><strong>Optional Specifications, Badges, Showroom Copy &amp; Walkthrough Video</strong><small>Expand when you want to customize body type, engine specs, feature chips, or TikTok video.</small></span></span></summary><div class="form-grid">${field('Transmission','transmission','select',['Auto','Manual'])}${field('Body type','body','select',['','MPV','SUV','Sedan','Wagon','Coupe','Hatchback','Convertible','Pickup'])}${field('Condition','conditionType','select',['Recond','Pre-owned','Consignment'])}${field('Auction house','auctionHouse')}${field('Registration year','registrationYear','number')}${field('Engine capacity (cc)','engineCc','number')}${field('Engine description','engine')}${field('Fuel type','fuelType','select',['','Petrol','Diesel','Hybrid','Electric'])}${field('Interior colour','interiorColor')}${field('Chassis / Frame No. / VIN (real vehicle number)','chassisNumber')}${field('Chassis model code (e.g. FL5)','chassisCode')}${field('Warranty','warrantyInfo','text',null,false,`<span class="field-quick-group"><button type="button" class="field-quick-btn" data-warranty-preset="Up to 5-Year Warranty (Engine, Gearbox, ECU &amp; Steering Rack)">5-Yr</button><button type="button" class="field-quick-btn" data-warranty-preset="Up to 7-Year / Unlimited Mileage Warranty Available">7-Yr</button></span>`)}</div><div class="badge-picker-block"><div class="badge-picker-head"><strong>Optional Trim &amp; Highlight Tags</strong><small>Stored with the vehicle for search &amp; detail view.</small></div><div class="badge-tag-grid">${SPECIAL_TAGS.map(tag=>`<label class="badge-tag-option"><input type="checkbox" name="specialBadgeTag" value="${esc(tag)}" ${activeTags.has(tag)||(tag==='LOW KM'&&editing.lowKm)?'checked':''}><span>${esc(tag)}</span></label>`).join('')}</div><div class="form-grid" style="margin-top:12px">${field('Custom badge label (optional, e.g. MUGEN / EDITION 1)','badgeLabel')}<label class="check-field" style="align-self:end"><input type="checkbox" name="lowKm" ${editing.lowKm||(editing.mileageKm!=null&&editing.mileageKm<=25000)?'checked':''}> Highlight as Low Mileage (LOW KM)</label></div></div><label class="check-field"><input type="checkbox" name="conditionExample" ${editing.conditionExample?'checked':''}> Show example grade &amp; demonstration report notice</label><label class="check-field"><input type="checkbox" name="gradeVerified" ${editing.gradeVerified?'checked':''}> Auction grade checked against the original report</label><label class="check-field"><input type="checkbox" name="isFeatured" ${editing.isFeatured?'checked':''}> Feature on the homepage</label><div class="form-grid wide">${field('Condition notes','conditionNotes','textarea',null,false,`<button type="button" class="field-quick-btn" data-action="auto-copy">✨ Auto-Write</button>`)}${field('Description','description','textarea',null,false,`<button type="button" class="field-quick-btn" data-action="auto-copy">✨ Auto-Write</button>`)}<div class="field"><span class="field-label-row"><span>Features / options (one per line — click chips below to add/remove)</span></span><div class="wb-feature-chips">${QUICK_FEATURES.map(f=>`<button type="button" class="wb-feature-chip ${currentFeatures.has(f)?'is-active':''}" data-toggle-feature="${esc(f)}">${currentFeatures.has(f)?'✓ ':'+ '}${esc(f)}</button>`).join('')}</div><textarea name="features" rows="5" placeholder="e.g.&#10;Sunroof / Panoramic Roof&#10;360° Surround Camera&#10;Apple CarPlay &amp; Android Auto">${esc(editing.features.join('\n'))}</textarea><small class="field-hint">Click any chip above to toggle common recond features, or type one feature per line.</small></div><div class="field-stack"><label class="field">Danny's TikTok explanation<input name="presenterUrl" type="url" value="${esc(editing.presenter?.url||'')}" placeholder="https://www.tiktok.com/@dannyongg/video/…"><small class="field-hint">Optional — embeds Danny's TikTok walkthrough video on the car detail page.</small></label><label class="field" style="margin-top:14px">Facebook video fallback<input name="presenterFacebook" type="url" value="${esc(editing.presenter?.facebook||'')}" placeholder="https://www.facebook.com/reel/…"><small class="field-hint">Optional Facebook Reel link shown alongside TikTok.</small></label></div></div></details><div class="editor-save"><span id="editorError" role="alert">Save and go live updates this vehicle only. Other drafts stay private.</span><div><button type="button" class="button quiet" data-action="preview-card">Preview card</button><button type="button" class="button quiet" data-action="save-draft">Save as draft</button><button type="submit" class="button" id="saveVehicle">Save and go live ${icon('check')}</button></div></div></form>`;
 }
 function deliveriesMarkup(){
  const stories=doc.stories||[];
@@ -283,7 +353,7 @@ function deliveriesMarkup(){
    <button type="button" class="button" data-action="add-story">${icon('plus')} Add photo / video</button>
   </div>
   <div class="story-workbench-grid" style="padding:0">
-   ${stories.map((s,idx)=>{const sSrc=staticWbSrc(s.image);return `<details class="wb-story-card ${s.published?'is-published':''}" data-story-id="${esc(s.id)}"><summary class="delivery-summary"><img ${sSrc?`src="${esc(sSrc)}"`:''} data-source="${esc(s.image)}" alt=""><span><strong>${esc(s.title||'New handover')}</strong><small>${s.published?'Shown after publication':'Hidden'} · ${s.videoUrl?'Photo + video':'Photo'}</small></span><span class="delivery-edit">Edit ↓</span></summary>
+   ${stories.map((s,idx)=>{const sSrc=staticWbSrc(s.image);return `<details class="wb-story-card ${s.published?'is-published':''}" data-story-id="${esc(s.id)}" data-story-idx="${idx}"><summary class="delivery-summary"><span class="wb-drag-handle" title="Drag to reorder delivery" aria-hidden="true">⋮⋮</span><img ${sSrc?`src="${esc(sSrc)}"`:''} data-source="${esc(s.image)}" alt=""><span><strong>${esc(s.title||'New handover')}</strong><small>#${idx+1} · ${s.published?'Shown after publication':'Hidden'} · ${s.videoUrl?'Photo + video':'Photo'}</small></span><span class="delivery-edit">Edit ↓</span></summary>
     <div class="wb-story-media">
      ${s.image?`<img ${sSrc?`src="${esc(sSrc)}" `:''}data-source="${esc(s.image)}" alt="${esc(s.title)}" loading="lazy" decoding="async">`:`<div class="wb-photo-placeholder">${icon('photo')}</div>`}
      <span class="wb-story-badge ${s.videoUrl?'is-video':''}">${s.videoUrl?'VIDEO + PHOTO':'PHOTO'}</span>
@@ -412,14 +482,9 @@ function settings(){
   <summary><span class="form-section-title"><span>03</span><span><strong>Deliveries (Photos &amp; Videos)</strong><small>Manage customer handover photos and TikTok/Reel videos shown on the homepage (${(doc.stories||[]).filter(s=>s.published).length} active).</small></span></span></summary>
   ${deliveriesMarkup()}
  </details>
- <details class="wb-panel form-section backup-panel settings-group" id="backupGroup" open>
-  <summary><span class="form-section-title"><span>04</span><span><strong>Cloudflare Pages &amp; GitHub Pages Export, Backup &amp; Reset</strong><small>Publish your updated vehicles, deliveries, and XPEL/3M tint packages to Cloudflare Pages or GitHub Pages.</small></span></span></summary>
-  <div class="backup-explainer-grid">
-   <div class="backup-explainer-item"><strong>1. Export Site Update ZIP (Cloudflare &amp; GitHub)</strong><p>Packages <code>data/public-site.json</code>, <code>data/inventory-workbench.json</code>, and all new <code>public/assets/uploads/*</code> photos. Commit to your repo to deploy automatically on Cloudflare Pages or GitHub Pages.</p></div>
-   <div class="backup-explainer-item"><strong>2. Download / Restore JSON backup</strong><p>Saves or restores the complete inventory, deliveries, and XPEL/3M services JSON in this browser.</p></div>
-   <div class="backup-explainer-item"><strong>3. Reset to website stock</strong><p>Clears local edits in this browser and reloads the currently published website snapshot.</p></div>
-  </div>
-  <div class="actions">
+ <details class="wb-panel form-section backup-panel settings-group" id="backupGroup">
+  <summary><span class="form-section-title"><span>04</span><span><strong>Export, Backup &amp; Reset</strong><small>Download a site update ZIP, save/restore a JSON backup, or reset local edits.</small></span></span></summary>
+  <div class="actions" style="margin-top:12px">
    <button type="button" class="button" data-action="export">Export site update ZIP</button>
    <button type="button" class="button quiet" data-action="json">Download public-site.json</button>
    <label class="button quiet">Restore JSON backup<input id="restoreBackup" type="file" accept=".json" hidden></label>
@@ -457,6 +522,8 @@ function bind(){
  document.querySelectorAll('[data-select]').forEach(b=>b.onchange=()=>{if(b.checked)selection.add(b.dataset.select);else selection.delete(b.dataset.select);render();});
  if($('#selectAll'))$('#selectAll').onchange=e=>{document.querySelectorAll('[data-select]').forEach(b=>e.target.checked?selection.add(b.dataset.select):selection.delete(b.dataset.select));render();};
  document.querySelectorAll('[data-status]').forEach(select=>select.onchange=()=>changeVehicleStatus(select));
+ document.querySelectorAll('[data-quick-status]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.quickStatus,next=btn.dataset.statusVal,sel=document.querySelector(`select[data-status="${CSS.escape(id)}"]`);if(sel&&sel.value!==next){sel.value=next;void changeVehicleStatus(sel);}});
+ document.querySelectorAll('[data-quick-price]').forEach(inp=>inp.onchange=async()=>{const v=doc?.vehicles.find(item=>item.id===inp.dataset.quickPrice);if(!v)return;const raw=inp.value.trim(),next=raw===''?null:Number(raw);if(next!=null&&(Number.isNaN(next)||next<0))return toast('Enter a valid price in RM.',true);if(v.priceRm===next)return;const prev=v.priceRm;v.priceRm=next;if(prev!=null&&next!=null){recordActivityLog({vehicleId:v.id,stockId:v.stockId||'DRS',title:`${v.year||v.manufactureYear||''} ${v.make||''} ${v.model||''}`.trim(),cover:v.coverImageUrl||v.gallery?.[0]?.url||'',kind:'price',prevPrice:Number(prev),nextPrice:Number(next),delta:Number(next)-Number(prev),status:v.status});}try{await persist();if(cloudReady)await publishItem({collection:'vehicles',id:v.id});else toast(`${v.stockId} price updated to ${money(next)}.`);}catch(err){v.priceRm=prev;inp.value=prev??'';toast(err.message,true);}});
  if($('#bulkStatus'))$('#bulkStatus').onchange=async e=>{const next=e.target.value;if(!next)return;if(!await confirmAction('Update '+selection.size+' vehicles?','Set the selected cars to '+statusName(next)+' in your local inventory.'))return;const before=structuredClone(doc);for(const v of doc.vehicles)if(selection.has(v.id))v.status=next;try{await persist();selection.clear();render();toast('Selected vehicle statuses updated.');}catch(error){doc=before;toast(error.message,true);}};
  for(const action of ['duplicate','delete'])document.querySelectorAll('[data-'+action+']').forEach(b=>b.onclick=async()=>{const v=doc.vehicles.find(v=>v.id===b.dataset[action]);if(!v)return;if(action==='duplicate'){editing=normalizeVehicle({...v,id:crypto.randomUUID(),stockId:v.stockId+'-COPY',status:'draft'});while(doc.vehicles.some(x=>x.stockId===editing.stockId))editing.stockId+='-COPY';activate('edit');return;}if(!await confirmAction(label(action)+' '+v.stockId+'?','Remove this car from your browser inventory? Export a backup first.'))return;const before=structuredClone(doc);doc.vehicles=doc.vehicles.filter(x=>x.id!==v.id);try{await persist();render();toast('Vehicle removed locally.');}catch(error){doc=before;try{await persist();}catch{}render();toast(error.message,true);}});
  if($('#vehicleForm'))$('#vehicleForm').onsubmit=e=>{e.preventDefault();if(!busy)saveVehicle(false);};
@@ -564,6 +631,7 @@ $('#exportUpdate').onclick=()=>activate('advanced');$('#exportUpdate').textConte
 if($('#exportHelp'))$('#exportHelp').onclick=()=>confirmAction('How publishing works (Local → Export ZIP → Cloudflare / GitHub Pages)','1. Auto-Saved in Browser: All edits to vehicles, XPEL/3M tint packages, and deliveries save immediately in your browser.\n2. Preview Anytime: Click “Preview showroom” to inspect your changes on the website.\n3. Publish to Cloudflare Pages or GitHub Pages: Click “Export site update” to download a ZIP containing data/public-site.json, data/inventory-workbench.json, and public/assets/uploads/*. In Car-Recond-Japan, copy those folders into gemini-site/ and commit to deploy.');
 $('#openPreview').onclick=async()=>{if(editorDirty)return toast('Save your current edits before opening a preview.',true);if(busy)return toast('Wait for the photos to finish.');try{await writeLocal('preview',publicSnapshot(doc));location.href=(view==='services'?base+'services/':base)+'?local-preview=1';}catch(error){toast(error.message,true);}};
 window.addEventListener('beforeunload',e=>{if(busy||editorDirty){e.preventDefault();e.returnValue='';}});
+async function initializeWorkbench(){
 try{
  let stored;
  try{stored=await readLocal('inventory');}catch{}
@@ -585,6 +653,8 @@ try{
  syncStatusBanner();
  render();
 }catch(error){content.innerHTML=`<section class="wb-panel empty-state"><h2>Inventory could not load</h2><p>${esc(error.message)}</p><button class="button" onclick="location.reload()">Try again</button></section>`;}
+}
+
 
 async function uploadReport(file){
  if(!file||busy)return;captureForm();const target=editing;busy=true;
@@ -609,17 +679,386 @@ function overviewMarkup(){
  const count=status=>doc.vehicles.filter(v=>v.status===status).length;
  const counts={available:count('available'),booked:count('reserved'),sold:count('sold'),drafts:count('draft')};
  window.dannyOwnerCounts=counts;
- const missing=doc.vehicles.filter(v=>v.status==='available'&&!v.coverImageUrl).length;
+ const totalCars=Math.max(1,counts.available+counts.booked+counts.sold+counts.drafts);
+ const availCars=doc.vehicles.filter(v=>v.status==='available');
+ const bookedCars=doc.vehicles.filter(v=>v.status==='reserved');
+ const availValue=availCars.reduce((s,v)=>s+(Number(v.priceRm)||0),0);
+ const bookedValue=bookedCars.reduce((s,v)=>s+(Number(v.priceRm)||0),0);
+ const pricedAvail=availCars.filter(v=>v.priceRm!=null&&v.priceRm>0);
+ const avgPrice=pricedAvail.length?Math.round(availValue/pricedAvail.length):0;
+ const missing=availCars.filter(v=>!v.coverImageUrl&&!v.gallery?.length).length;
  const examples=doc.vehicles.filter(v=>v.conditionExample).length;
- const publishedAt=lastPublishedAt?'Last published '+esc(new Date(lastPublishedAt).toLocaleString()):'';
+ const readyCount=availCars.filter(v=>(v.coverImageUrl||v.gallery?.length)&&!v.conditionExample).length;
+ const readinessPct=availCars.length?Math.round((readyCount/availCars.length)*100):100;
+ const publishedAt=lastPublishedAt?'Last published '+esc(new Date(lastPublishedAt).toLocaleString()):'Local & cloud workspace ready';
 
- return `<section class="owner-overview"><div class="owner-overview-heading"><div><h2>Stock at a glance</h2>${publishedAt?`<p class="owner-last-published">${publishedAt}</p>`:''}</div><button class="button quiet" data-owner-nav="inventory">View vehicles →</button></div><div id="ownerCountMount" class="owner-count-mount"><div class="owner-count-grid"><div class="owner-count-card"><span>Available</span><strong>${counts.available}</strong></div><div class="owner-count-card"><span>Booked</span><strong>${counts.booked}</strong></div><div class="owner-count-card"><span>Sold</span><strong>${counts.sold}</strong></div><div class="owner-count-card"><span>Drafts</span><strong>${counts.drafts}</strong></div></div></div><section class="wb-panel owner-visitors"><div class="owner-overview-heading"><div><h3>Website visitors</h3><p>Real visits to your showroom</p></div><button type="button" class="button quiet small" id="refreshVisitorStats">Refresh</button></div><div id="ownerVisitorStats" aria-live="polite">Loading visitor statistics…</div></section><div class="owner-task-grid"><section class="wb-panel"><h3>Your next actions</h3><div class="owner-task-list"><button data-owner-nav="inventory">Manage ${doc.vehicles.length} vehicles <span aria-hidden="true">→</span></button><button data-owner-nav="homepage">Update the homepage photo or headline <span aria-hidden="true">→</span></button><button data-owner-nav="deliveries">Add a customer handover <span aria-hidden="true">→</span></button></div></section><section class="wb-panel"><h3>Before publishing</h3><p>${missing?`${missing} available vehicle(s) need a cover photo.`:'All available vehicles have a cover photo.'}</p><p>${examples?`${examples} vehicles still use example grades. Replace these with verified reports.`:'Grades should match each car’s original report.'}</p><button class="button quiet" data-owner-nav="inventory">Review vehicles</button></section></div></section>`;
-}function mediaLibraryMarkup(){return `<section><p class="eyebrow">YOUR VEHICLE PHOTOGRAPHY</p><h2>Media Library</h2><p class="owner-intro">Choose a vehicle to upload, reorder or frame its photographs. Original images stay intact.</p><div class="owner-media-grid">${doc.vehicles.map(v=>`<article>${v.coverImageUrl?`<img data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}">`:'<div class="photo-placeholder">No cover photo</div>'}<p><strong>${esc(v.make+' '+v.model)}</strong><br>${v.gallery.length} photos · ${esc(v.stockId)}</p><button class="button quiet small" data-owner-media="${esc(v.id)}">Manage photos</button></article>`).join('')}</div></section>`;}
-function homepageEditorMarkup(){return `<form id="ownerHomepageForm" class="wb-panel" style="padding:24px"><p class="eyebrow">HOMEPAGE EDITOR</p><h2>Let the cars lead.</h2><p class="owner-intro">Edit the content inside a designed layout. Save a draft, preview it, then publish.</p><img class="owner-home-preview" data-source="${esc(doc.homepage.heroImage||'/assets/mountain-retreat-hero.png')}" alt="Homepage banner preview"><label class="button quiet" style="margin-top:14px">Replace banner photo<input id="ownerHeroFile" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><div class="form-grid">${[['en','English headline','Japanese recond cars. Selected by Danny.'],['zh','中文标题','日本进口车，Danny 为你精选。'],['ms','Tajuk Bahasa Melayu','Kereta recond Jepun. Pilihan Danny.']].map(([key,name,fallback])=>`<label class="field">${name}<input name="hero-${key}" value="${esc(doc.homepage.heroTitles?.[key]||fallback)}" maxlength="120"></label>`).join('')}<label class="field">Layout<select name="layout"><option value="showroom" ${doc.homepage.layout!=='compact'?'selected':''}>Showroom — large car photograph</option><option value="compact" ${doc.homepage.layout==='compact'?'selected':''}>Compact — shorter introduction</option></select></label><label class="field">Section order<select name="sectionOrder"><option value="inventory-first">Vehicles, deliveries, contact</option><option value="deliveries-first" ${doc.homepage.sectionOrder==='deliveries-first'?'selected':''}>Deliveries, vehicles, contact</option></select></label></div><div class="owner-section-tabs"><label><input type="checkbox" name="showDeliveries" ${doc.homepage.showDeliveries!==false?'checked':''}> Show deliveries</label><label><input type="checkbox" name="showContact" ${doc.homepage.showContact!==false?'checked':''}> Show contact section</label></div><h3>Featured vehicles</h3><div class="owner-section-tabs">${doc.vehicles.filter(v=>v.status==='available').map(v=>`<label><input type="checkbox" name="featured" value="${esc(v.id)}" ${v.featured?'checked':''}> ${esc(v.make+' '+v.model)}</label>`).join('')}</div><button class="button" type="submit">${previewEditor?'Save preview draft':'Save and go live'}</button><button class="button quiet" type="submit" name="draftOnly" value="yes">Save draft</button><button class="button quiet" type="button" data-owner-preview>Preview website</button><p class="owner-intro">Use your browser’s device preview to review the desktop and mobile layout before publishing.</p></form>`;}
+ // Brand distribution data
+ const brandMap=new Map();
+ for(const v of doc.vehicles.filter(x=>x.status!=='archived')){
+  const b=v.make||'Other';
+  const entry=brandMap.get(b)||{name:b,count:0,available:0,value:0};
+  entry.count+=1;
+  if(v.status==='available')entry.available+=1;
+  entry.value+=(Number(v.priceRm)||0);
+  brandMap.set(b,entry);
+ }
+ const brandList=[...brandMap.values()].sort((a,b)=>b.count-a.count||b.value-a.value).slice(0,6);
+ const maxBrandCount=Math.max(1,...brandList.map(b=>b.count));
+
+ // Price tier distribution data
+ const tiers=[
+  {label:'Under RM 200k',min:0,max:199999,count:0,color:'var(--mint)'},
+  {label:'RM 200k – 350k',min:200000,max:349999,count:0,color:'var(--price-accent)'},
+  {label:'RM 350k – 500k',min:350000,max:499999,count:0,color:'#3b82f6'},
+  {label:'RM 500k+',min:500000,max:Infinity,count:0,color:'#8b5cf6'},
+ ];
+ for(const v of doc.vehicles.filter(x=>x.status!=='archived'&&x.priceRm!=null)){
+  const p=Number(v.priceRm)||0;
+  const t=tiers.find(tier=>p>=tier.min&&p<=tier.max);
+  if(t)t.count+=1;
+ }
+ const maxTierCount=Math.max(1,...tiers.map(t=>t.count));
+
+ const stackedSegments=[
+  {key:'available',status:'available',label:'Available',count:counts.available,color:'var(--mint)'},
+  {key:'booked',status:'reserved',label:'Booked',count:counts.booked,color:'var(--price-accent)'},
+  {key:'sold',status:'sold',label:'Sold',count:counts.sold,color:'#b42d45'},
+  {key:'drafts',status:'draft',label:'Drafts',count:counts.drafts,color:'var(--muted)'},
+ ];
+
+ // Recent Activity data with price/status trend indicators
+ const allActivities=buildRecentActivities(doc.vehicles);
+ const filteredActivities=allActivities.filter(item=>overviewActivityFilter==='all'?true:item.kind===overviewActivityFilter);
+
+ // Showroom Spotlight Deck data (Surprise Interactive 3D-Tilt Stage)
+ const spotlightPool=doc.vehicles.filter(v=>v.status!=='archived');
+ if(!overviewSpotlightId||!spotlightPool.some(v=>v.id===overviewSpotlightId)){
+  const preferred=spotlightPool.find(v=>v.status==='available'&&(v.coverImageUrl||v.gallery?.length))||spotlightPool[0];
+  overviewSpotlightId=preferred?.id||'';
+ }
+ const spotCar=spotlightPool.find(v=>v.id===overviewSpotlightId)||spotlightPool[0]||null;
+ const spotCover=spotCar?staticWbSrc(spotCar.coverImageUrl||spotCar.gallery?.[0]?.url||''):'';
+ const spotMonthly=spotCar&&spotCar.priceRm?estimate(spotCar,doc.finance):null;
+ const spotBadges=spotCar?vehicleSpecialBadges(spotCar,doc.homepage):[];
+
+ const spotlightDeckMarkup=spotCar?`<section class="wb-panel wb-spotlight-deck" id="wbSpotlightDeck" aria-label="Interactive Showroom Spotlight Command Deck">
+  <div class="wb-spotlight-grid">
+   <div class="wb-spotlight-stage" id="wbSpotlightStage">
+    <div class="wb-spotlight-glare" aria-hidden="true"></div>
+    <div class="wb-spotlight-photo-wrap">
+     ${spotCover?`<img src="${esc(spotCover)}" data-source="${esc(spotCar.coverImageUrl||spotCar.gallery?.[0]?.url||'')}" alt="${esc(spotCar.make+' '+spotCar.model)}" class="wb-spotlight-img">`:`<div class="wb-spotlight-placeholder">${icon('photo')}<span>No cover photo</span></div>`}
+     <div class="wb-spotlight-overlay-top">
+      <span class="wb-spotlight-status is-${esc(spotCar.status)}">● ${esc(statusName(spotCar.status))}</span>
+      <div class="wb-spotlight-chips">
+       ${spotCar.auctionGrade?`<span class="wb-spotlight-chip">Grade ${esc(spotCar.auctionGrade)}${esc(spotCar.interiorGrade||'')}</span>`:''}
+       ${spotBadges.slice(0,2).map(b=>`<span class="wb-spotlight-chip is-gold">${esc(b)}</span>`).join('')}
+      </div>
+     </div>
+     <div class="wb-spotlight-overlay-bottom">
+      <div>
+       <small class="wb-spotlight-code">STOCK #${esc(spotCar.stockId)} · ${esc(spotCar.location||'Glenmarie')}</small>
+       <h3 class="wb-spotlight-title">${spotCar.year||spotCar.manufactureYear||''} ${esc(spotCar.make)} ${esc(spotCar.model)}</h3>
+       <p class="wb-spotlight-sub">${esc(spotCar.variant||spotCar.body||'Japan Recond')} · ${esc(spotCar.transmission||'Auto')}${spotCar.mileageKm!=null?` · ${Number(spotCar.mileageKm).toLocaleString('en-MY')} km`:''}</p>
+      </div>
+      <div class="wb-spotlight-price-block">
+       <strong>${money(spotCar.priceRm)}</strong>
+       <small>${spotMonthly?`≈ ${money(spotMonthly)} / mo`:'Custom financing'}</small>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="wb-spotlight-controls">
+    <div class="wb-spotlight-head">
+     <div>
+      <span class="wb-widget-eyebrow">✦ INTERACTIVE SHOWROOM COMMAND DECK</span>
+      <h3>Live Vehicle Spotlight &amp; Instant Tuner</h3>
+      <p>Hover the 3D stage to inspect, or tune price &amp; status below — every adjustment updates your live KPIs and logs to Recent Activity automatically.</p>
+     </div>
+     <button type="button" class="button quiet small wb-surprise-btn" data-spotlight-surprise title="Spotlight a random standout vehicle">✦ Surprise Pick</button>
+    </div>
+    <div class="wb-spotlight-tuner">
+     <div class="wb-tuner-box">
+      <span class="wb-tuner-label">Instant Price Adjustment (Logs Trend)</span>
+      <div class="wb-tuner-actions">
+       <button type="button" class="wb-tune-btn is-down" data-spotlight-price-step="-2000" data-vehicle-id="${esc(spotCar.id)}">▼ −RM 2,000</button>
+       <strong class="wb-tuner-current">${money(spotCar.priceRm)}</strong>
+       <button type="button" class="wb-tune-btn is-up" data-spotlight-price-step="2000" data-vehicle-id="${esc(spotCar.id)}">▲ +RM 2,000</button>
+      </div>
+     </div>
+     <div class="wb-tuner-box">
+      <span class="wb-tuner-label">1-Click Status Switch</span>
+      <div class="wb-tuner-actions">
+       ${[['available','Available'],['reserved','Booked'],['sold','Sold']].map(([st,lbl])=>`<button type="button" class="wb-tune-status ${spotCar.status===st?'is-active '+st:''}" data-spotlight-status="${st}" data-vehicle-id="${esc(spotCar.id)}">${lbl}</button>`).join('')}
+      </div>
+     </div>
+    </div>
+    <div class="wb-spotlight-carousel" role="tablist" aria-label="Select spotlight vehicle">
+     ${spotlightPool.slice(0,8).map(v=>{
+      const thumb=staticWbSrc(v.coverImageUrl||v.gallery?.[0]?.url||'');
+      const active=v.id===spotCar.id;
+      return `<button type="button" role="tab" aria-selected="${active}" class="wb-spot-thumb ${active?'is-active':''}" data-spotlight-select="${esc(v.id)}">
+       ${thumb?`<img src="${esc(thumb)}" data-source="${esc(v.coverImageUrl||v.gallery?.[0]?.url||'')}" alt="${esc(v.make+' '+v.model)}">`:`<span class="wb-spot-thumb-fallback">${esc((v.make||'D')[0])}</span>`}
+       <span class="wb-spot-thumb-meta">
+        <strong>${esc(v.make)} ${esc(v.model)}</strong>
+        <small>${money(v.priceRm)}</small>
+       </span>
+      </button>`;
+     }).join('')}
+    </div>
+    <div class="wb-spotlight-foot">
+     <button type="button" class="button small" data-edit="${esc(spotCar.id)}">Open full 3-step editor →</button>
+     <button type="button" class="button quiet small" data-photos="${esc(spotCar.id)}">${icon('photo')} Manage ${spotCar.gallery?.length||0} photos</button>
+    </div>
+   </div>
+  </div>
+ </section>`:'';
+
+ const widgets={
+  activity:`<section class="wb-panel wb-overview-widget" data-overview-widget="activity">
+   <div class="wb-widget-head">
+    <div>
+     <span class="wb-widget-eyebrow">LIVE AUDIT &amp; MOVEMENT FEED</span>
+     <h3>Recent Activity &amp; Price/Status Trends</h3>
+    </div>
+    <div class="wb-widget-controls">
+     <div class="wb-chart-tabs" role="tablist" aria-label="Filter recent activity">
+      <button type="button" role="tab" class="wb-chart-tab ${overviewActivityFilter==='all'?'is-active':''}" data-activity-filter="all">All</button>
+      <button type="button" role="tab" class="wb-chart-tab ${overviewActivityFilter==='price'?'is-active':''}" data-activity-filter="price">Price</button>
+      <button type="button" role="tab" class="wb-chart-tab ${overviewActivityFilter==='status'?'is-active':''}" data-activity-filter="status">Status</button>
+     </div>
+     <span class="wb-drag-pill" title="Drag to reorder panel">⋮⋮ Drag</span>
+    </div>
+   </div>
+   <div class="wb-activity-list" role="list">
+    ${filteredActivities.slice(0,5).map(act=>{
+     const thumb=staticWbSrc(act.cover);
+     let trendBadge='',summaryLine='';
+     if(act.kind==='price'){
+      const delta=Number(act.delta)||0;
+      const isUp=delta>=0;
+      const pct=act.prevPrice?Math.abs((delta/act.prevPrice)*100).toFixed(1):'1.0';
+      const sign=isUp?'+':'−';
+      trendBadge=`<span class="wb-trend-badge ${isUp?'is-up':'is-down'}" title="${isUp?'Price increased':'Price reduced / value offer'}">${isUp?'▲':'▼'} ${sign}RM ${Math.abs(delta).toLocaleString('en-MY')} (${pct}%)</span>`;
+      summaryLine=`Price adjusted from <s>${money(act.prevPrice)}</s> to <strong>${money(act.nextPrice)}</strong>`;
+     }else{
+      const nextSt=act.nextStatus||act.status||'available';
+      const prevSt=act.prevStatus||'draft';
+      const stClass=nextSt==='available'?'is-avail':nextSt==='reserved'?'is-booked':'is-sold';
+      const stIcon=nextSt==='available'?'✓':nextSt==='reserved'?'●':'★';
+      trendBadge=`<span class="wb-trend-badge ${stClass}">${stIcon} ${esc(statusName(prevSt))} → ${esc(statusName(nextSt))}</span>`;
+      summaryLine=`Status updated to <strong>${esc(statusName(nextSt))}</strong>${act.priceRm?` · Listed at ${money(act.priceRm)}`:''}`;
+     }
+     return `<button type="button" role="listitem" class="wb-activity-row" data-activity-edit="${esc(act.vehicleId)}" title="Click to open ${esc(act.title)}">
+      <div class="wb-activity-avatar">
+       ${thumb?`<img src="${esc(thumb)}" data-source="${esc(act.cover)}" alt="${esc(act.title)}">`:`<span>${esc((act.title||'D')[0])}</span>`}
+      </div>
+      <div class="wb-activity-body">
+       <div class="wb-activity-top">
+        <strong>${esc(act.title)} <code class="wb-activity-code">#${esc(act.stockId)}</code></strong>
+        <small class="wb-activity-time">${esc(act.timeLabel||'Recent')}</small>
+       </div>
+       <div class="wb-activity-bottom">
+        <span class="wb-activity-desc">${summaryLine}</span>
+        ${trendBadge}
+       </div>
+      </div>
+     </button>`;
+    }).join('')||'<p class="muted">No matching activity records yet.</p>'}
+   </div>
+  </section>`,
+  portfolio:`<section class="wb-panel wb-overview-widget" data-overview-widget="portfolio">
+   <div class="wb-widget-head">
+    <div>
+     <span class="wb-widget-eyebrow">PORTFOLIO &amp; STOCK COMPOSITION</span>
+     <h3>Showroom Valuation &amp; Status Mix</h3>
+    </div>
+    <span class="wb-drag-pill" title="Drag to reorder panel">⋮⋮ Drag</span>
+   </div>
+   <div class="wb-portfolio-metrics">
+    <div class="wb-metric-box">
+     <span>Available Stock Value</span>
+     <strong>${money(availValue)}</strong>
+     <small>${counts.available} units ready for immediate viewing</small>
+    </div>
+    <div class="wb-metric-box">
+     <span>Average Asking Price</span>
+     <strong>${avgPrice?money(avgPrice):'—'}</strong>
+     <small>Booked pipeline: ${money(bookedValue)}</small>
+    </div>
+    <div class="wb-metric-box">
+     <span>Listing Readiness</span>
+     <strong>${readinessPct}%</strong>
+     <small>${missing?`${missing} missing cover photo`:'All covers complete'}</small>
+    </div>
+   </div>
+   <div class="wb-composition-block">
+    <div class="wb-composition-head">
+     <span>Interactive Stock Status Ratio (Click any segment to filter)</span>
+     <strong>${doc.vehicles.length} total vehicles</strong>
+    </div>
+    <div class="wb-stacked-bar" role="group" aria-label="Stock composition bar">
+     ${stackedSegments.map(seg=>{
+      const pct=Math.round((seg.count/totalCars)*100);
+      return seg.count>0?`<button type="button" class="wb-stacked-seg" data-status-jump="${seg.status}" style="width:${Math.max(6,pct)}%;background:${seg.color}" title="${seg.label}: ${seg.count} (${pct}%)"></button>`:'';
+     }).join('')}
+    </div>
+    <div class="wb-stacked-legend">
+     ${stackedSegments.map(seg=>{
+      const pct=Math.round((seg.count/totalCars)*100);
+      return `<button type="button" class="wb-legend-pill" data-status-jump="${seg.status}"><i style="background:${seg.color}"></i><span>${seg.label}</span><strong>${seg.count}</strong><small>${pct}%</small></button>`;
+     }).join('')}
+    </div>
+   </div>
+  </section>`,
+  distribution:`<section class="wb-panel wb-overview-widget" data-overview-widget="distribution">
+   <div class="wb-widget-head">
+    <div>
+     <span class="wb-widget-eyebrow">INVENTORY ANALYTICS GRAPH</span>
+     <h3>Brand &amp; Price Bracket Breakdown</h3>
+    </div>
+    <div class="wb-widget-controls">
+     <div class="wb-chart-tabs" role="tablist">
+      <button type="button" role="tab" class="wb-chart-tab ${overviewChartTab==='brands'?'is-active':''}" data-chart-tab="brands">By Brand</button>
+      <button type="button" role="tab" class="wb-chart-tab ${overviewChartTab==='prices'?'is-active':''}" data-chart-tab="prices">By Price Tier</button>
+     </div>
+     <span class="wb-drag-pill" title="Drag to reorder panel">⋮⋮ Drag</span>
+    </div>
+   </div>
+   ${overviewChartTab==='brands'?`<div class="wb-bar-chart" aria-label="Vehicles by brand">
+    ${brandList.map(b=>{
+     const pct=Math.round((b.count/maxBrandCount)*100);
+     return `<button type="button" class="wb-bar-row" data-brand-jump="${esc(b.name)}" title="Click to filter ${esc(b.name)} vehicles">
+      <div class="wb-bar-label">
+       <strong>${esc(b.name)} <span class="wb-bar-jump-cue">Filter →</span></strong>
+       <span>${b.available} avail · ${b.count} total · ${money(b.value)}</span>
+      </div>
+      <div class="wb-bar-track"><span class="wb-bar-fill" style="width:${Math.max(8,pct)}%"></span></div>
+     </button>`;
+    }).join('')||'<p class="muted">No vehicles in stock yet.</p>'}
+   </div>`:`<div class="wb-bar-chart" aria-label="Vehicles by price bracket">
+    ${tiers.map(t=>{
+     const pct=Math.round((t.count/maxTierCount)*100);
+     return `<div class="wb-bar-row is-static">
+      <div class="wb-bar-label">
+       <strong>${esc(t.label)}</strong>
+       <span>${t.count} vehicle${t.count===1?'':'s'} (${Math.round((t.count/totalCars)*100)}% of stock)</span>
+      </div>
+      <div class="wb-bar-track"><span class="wb-bar-fill" style="width:${t.count?Math.max(8,pct):0}%;background:${t.color}"></span></div>
+     </div>`;
+    }).join('')}
+   </div>`}
+  </section>`,
+  visitors:`<section class="wb-panel owner-visitors wb-overview-widget" data-overview-widget="visitors">
+   <div class="owner-overview-heading">
+    <div>
+     <span class="wb-widget-eyebrow">SHOWROOM TRAFFIC &amp; AUDIENCE</span>
+     <h3>Website Visitors</h3>
+     <p>Real visits to your showroom across devices and regions</p>
+    </div>
+    <div class="wb-widget-controls">
+     <button type="button" class="button quiet small" id="refreshVisitorStats">Refresh</button>
+     <span class="wb-drag-pill" title="Drag to reorder panel">⋮⋮ Drag</span>
+    </div>
+   </div>
+   <div id="ownerVisitorStats" aria-live="polite">Loading visitor statistics…</div>
+  </section>`,
+  tasks:`<div class="owner-task-grid wb-overview-widget" data-overview-widget="tasks">
+   <section class="wb-panel">
+    <div class="wb-widget-head">
+     <div>
+      <span class="wb-widget-eyebrow">QUICK WORKFLOWS</span>
+      <h3>Your next actions</h3>
+     </div>
+     <span class="wb-drag-pill" title="Drag to reorder panel">⋮⋮ Drag</span>
+    </div>
+    <div class="owner-task-list">
+     <button data-owner-nav="inventory"><span>Manage ${doc.vehicles.length} vehicles</span><span aria-hidden="true">→</span></button>
+     <button data-owner-nav="edit"><span>+ Add a new recond vehicle</span><span aria-hidden="true">→</span></button>
+     <button data-owner-nav="homepage"><span>Update homepage banner, headline &amp; layout</span><span aria-hidden="true">→</span></button>
+     <button data-owner-nav="deliveries"><span>Add a customer handover (${(doc.stories||[]).filter(s=>s.published).length} live)</span><span aria-hidden="true">→</span></button>
+     <button data-owner-nav="services"><span>Update XPEL &amp; 3M tinting price sheets</span><span aria-hidden="true">→</span></button>
+    </div>
+   </section>
+   <section class="wb-panel">
+    <div class="wb-widget-head">
+     <div>
+      <span class="wb-widget-eyebrow">QUALITY AUDIT</span>
+      <h3>Before publishing</h3>
+     </div>
+    </div>
+    <div class="wb-checklist">
+     <div class="wb-check-item ${missing?'is-warn':'is-ok'}">
+      <span class="wb-check-icon">${missing?'!':'✓'}</span>
+      <div>
+       <strong>${missing?`${missing} available vehicle(s) need a cover photo`:'All available vehicles have a cover photo'}</strong>
+       <p>Every public vehicle requires at least 1 clear exterior cover photo before publishing.</p>
+      </div>
+     </div>
+     <div class="wb-check-item ${examples?'is-warn':'is-ok'}">
+      <span class="wb-check-icon">${examples?'!':'✓'}</span>
+      <div>
+       <strong>${examples?`${examples} vehicle(s) still use example grades`:'All vehicle grades verified'}</strong>
+       <p>Replace demonstration condition notices with each car’s actual auction sheet grade.</p>
+      </div>
+     </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+     <button class="button quiet small" data-owner-nav="inventory">Review vehicles</button>
+     <button class="button quiet small" data-owner-nav="media">Open Media Library</button>
+    </div>
+   </section>
+  </div>`
+ };
+
+ const defaultOrder=['activity','portfolio','distribution','visitors','tasks'];
+ let savedOrder=[...defaultOrder];
+ try{
+  const parsed=JSON.parse(localStorage.getItem('danny-wb-overview-order')||'null');
+  if(Array.isArray(parsed)&&parsed.every(k=>widgets[k])){
+   const merged=[...parsed];
+   for(const k of defaultOrder)if(!merged.includes(k))merged.unshift(k);
+   savedOrder=merged;
+  }
+ }catch{}
+
+ return `<section class="owner-overview">
+  <div class="owner-overview-heading">
+   <div>
+    <p class="eyebrow">EXECUTIVE COMMAND CENTER</p>
+    <h2>Stock at a glance</h2>
+    <p class="owner-last-published">${publishedAt} · Tune live prices in the Spotlight Deck, track movements in Recent Activity, or drag panels to customize.</p>
+   </div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="button quiet" data-owner-nav="edit">${icon('plus')} Add vehicle</button>
+    <button class="button" data-owner-nav="inventory">View vehicles →</button>
+   </div>
+  </div>
+  <div id="ownerCountMount" class="owner-count-mount">
+   <div class="owner-count-grid">
+    <div class="owner-count-card"><span>Available</span><strong>${counts.available}</strong></div>
+    <div class="owner-count-card"><span>Booked</span><strong>${counts.booked}</strong></div>
+    <div class="owner-count-card"><span>Sold</span><strong>${counts.sold}</strong></div>
+    <div class="owner-count-card"><span>Drafts</span><strong>${counts.drafts}</strong></div>
+   </div>
+  </div>
+  ${spotlightDeckMarkup}
+  <div class="wb-overview-widgets" id="overviewWidgetsGrid">
+   ${savedOrder.map(k=>widgets[k]).join('')}
+  </div>
+ </section>`;
+}
+function mediaLibraryMarkup(){return `<section><p class="eyebrow">YOUR VEHICLE PHOTOGRAPHY</p><h2>Media Library</h2><p class="owner-intro">Choose a vehicle to upload, reorder or frame its photographs. Original images stay intact.</p><div class="owner-media-grid">${doc.vehicles.map(v=>`<article>${v.coverImageUrl?`<img data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}">`:'<div class="photo-placeholder">No cover photo</div>'}<p><strong>${esc(v.make+' '+v.model)}</strong><br>${v.gallery.length} photos · ${esc(v.stockId)}</p><button class="button quiet small" data-owner-media="${esc(v.id)}">Manage photos</button></article>`).join('')}</div></section>`;}
+function homepageEditorMarkup(){
+ const isDeliveriesFirst=doc.homepage.sectionOrder==='deliveries-first';
+ const seqItems=isDeliveriesFirst
+  ?[['deliveries','Customer Deliveries & Handovers','Showcases owner handover photos & TikTok videos'],['inventory','Showroom Vehicle Inventory','Main filterable grid of available, booked & sold cars']]
+  :[['inventory','Showroom Vehicle Inventory','Main filterable grid of available, booked & sold cars'],['deliveries','Customer Deliveries & Handovers','Showcases owner handover photos & TikTok videos']];
+ return `<form id="ownerHomepageForm" class="wb-panel" style="padding:24px"><p class="eyebrow">HOMEPAGE EDITOR</p><h2>Let the cars lead.</h2><p class="owner-intro">Edit the content inside a designed layout. Drag sections to reorder, save a draft, preview it, then publish.</p><img class="owner-home-preview" data-source="${esc(doc.homepage.heroImage||'/assets/mountain-retreat-hero.png')}" alt="Homepage banner preview"><label class="button quiet" style="margin-top:14px">Replace banner photo<input id="ownerHeroFile" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><div class="form-grid" style="margin-top:18px">${[['en','English headline','Japanese recond cars. Selected by Danny.'],['zh','中文标题','日本进口车，Danny 为你精选。'],['ms','Tajuk Bahasa Melayu','Kereta recond Jepun. Pilihan Danny.']].map(([key,name,fallback])=>`<label class="field">${name}<input name="hero-${key}" value="${esc(doc.homepage.heroTitles?.[key]||fallback)}" maxlength="120"></label>`).join('')}<label class="field">Layout<select name="layout"><option value="showroom" ${doc.homepage.layout!=='compact'?'selected':''}>Showroom — large car photograph</option><option value="compact" ${doc.homepage.layout==='compact'?'selected':''}>Compact — shorter introduction</option></select></label><label class="field">Section order<select name="sectionOrder" id="homepageSectionOrderSelect"><option value="inventory-first" ${!isDeliveriesFirst?'selected':''}>Vehicles, deliveries, contact</option><option value="deliveries-first" ${isDeliveriesFirst?'selected':''}>Deliveries, vehicles, contact</option></select></label></div><div class="wb-drag-sequencer"><h4>Interactive Section Order (Drag to reorder homepage flow)</h4><div class="wb-sequencer-list" id="homepageSequencerList">${seqItems.map(([id,title,desc],idx)=>`<div class="wb-sequencer-item" draggable="true" data-seq-id="${id}"><span class="wb-drag-handle" aria-hidden="true">⋮⋮</span><span class="wb-seq-num">0${idx+1}</span><div><strong>${title}</strong><small>${desc}</small></div></div>`).join('')}</div></div><div class="owner-section-tabs" style="margin-top:16px"><label class="check-field"><input type="checkbox" name="showDeliveries" ${doc.homepage.showDeliveries!==false?'checked':''}> Show deliveries section</label><label class="check-field"><input type="checkbox" name="showContact" ${doc.homepage.showContact!==false?'checked':''}> Show contact &amp; map section</label></div><h3>Featured vehicles</h3><div class="owner-section-tabs">${doc.vehicles.filter(v=>v.status==='available').map(v=>`<label class="check-field"><input type="checkbox" name="featured" value="${esc(v.id)}" ${v.featured?'checked':''}> ${esc(v.make+' '+v.model)}</label>`).join('')}</div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px"><button class="button" type="submit">${previewEditor?'Save preview draft':'Save and go live'}</button><button class="button quiet" type="submit" name="draftOnly" value="yes">Save draft</button><button class="button quiet" type="button" data-owner-preview>Preview website</button></div><p class="owner-intro" style="margin-top:14px">Use your browser’s device preview to review the desktop and mobile layout before publishing.</p></form>`;
+}
 function toolsSettingsMarkup(){return `<section class="wb-panel" style="padding:24px"><p class="eyebrow">BUYING TOOLS</p><h2>Calculator & JPJ</h2><p>Loan assumptions are editable in Website Settings. JPJ rate tables stay linked to the official reference, rather than allowing accidental changes.</p><div class="owner-section-tabs"><button class="button" data-owner-nav="settings">Edit loan assumptions</button><a class="button quiet" href="${base}tools/" target="_blank" rel="noopener">Open customer tools ↗</a></div><p>Default annual rate: ${Number(doc.finance.rate)}% · Deposit: ${Number(doc.finance.downPayment)}% · Tenure: ${Number(doc.finance.tenure)} years</p><p>Road tax supports petrol/diesel private saloon and non-saloon codes AB / AC / AD / AE in Peninsular Malaysia. EVs, East Malaysia and other classes need the applicable JPJ schedule.</p></section>`;}
-function advancedMarkup(){return `<section class="wb-panel" style="padding:24px"><p class="eyebrow">ADVANCED STUDIO</p><h2>Backups & recovery</h2><p>Everyday editing lives in Vehicles, Homepage and Deliveries. Keep a backup before making major changes.</p><div class="owner-section-tabs">${previewEditor?'':'<button class="button" id="ownerPublishAll">Review &amp; publish all drafts</button>'}<button class="button quiet" id="ownerBackup">Download site backup</button>${previewEditor?'':'<button class="button quiet" id="ownerRollback">Restore previous publication</button>'}<button class="button quiet" data-owner-nav="settings">Imports & advanced settings</button></div><p>${previewEditor?'Preview drafts and uploaded photos are saved in this browser. Download a site backup before clearing browser data. Import that backup into the live dashboard when you are ready to publish.':'Rollback restores the immediately previous publication. It is only available after at least two successful publications.'}</p></section>`;}
+function advancedMarkup(){return `<section class="wb-panel" style="padding:24px"><p class="eyebrow">ADVANCED STUDIO</p><h2>Backups & recovery</h2><p>Everyday editing lives in Vehicles, Homepage and Deliveries. Keep a backup before making major changes.</p><div class="owner-section-tabs">${previewEditor?'':'<button class="button" id="ownerPublishAll">Review &amp; publish all drafts</button>'}<button class="button quiet" id="ownerBackup">Download site backup</button>${previewEditor?'':'<button class="button quiet" id="ownerRollback">Restore previous publication</button>'}<button class="button quiet" data-owner-nav="settings">Imports & advanced settings</button></div><p>Rollback restores the immediately previous publication. It is only available after at least two successful publications.</p></section>`;}
 async function publishWebsite(){
- if(previewEditor){if(editorDirty)return toast('Save your current edits first.',true);await persist();toast('Preview draft saved in this browser. Use Preview showroom to review it.');return;}
+ if(previewEditor){if(editorDirty)return toast('Save your current edits first.',true);await persist();toast('Preview draft saved.');return;}
  if(busy||!doc)return;if(editorDirty)return toast('Save your current edits before publishing.',true);if(!cloudReady)return toast('Publishing is unavailable. Your local copy remains saved; reconnect and reload.',true);
  if(!await confirmAction('Publish website?','Your saved vehicles, homepage content, tint packages and approved delivery photographs will become visible to customers.'))return;
  busy=true;const b=$('#exportUpdate');b.disabled=true;b.textContent='Publishing…';
@@ -628,8 +1067,174 @@ async function publishWebsite(){
 function bindOwnerExtras(){
  if(view==='settings')document.querySelector('#deliveriesGroup')?.remove();
  enhanceLanguageControls();
+ document.querySelectorAll('[data-chart-tab]').forEach(btn=>btn.onclick=()=>{overviewChartTab=btn.dataset.chartTab;render();});
+ document.querySelectorAll('[data-activity-filter]').forEach(btn=>btn.onclick=()=>{overviewActivityFilter=btn.dataset.activityFilter||'all';render();});
+ document.querySelectorAll('[data-activity-edit]').forEach(btn=>btn.onclick=()=>{if(busy)return;openVehicleEditor(btn.dataset.activityEdit,false);});
+ document.querySelectorAll('[data-spotlight-select]').forEach(btn=>btn.onclick=()=>{overviewSpotlightId=btn.dataset.spotlightSelect||'';render();});
+ document.querySelectorAll('[data-spotlight-surprise]').forEach(btn=>btn.onclick=()=>{
+  const pool=doc.vehicles.filter(v=>v.status!=='archived'&&v.id!==overviewSpotlightId);
+  if(!pool.length)return;
+  const pick=pool[Math.floor(Math.random()*pool.length)];
+  overviewSpotlightId=pick.id;
+  render();
+  toast(`✦ Spotlighted ${pick.year||''} ${pick.make} ${pick.model} (${money(pick.priceRm)})`);
+ });
+ document.querySelectorAll('[data-spotlight-price-step]').forEach(btn=>btn.onclick=async()=>{
+  if(busy)return;
+  const v=doc.vehicles.find(item=>item.id===btn.dataset.vehicleId);
+  if(!v)return;
+  const step=Number(btn.dataset.spotlightPriceStep)||0;
+  const prev=Number(v.priceRm)||200000;
+  const next=Math.max(10000,prev+step);
+  v.priceRm=next;
+  recordActivityLog({
+   vehicleId:v.id,
+   stockId:v.stockId||'DRS',
+   title:`${v.year||v.manufactureYear||''} ${v.make||''} ${v.model||''}`.trim(),
+   cover:v.coverImageUrl||v.gallery?.[0]?.url||'',
+   kind:'price',
+   prevPrice:prev,
+   nextPrice:next,
+   delta:step,
+   status:v.status
+  });
+  await persist();
+  render();
+  toast(`${v.stockId} price ${step>=0?'increased':'reduced'} to ${money(next)} · Logged to Recent Activity`);
+ });
+ document.querySelectorAll('[data-spotlight-status]').forEach(btn=>btn.onclick=async()=>{
+  if(busy)return;
+  const v=doc.vehicles.find(item=>item.id===btn.dataset.vehicleId);
+  const next=btn.dataset.spotlightStatus;
+  if(!v||!next||v.status===next)return;
+  const prev=v.status;
+  v.status=next;
+  recordActivityLog({
+   vehicleId:v.id,
+   stockId:v.stockId||'DRS',
+   title:`${v.year||v.manufactureYear||''} ${v.make||''} ${v.model||''}`.trim(),
+   cover:v.coverImageUrl||v.gallery?.[0]?.url||'',
+   kind:'status',
+   prevStatus:prev,
+   nextStatus:next,
+   priceRm:Number(v.priceRm)||0,
+   status:next
+  });
+  await persist();
+  render();
+  toast(`${v.stockId} status updated to ${statusName(next)} · Logged to Recent Activity`);
+ });
+ // 3D Tilt & Spotlight Glare interaction on #wbSpotlightStage
+ const stage=$('#wbSpotlightStage');
+ if(stage){
+  stage.onpointermove=e=>{
+   const rect=stage.getBoundingClientRect();
+   const x=(e.clientX-rect.left)/Math.max(1,rect.width);
+   const y=(e.clientY-rect.top)/Math.max(1,rect.height);
+   const rx=((0.5-y)*9).toFixed(2);
+   const ry=((x-0.5)*11).toFixed(2);
+   stage.style.setProperty('--tilt-rx',`${rx}deg`);
+   stage.style.setProperty('--tilt-ry',`${ry}deg`);
+   stage.style.setProperty('--spot-x',`${(x*100).toFixed(1)}%`);
+   stage.style.setProperty('--spot-y',`${(y*100).toFixed(1)}%`);
+  };
+  stage.onpointerleave=()=>{
+   stage.style.setProperty('--tilt-rx','0deg');
+   stage.style.setProperty('--tilt-ry','0deg');
+   stage.style.setProperty('--spot-x','50%');
+   stage.style.setProperty('--spot-y','50%');
+  };
+ }
+ // Interactive cursor-tracking border glow on overview widgets
+ document.querySelectorAll('.wb-overview-widget,.wb-spotlight-deck').forEach(card=>{
+  card.onpointermove=e=>{
+   const rect=card.getBoundingClientRect();
+   card.style.setProperty('--card-mx',`${(e.clientX-rect.left).toFixed(0)}px`);
+   card.style.setProperty('--card-my',`${(e.clientY-rect.top).toFixed(0)}px`);
+  };
+ });
+ document.querySelectorAll('[data-status-jump]').forEach(btn=>btn.onclick=()=>{if(busy)return;filter=btn.dataset.statusJump||'all';issueFilter='';make='';year='';query='';activate('inventory');});
+ document.querySelectorAll('[data-brand-jump]').forEach(btn=>btn.onclick=()=>{if(busy)return;make=btn.dataset.brandJump||'';filter='all';issueFilter='';year='';query='';activate('inventory');});
+ // Overview widgets drag-and-drop
+ const widgetsGrid=$('#overviewWidgetsGrid');
+ if(widgetsGrid){
+  const panels=[...widgetsGrid.querySelectorAll('[data-overview-widget]')];
+  let draggedWidget=null;
+  panels.forEach(panel=>{
+   panel.draggable=true;
+   panel.ondragstart=e=>{
+    if(e.target.closest('button,a,input,select')){e.preventDefault();return;}
+    draggedWidget=panel.dataset.overviewWidget;
+    panel.classList.add('is-dragging');
+    e.dataTransfer.setData('text/plain',draggedWidget);
+   };
+   panel.ondragend=()=>panel.classList.remove('is-dragging');
+   panel.ondragover=e=>{e.preventDefault();panel.classList.add('drag-over');};
+   panel.ondragleave=()=>panel.classList.remove('drag-over');
+   panel.ondrop=e=>{
+    e.preventDefault();panel.classList.remove('drag-over');
+    const targetKey=panel.dataset.overviewWidget;
+    if(!draggedWidget||draggedWidget===targetKey)return;
+    const order=panels.map(p=>p.dataset.overviewWidget);
+    const fromIdx=order.indexOf(draggedWidget),toIdx=order.indexOf(targetKey);
+    if(fromIdx<0||toIdx<0)return;
+    order.splice(fromIdx,1);order.splice(toIdx,0,draggedWidget);
+    try{localStorage.setItem('danny-wb-overview-order',JSON.stringify(order));}catch{}
+    render();
+    toast('Dashboard panel layout updated.');
+   };
+  });
+ }
+ // Homepage sequencer drag-and-drop
+ const seqList=$('#homepageSequencerList');
+ if(seqList){
+  const items=[...seqList.querySelectorAll('.wb-sequencer-item')];
+  let draggedSeq=null;
+  items.forEach(item=>{
+   item.ondragstart=e=>{draggedSeq=item.dataset.seqId;item.classList.add('is-dragging');e.dataTransfer.setData('text/plain',draggedSeq);};
+   item.ondragend=()=>item.classList.remove('is-dragging');
+   item.ondragover=e=>{e.preventDefault();item.classList.add('drag-over');};
+   item.ondragleave=()=>item.classList.remove('drag-over');
+   item.ondrop=e=>{
+    e.preventDefault();item.classList.remove('drag-over');
+    if(!draggedSeq||draggedSeq===item.dataset.seqId)return;
+    const select=$('#homepageSectionOrderSelect');
+    if(select){
+     select.value=select.value==='deliveries-first'?'inventory-first':'deliveries-first';
+     doc.homepage.sectionOrder=select.value;
+     editorDirty=true;
+     render();
+     toast('Homepage section order swapped. Click Save to apply.');
+    }
+   };
+  });
+ }
+ // Deliveries drag-and-drop reorder
+ const storyCards=[...document.querySelectorAll('.story-workbench-grid .wb-story-card')];
+ let draggedStoryIdx=null;
+ storyCards.forEach((card,idx)=>{
+  card.draggable=true;
+  card.ondragstart=e=>{
+   if(e.target.closest('input,select,textarea,button,label')){e.preventDefault();return;}
+   draggedStoryIdx=idx;
+   card.classList.add('is-dragging');
+   e.dataTransfer.setData('text/plain',String(idx));
+  };
+  card.ondragend=()=>card.classList.remove('is-dragging');
+  card.ondragover=e=>{e.preventDefault();card.classList.add('drag-over');};
+  card.ondragleave=()=>card.classList.remove('drag-over');
+  card.ondrop=async e=>{
+   e.preventDefault();card.classList.remove('drag-over');
+   if(draggedStoryIdx==null||draggedStoryIdx===idx)return;
+   const [moved]=doc.stories.splice(draggedStoryIdx,1);
+   doc.stories.splice(idx,0,moved);
+   await persist();
+   render();
+   toast(`Moved “${moved.title||'handover'}” to position #${idx+1}.`);
+  };
+ });
  document.querySelectorAll('[data-live-story]').forEach(b=>b.onclick=()=>saveCurrentItem(b,{collection:'stories',id:b.dataset.liveStory}));
- document.querySelectorAll('.wb-tint-card').forEach(card=>{const b=document.createElement('button');b.type='button';b.className='button';b.textContent='Save and go live';b.onclick=()=>saveCurrentItem(b,{collection:'tintPackages',id:card.dataset.tintId});card.append(b);});
+ document.querySelectorAll('.wb-tint-card').forEach(card=>{if(card.querySelector('.wb-tint-live-btn'))return;const b=document.createElement('button');b.type='button';b.className='button wb-tint-live-btn';b.textContent=previewEditor?'Save preview draft':'Save and go live';b.onclick=()=>saveCurrentItem(b,{collection:'tintPackages',id:card.dataset.tintId});card.append(b);});
  document.querySelectorAll('.wb-story-card').forEach(item=>item.addEventListener('toggle',()=>{if(item.open)document.querySelectorAll('.wb-story-card').forEach(other=>{if(other!==item)other.open=false;});}));
  document.querySelectorAll('[data-nav],[data-owner-nav]').forEach(b=>b.onclick=async()=>{if(busy)return;if(editorDirty&&!await confirmAction('Leave unsaved changes?','Save this vehicle to keep your edits. Leave anyway?'))return;const next=b.dataset.ownerNav||b.dataset.nav;if(next==='edit')newVehicle();else activate(next);});
  document.querySelectorAll('[data-owner-media]').forEach(b=>b.onclick=()=>{editing=structuredClone(doc.vehicles.find(v=>v.id===b.dataset.ownerMedia));activate('edit');$('#photosSection')?.scrollIntoView({block:'start'});});
@@ -642,9 +1247,9 @@ function bindOwnerExtras(){
  document.querySelectorAll('[data-owner-preview]').forEach(b=>b.onclick=()=>$('#openPreview').click());
  const helper=document.querySelector('.wb-autofill-bar');if(helper&&!helper.parentElement.classList.contains('owner-helpers')){helper.querySelectorAll('p').forEach(p=>p.textContent='Model templates assist naming only. Enter specifications, equipment, grade and warranty from the vehicle documents.');const wrapper=document.createElement('details');wrapper.className='owner-helpers';wrapper.innerHTML='<summary>Optional model naming helpers</summary>';helper.before(wrapper);wrapper.append(helper);}
  const tiles=[...document.querySelectorAll('.photo-editor-grid .photo-tile')];let dragged=null;
- tiles.forEach((tile,i)=>{tile.draggable=true;tile.setAttribute('aria-label',`Photo ${i+1}. Drag to reorder or use arrow buttons.`);tile.ondragstart=e=>{if(e.target.closest('input,select,button')){e.preventDefault();return;}dragged=i;e.dataTransfer.setData('text/plain',String(i));};tile.ondragover=e=>{e.preventDefault();tile.classList.add('drag-over');};tile.ondragleave=()=>tile.classList.remove('drag-over');tile.ondrop=e=>{e.preventDefault();if(dragged==null||dragged===i)return;captureForm();const [photo]=editing.gallery.splice(dragged,1);editing.gallery.splice(i,0,photo);editing.coverImageUrl=editing.gallery[0]?.url||'';editorDirty=true;render();};
+ tiles.forEach((tile,i)=>{tile.draggable=true;tile.setAttribute('aria-label',`Photo ${i+1}. Drag to reorder or use arrow buttons.`);tile.ondragstart=e=>{if(e.target.closest('input,select,button')){e.preventDefault();return;}dragged=i;tile.classList.add('is-dragging');e.dataTransfer.setData('text/plain',String(i));};tile.ondragend=()=>tile.classList.remove('is-dragging');tile.ondragover=e=>{e.preventDefault();tile.classList.add('drag-over');};tile.ondragleave=()=>tile.classList.remove('drag-over');tile.ondrop=e=>{e.preventDefault();tile.classList.remove('drag-over');if(dragged==null||dragged===i)return;captureForm();const [photo]=editing.gallery.splice(dragged,1);editing.gallery.splice(i,0,photo);editing.coverImageUrl=editing.gallery[0]?.url||'';editorDirty=true;render();};
   const m=editing.gallery[i],img=tile.querySelector('img');img.style.objectPosition=`${m.cropX??50}% ${m.cropY??50}%`;
-  tile.insertAdjacentHTML('beforeend',`<label class="crop-controls">Frame X<input type="range" min="0" max="100" value="${m.cropX??50}" data-crop="${i}" data-axis="cropX" aria-label="Photo ${i+1} horizontal framing"></label><label class="crop-controls">Frame Y<input type="range" min="0" max="100" value="${m.cropY??50}" data-crop="${i}" data-axis="cropY" aria-label="Photo ${i+1} vertical framing"></label>`);
+  tile.insertAdjacentHTML('beforeend',`<label class="crop-controls">Frame X<input type="range" min="0" max="100" value="${m.cropX??50}" data-crop="${i}" data-axis="cropX" aria-label="Photo ${i+1} horizontal framing"></label><label class="crop-controls">Frame Y<input type="range" min="0" max="100" value="${m.cropX!=null?m.cropY??50:50}" data-crop="${i}" data-axis="cropY" aria-label="Photo ${i+1} vertical framing"></label>`);
  });
  document.querySelectorAll('[data-crop]').forEach(input=>input.oninput=()=>{const i=Number(input.dataset.crop),m=editing.gallery[i];m[input.dataset.axis]=Number(input.value);const img=tiles[i].querySelector('img');img.style.objectPosition=`${m.cropX??50}% ${m.cropY??50}%`;editorDirty=true;});
  bindThemeControls();
@@ -652,6 +1257,7 @@ function bindOwnerExtras(){
 window.addEventListener('unhandledrejection',event=>{if(event.reason?.message){toast(event.reason.message,true);event.preventDefault();}});
 
 async function publishItem(scope){
+ if(previewEditor){syncStatusBanner();toast('Preview draft saved in this browser. Use Preview showroom to review your changes.');return;}
  if(!cloudReady)throw Error('Not live yet. Reconnect and reload; your draft is kept.');
  await saveQueue;
  const response=await fetch('/api/owner/publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({document:doc,baseRevision:serverRevision,scope})});
@@ -659,3 +1265,6 @@ async function publishItem(scope){
  serverRevision=publishedRevision=result.revision;lastPublishedAt=result.updatedAt;pendingDraftChanges=result.pendingChanges;cloudStatus='Saved and live · '+new Date(result.updatedAt).toLocaleTimeString();syncStatusBanner();toast('Saved and live. View the website to see your update.');
 }
 async function saveCurrentItem(button,scope){if(busy)return;busy=true;button.disabled=true;try{await persist();await publishItem(scope);}catch(e){toast(e.message,true);}finally{busy=false;button.disabled=false;}}
+
+// Start after all module state, including overview chart tabs, is initialized.
+queueMicrotask(()=>{void initializeWorkbench();});

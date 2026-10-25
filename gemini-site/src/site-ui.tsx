@@ -30,18 +30,41 @@ function FooterFibers({container,dark}:{container:HTMLElement;dark:boolean}){
 }
 function MinimalFooter({container,dashboardHref}:{container:HTMLElement;dashboardHref:string}){
   const [dark,setDark]=useState(()=>document.documentElement.dataset.theme==='dark');
-  useEffect(()=>{const sync=()=>setDark(document.documentElement.dataset.theme==='dark');document.addEventListener('danny-theme-change',sync);return()=>document.removeEventListener('danny-theme-change',sync);},[]);
+  const [,setLangTick]=useState(0);
+  useEffect(()=>{
+    const sync=()=>setDark(document.documentElement.dataset.theme==='dark');
+    const syncLang=()=>setLangTick(n=>n+1);
+    document.addEventListener('danny-theme-change',sync);
+    document.addEventListener('danny:language-change',syncLang);
+    return()=>{
+      document.removeEventListener('danny-theme-change',sync);
+      document.removeEventListener('danny:language-change',syncLang);
+    };
+  },[]);
   const fibers=document.body.classList.contains('exhibition-home');
+  const base=container.dataset.homeHref||'/';
+  const lang=container.dataset.language||(document.documentElement.lang.startsWith('zh')?'zh':document.documentElement.lang==='ms'?'ms':'en');
+  const navCopy=lang==='zh'
+    ?{aria:'快捷导航',stock:'在售车源',tools:'贷款与路税计算器',services:'隔热膜与售后',contact:'联系 Danny'}
+    :lang==='ms'
+    ?{aria:'Pautan pantas',stock:'Stok Kereta',tools:'Kalkulator Pinjaman & Cukai Jalan',services:'Tinted & Servis',contact:'Hubungi Danny'}
+    :{aria:'Quick links',stock:'Browse Stock',tools:'Loan & Road Tax',services:'Tinting & Services',contact:'Contact Danny'};
   const socials=[['TikTok','tiktok','tiktok'],['小红书 / RED','rednote','xiaohongshu'],['Facebook','facebook','facebook']].filter(([,key])=>/^https?:\/\//i.test(container.dataset[key]||''));
   return <>{fibers&&<FooterFibers container={container} dark={dark}/>}
     <div className="footer-layout">
-      <div className="footer-center"><a className="footer-title" href={container.dataset.homeHref||'/'}><span>DANNY</span><small>RECON SELECT</small></a>
+      <div className="footer-center">
+        <a className="footer-title" href={base}><span className="brand-logo" aria-hidden="true"><img className="brand-logo-img logo-dark" src={`${base}assets/logo-danny-dark.png`} alt="" width="32" height="22" decoding="async" /><img className="brand-logo-img logo-light" src={`${base}assets/logo-danny-light.png`} alt="" width="32" height="22" decoding="async" /></span><span className="brand-wordmark-text"><span>DANNY</span><small>RECON SELECT</small></span></a>
+        <nav className="footer-quick-links" aria-label={navCopy.aria}>
+          <a href={`${base}#inventory`}>{navCopy.stock}</a>
+          <a href={`${base}tools/`}>{navCopy.tools}</a>
+          <a href={`${base}services/`}>{navCopy.services}</a>
+          <a href={`${base}#contact`}>{navCopy.contact}</a>
+        </nav>
         <a className="footer-owner-link" href={dashboardHref}>{container.dataset.dashboardLabel||'Owner Dashboard'} <span aria-hidden="true">↗</span></a>
       </div>
       <div className="footer-baseline"><small>© {new Date().getFullYear()} Danny Recon Select</small>
-        <nav className="footer-socials" aria-label={container.dataset.language==='zh'?'社交平台':'Social media'}>{socials.map(([label,key,file])=><a key={key} href={container.dataset[key]} target="_blank" rel="noopener noreferrer" aria-label={label}><img src={`${container.dataset.iconBase}${file}.svg`} alt="" width="21" height="21" loading="lazy"/></a>)}</nav>
+        <nav className="footer-socials" aria-label={lang==='zh'?'社交平台':'Social media'}>{socials.map(([label,key,file])=><a key={key} href={container.dataset[key]} target="_blank" rel="noopener noreferrer" aria-label={label}><img src={`${container.dataset.iconBase}${file}.svg`} alt="" width="21" height="21" loading="lazy"/></a>)}</nav>
       </div>
     </div></>;
-
 }
 export function renderMinimalFooter(container:HTMLElement,dashboardHref:string){rootFor(container).render(<MinimalFooter container={container} dashboardHref={dashboardHref}/>);}

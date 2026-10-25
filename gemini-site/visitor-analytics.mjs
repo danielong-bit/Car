@@ -14,5 +14,6 @@ export function visitorAnalytics(storage,request,now=Date.now()){
   return respond({ok:true});
  });
  const rows=(query,...params)=>Array.from(sql.exec(query,...params));
- return respond({total:rows('SELECT COUNT(*) AS count FROM visitor_sessions WHERE created >= ?',since)[0].count,today:rows('SELECT COUNT(*) AS count FROM visitor_sessions WHERE created >= ?',today)[0].count,countries:rows('SELECT country AS name,COUNT(*) AS count FROM visitor_sessions WHERE created >= ? GROUP BY country ORDER BY count DESC LIMIT 6',since),devices:rows('SELECT device AS name,COUNT(*) AS count FROM visitor_sessions WHERE created >= ? GROUP BY device ORDER BY count DESC',since),updatedAt:new Date(now).toISOString()});
+ const daily=Array.from({length:7},(_,index)=>{const start=today-(6-index)*86400000;return rows('SELECT COUNT(*) AS count FROM visitor_sessions WHERE created >= ? AND created < ?',start,start+86400000)[0].count;});
+ return respond({daily,total:rows('SELECT COUNT(*) AS count FROM visitor_sessions WHERE created >= ?',since)[0].count,today:rows('SELECT COUNT(*) AS count FROM visitor_sessions WHERE created >= ?',today)[0].count,countries:rows('SELECT country AS name,COUNT(*) AS count FROM visitor_sessions WHERE created >= ? GROUP BY country ORDER BY count DESC LIMIT 6',since),devices:rows('SELECT device AS name,COUNT(*) AS count FROM visitor_sessions WHERE created >= ? GROUP BY device ORDER BY count DESC',since),updatedAt:new Date(now).toISOString()});
 }

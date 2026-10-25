@@ -125,22 +125,98 @@ function safeInlineJson(value) {
   return JSON.stringify(value).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e');
 }
 
+function escapeAttr(value = '') {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+}
+
 async function renderTemplate(templateName, {route = '', title} = {}) {
   let html = await readFile(path.join(templatesPath, templateName), 'utf8');
   if (title) html = html.replace(/<title>[^<]*<\/title>/i, `<title>${String(title).replaceAll('&','&amp;').replaceAll('<','&lt;')}</title>`);
 
   const canonicalPath = route ? `${basePath}${route.replace(/^\/+|\/+$/g, '')}/` : basePath;
   const canonicalUrl = `https://danielong-bit.github.io${canonicalPath}`;
-  const metadata = `<link rel="canonical" href="${canonicalUrl}"><meta property="og:site_name" content="Danny Recond Select"><meta property="og:type" content="website"><meta property="og:url" content="${canonicalUrl}">`;
+  const isVehicleTemplate = ['cms-vehicle.html', 'audi.html'].includes(templateName);
+  const key = isVehicleTemplate ? decodeURIComponent(route.split('/').at(-1) || '') : '';
+  const vehicle = isVehicleTemplate
+    ? publicData.vehicles.find(v => v.id === key || v.stockId === key || (key === 'audi' && v.id === 'audi-s5'))
+    : null;
+
+  const titleMatch = html.match(/<title>([^<]*)<\/title>/i);
+  const resolvedTitle = (title || (titleMatch ? titleMatch[1] : 'Danny Recon Select · Japan Recond by Danny')).trim();
+  const existingDescMatch = html.match(/<meta\s+name="description"\s+content="([^"]*)"/i);
+  const vehicleTitle = vehicle ? [vehicle.year, vehicle.make || vehicle.brand, vehicle.model, vehicle.variant].filter(Boolean).join(' ') : '';
+  const vehiclePrice = vehicle
+    ? (vehicle.status === 'sold' ? 'SOLD' : vehicle.priceRm != null ? `RM ${Number(vehicle.priceRm).toLocaleString('en-MY')}` : 'Enquire for price')
+    : '';
+  const vehicleSpecs = vehicle
+    ? [vehicle.conditionType === 'Recond' ? 'Japan Recond' : vehicle.conditionType, vehicle.mileage, vehicle.transmission, vehicle.exteriorColor].filter(Boolean).join(' · ')
+    : '';
+  const resolvedDescription = vehicle
+    ? `${vehicleTitle} (${vehiclePrice})${vehicleSpecs ? ` — ${vehicleSpecs}` : ''}. Stock #${vehicle.stockId || vehicle.id} at Danny Recon Select, Bukit Jelutong, Shah Alam.`
+    : (existingDescMatch ? existingDescMatch[1] : 'Selected Japanese and continental reconditioned cars in Bukit Jelutong, Shah Alam — inspect photos, compare models, and message Danny on WhatsApp.');
+
+  const rawImage = (vehicle && vehicle.gallery?.find(m => m.visible !== false && !m.video)?.url) || '/assets/audi-s5-v2/cover-front-left.webp';
+  const imageUrl = /^https?:\/\//i.test(rawImage) ? rawImage : `https://danielong-bit.github.io${prefixRootPath(rawImage)}`;
+
+  const schemaObj = vehicle ? {
+    '@context': 'https://schema.org',
+    '@type': 'Car',
+    name: vehicleTitle || resolvedTitle,
+    sku: vehicle.stockId || vehicle.id,
+    brand: {'@type': 'Brand', name: vehicle.make || vehicle.brand || 'Recon'},
+    model: vehicle.model || '',
+    ...(vehicle.year ? {vehicleModelDate: String(vehicle.year)} : {}),
+    ...(vehicle.body ? {bodyType: vehicle.body} : {}),
+    ...(vehicle.transmission ? {vehicleTransmission: vehicle.transmission} : {}),
+    ...(vehicle.exteriorColor ? {color: vehicle.exteriorColor} : {}),
+    ...(vehicle.fuelType ? {fuelType: vehicle.fuelType} : {}),
+    image: imageUrl,
+    description: resolvedDescription,
+    url: canonicalUrl,
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'MYR',
+      ...(vehicle.priceRm != null ? {price: Number(vehicle.priceRm)} : {}),
+      availability: vehicle.status === 'sold' ? 'https://schema.org/SoldOut' : vehicle.status === 'reserved' ? 'https://schema.org/LimitedAvailability' : 'https://schema.org/InStock',
+      seller: {'@type': 'AutoDealer', name: 'Danny Recon Select', telephone: '+60125686528'},
+    },
+  } : (!route ? {
+    '@context': 'https://schema.org',
+    '@type': 'AutoDealer',
+    name: 'Danny Recon Select',
+    description: resolvedDescription,
+    url: canonicalUrl,
+    telephone: '+60125686528',
+    email: 'dannyong2004@gmail.com',
+    image: imageUrl,
+    priceRange: 'RM 100,000 - RM 1,000,000',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'U8, Metropolitan Business Park, 4, Jalan Para U8/103, Bukit Jelutong',
+      addressLocality: 'Shah Alam',
+      addressRegion: 'Selangor',
+      postalCode: '40150',
+      addressCountry: 'MY',
+    },
+  } : null);
+
+  if (existingDescMatch && vehicle) {
+    html = html.replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i, `<meta name="description" content="${escapeAttr(resolvedDescription)}">`);
+  }
+  const descMeta = !existingDescMatch ? `<meta name="description" content="${escapeAttr(resolvedDescription)}">` : '';
+  const schemaScript = schemaObj ? `<script type="application/ld+json">${safeInlineJson(schemaObj)}</script>` : '';
+  const metadata = `${descMeta}<link rel="canonical" href="${canonicalUrl}"><meta property="og:site_name" content="Danny Recon Select"><meta property="og:type" content="${vehicle ? 'product' : 'website'}"><meta property="og:title" content="${escapeAttr(resolvedTitle)}"><meta property="og:description" content="${escapeAttr(resolvedDescription)}"><meta property="og:image" content="${escapeAttr(imageUrl)}"><meta property="og:url" content="${canonicalUrl}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${escapeAttr(resolvedTitle)}"><meta name="twitter:description" content="${escapeAttr(resolvedDescription)}"><meta name="twitter:image" content="${escapeAttr(imageUrl)}">${schemaScript}`;
   const runtime = `<base href="${basePath}"><script>window.SITE_BASE=${safeInlineJson(basePath)};window.GITHUB_PAGES_STATIC=true;window.DANNY_PREVIEW_EDITOR=${previewEditor};window.CMS_DATA=${safeInlineJson(publicData)};</script>`;
   if (!/<head(?:\s[^>]*)?>/i.test(html) || !/<\/body>/i.test(html)) {
     throw new Error(`Template ${templateName} is missing its document head or body.`);
   }
   html = html.replace(/<head(?:\s[^>]*)?>/i, match => `${match}${runtime}${metadata}`);
-  if (['cms-vehicle.html','audi.html'].includes(templateName)) {
-    const key=decodeURIComponent(route.split('/').at(-1)||'');
-    const vehicle=publicData.vehicles.find(v=>v.id===key||v.stockId===key||(key==='audi'&&v.id==='audi-s5'));
-    if(vehicle) html=html.replace(/(<main[^>]*id="vehicleContent"[^>]*>)[\s\S]*?(<\/main>)/,(_match,open,close)=>open+initialVehicleMarkup(vehicle,publicData,{base:basePath,pathname:canonicalPath})+close);
+  if (vehicle) {
+    html = html.replace(/(<main[^>]*id="vehicleContent"[^>]*>)[\s\S]*?(<\/main>)/, (_match, open, close) => open + initialVehicleMarkup(vehicle, publicData, {base: basePath, pathname: canonicalPath}) + close);
   }
   return rewriteMarkupPaths(html);
 }
@@ -150,8 +226,8 @@ async function dashboardPage() {
   return page
     .replace(/<aside class="wb-sidebar">[\s\S]*?<\/aside>/,()=>ownerSidebarMarkup('/'))
     .replace('<div id="workspaceContent">', (previewEditor?'<p class="preview-editor-notice" role="status">Preview workspace · Changes are saved in this browser. The live website stays unchanged.</p>':'')+'<div id="workspaceContent">')
-    .replace('</head>', '<link rel="stylesheet" href="/assets/workbench-ui.css?v=owner-ui-20261024d"><link rel="stylesheet" href="/workbench-hierarchy.css?v=owner-nav-20261023b"></head>')
-    .replace('</body>', '<div id="workbenchUiMount"></div><script type="module" src="/assets/workbench-ui.js?v=owner-ui-20261024d"></script></body>');
+    .replace('</head>', '<link rel="stylesheet" href="/assets/workbench-ui.css?v=owner-ui-20261025a"><link rel="stylesheet" href="/workbench-hierarchy.css?v=owner-nav-20261023b"></head>')
+    .replace('</body>', '<div id="workbenchUiMount"></div><script type="module" src="/assets/workbench-ui.js?v=owner-ui-20261025a"></script></body>');
 }
 
 const snapshot = JSON.parse(await readFile(publicDataPath, 'utf8'));
@@ -174,7 +250,7 @@ if (process.env.KEEP_OUTPUT !== '1' && (outputDirectory !== path.resolve(project
 await mkdir(outputDirectory, {recursive: true});
 await prepareExhibition();
 await copyPublicAssets();
-await buildUiIslands(outputDirectory, {includeOwner: process.env.OWNER_WORKER_BUILD === '1'||previewEditor});
+await buildUiIslands(outputDirectory, {includeOwner: process.env.OWNER_WORKER_BUILD==='1'||previewEditor});
 await writeFile(path.join(outputDirectory,'published-baseline.json'),JSON.stringify({document:publicData}));
 const pages = [
   {template:'tools.html',file:'tools/index.html',route:'tools',title:'Calculator & JPJ · Danny Recon Select'},
@@ -184,17 +260,19 @@ const pages = [
   {template: 'audi.html', file: 'audi/index.html', route: 'audi', title: 'Audi S5 Avant · Danny Recond Select'},
 ];
 for (const vehicle of publicData.vehicles) {
+  const vehicleMake = vehicle.make || vehicle.brand || '';
+  const vehicleHeading = [vehicle.year, vehicleMake, vehicle.model].filter(Boolean).join(' ');
   pages.push({
     template: 'cms-vehicle.html',
     file: `vehicle/${vehicle.id}/index.html`,
     route: `vehicle/${vehicle.id}`,
-    title: `${vehicle.year} ${vehicle.brand} ${vehicle.model} · Danny Recond Select`,
+    title: `${vehicleHeading} · Danny Recon Select`,
   });
   pages.push({
     template: 'cms-vehicle.html',
     file: `stock/${vehicle.stockId}/index.html`,
     route: `stock/${vehicle.stockId}`,
-    title: `${vehicle.year} ${vehicle.brand} ${vehicle.model} · Danny Recond Select`,
+    title: `${vehicleHeading} · Danny Recon Select`,
   });
 }
 
@@ -210,16 +288,17 @@ await writeFile(path.join(outputDirectory, 'audi.html'), audiAlias);
 const calculatorAlias = await readFile(path.join(outputDirectory, 'calculator', 'index.html'));
 await writeFile(path.join(outputDirectory, 'calculator.html'), calculatorAlias);
 await mkdir(path.join(outputDirectory, 'studio'), {recursive: true});
-if(process.env.OWNER_WORKER_BUILD!=='1')await writeFile(path.join(outputDirectory,'inventory-workbench.json'),JSON.stringify({document:publicData}));
-const dashboard = process.env.OWNER_WORKER_BUILD === '1'||previewEditor ? await dashboardPage() : `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=https://car-recond-japan.danielong2005.workers.dev/studio/"><title>Owner Log In - Danny Recon Select</title></head><body><a href="https://car-recond-japan.danielong2005.workers.dev/studio/">Continue to Owner Log In</a></body></html>`;
-await writeFile(path.join(outputDirectory, 'studio', 'index.html'), dashboard);
+await mkdir(path.join(outputDirectory, 'workbench'), {recursive: true});
+await mkdir(path.join(outputDirectory, 'dashboard'), {recursive: true});
 await mkdir(path.join(outputDirectory, 'admin'), {recursive: true});
+if(process.env.OWNER_WORKER_BUILD!=='1')await writeFile(path.join(outputDirectory,'inventory-workbench.json'),JSON.stringify({document:publicData}));
+const dashboard = process.env.OWNER_WORKER_BUILD==='1'||previewEditor ? await dashboardPage() : `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=https://car-recond-japan.danielong2005.workers.dev/studio/"><title>Owner Log In</title></head><body><a href="https://car-recond-japan.danielong2005.workers.dev/studio/">Continue to Owner Log In</a></body></html>`;
+await writeFile(path.join(outputDirectory, 'studio', 'index.html'), dashboard);
+await writeFile(path.join(outputDirectory, 'workbench', 'index.html'), previewEditor?dashboard:'<html><head><meta http-equiv="refresh" content="0;url=/studio/"></head><body><a href="/studio/">Owner dashboard</a></body></html>');
+await writeFile(path.join(outputDirectory, 'dashboard', 'index.html'), previewEditor?dashboard:'<html><head><meta http-equiv="refresh" content="0;url=/studio/"></head><body><a href="/studio/">Owner dashboard</a></body></html>');
 await writeFile(path.join(outputDirectory, 'admin', 'index.html'), dashboard);
 await writeFile(path.join(outputDirectory,'admin.html'),dashboard);
-if(previewEditor){
- await mkdir(path.join(outputDirectory,'owner-login'),{recursive:true});
- await writeFile(path.join(outputDirectory,'owner-login','index.html'),'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/studio/"><title>Preview editor</title></head><body><a href="/studio/">Open preview editor</a></body></html>');
-}
+if(previewEditor){await mkdir(path.join(outputDirectory,'owner-login'),{recursive:true});await writeFile(path.join(outputDirectory,'owner-login','index.html'),'<html><head><meta http-equiv="refresh" content="0;url=/studio/"></head><body><a href="/studio/">Open preview editor</a></body></html>');}
 await writeFile(
   path.join(outputDirectory, '404.html'),
   `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="${basePath}"><title>Page not found · Danny Recond Select</title><link rel="stylesheet" href="design-system.css"></head><body><main class="public-cms-wrap"><section class="public-panel"><p class="stories-eyebrow">DANNY RECOND SELECT</p><h1 class="public-title">We couldn’t find this page.</h1><p class="public-muted">Browse the current vehicles or return to the home page.</p><div class="public-actions"><a href="${basePath}#inventory">Browse inventory</a><a class="secondary" href="${basePath}">Home</a></div></section></main></body></html>`,

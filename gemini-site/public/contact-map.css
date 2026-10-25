@@ -1,0 +1,1420 @@
+/* Danny Recon Select · Clean Contact Layout, Customer Testimonials, Hero Stock Count & Interactive Cards */
+
+/* 1. Section Separators & Unified Vertical Rhythm */
+.section-separator {
+ display: block;
+ border: 0 !important;
+ height: 1px !important;
+ background: linear-gradient(90deg, transparent 0%, var(--line, #232b38) 12%, var(--line, #232b38) 88%, transparent 100%) !important;
+ width: min(1320px, calc(100% - 48px));
+ margin: 0 auto !important;
+ opacity: 0.85;
+ clear: both;
+}
+
+html[data-theme=dark] .section-separator {
+ background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 12%, rgba(255, 255, 255, 0.1) 88%, transparent 100%) !important;
+}
+
+@media (max-width: 768px) {
+ .section-separator {
+  width: calc(100% - 32px);
+ }
+}
+
+.eyebrow {
+ font-size: 11px !important;
+ font-weight: 700 !important;
+ letter-spacing: 0.14em !important;
+ line-height: 1.4 !important;
+ text-transform: uppercase !important;
+ color: var(--gold, #f6dfa4) !important;
+ margin-bottom: 6px !important;
+}
+
+h2 {
+ font-size: clamp(24px, 2.5vw, 32px) !important;
+ font-weight: 700 !important;
+ line-height: 1.2 !important;
+ letter-spacing: -0.025em !important;
+ margin-top: 0 !important;
+ margin-bottom: 4px !important;
+}
+
+.section-heading {
+ margin-bottom: 14px !important;
+}
+
+.section-heading .eyebrow {
+ margin-bottom: 4px !important;
+}
+
+.section-heading h2 {
+ margin-bottom: 0 !important;
+}
+
+/* 2. CSS Selector 2: #customer-stories — Compact Customer Testimonial Cards */
+main:nth-of-type(1) > section#customer-stories:nth-of-type(3),
+html body #customer-stories.deliveries-section {
+ display: block !important;
+ visibility: visible !important;
+ opacity: 1 !important;
+ padding-block: 18px 22px !important;
+ margin-block: 0 !important;
+}
+
+html body #customer-stories #deliveryRail.delivery-rail {
+ display: grid !important;
+ grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+ gap: 14px !important;
+ overflow-x: visible !important;
+ padding-bottom: 2px !important;
+ visibility: visible !important;
+ opacity: 1 !important;
+}
+
+html body #customer-stories .delivery-card.testimonial-card {
+ flex: initial !important;
+ min-width: 0 !important;
+ width: 100% !important;
+ border: 1px solid var(--line) !important;
+ border-radius: 12px !important;
+ background: var(--surface) !important;
+ overflow: hidden !important;
+ display: flex !important;
+ flex-direction: column !important;
+ visibility: visible !important;
+ opacity: 1 !important;
+ transform: none !important;
+ box-shadow: 0 3px 12px rgba(16, 32, 51, 0.04) !important;
+ transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.24s ease !important;
+}
+
+@media (max-width: 1080px) {
+ html body #customer-stories #deliveryRail.delivery-rail {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+ }
+}
+
+@media (max-width: 640px) {
+ main:nth-of-type(1) > section#customer-stories:nth-of-type(3),
+ html body #customer-stories.deliveries-section {
+  padding-block: 16px 20px !important;
+  overflow: visible !important;
+ }
+ html body #customer-stories #deliveryRail.delivery-rail {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 12px !important;
+  overflow: visible !important;
+  padding-bottom: 4px !important;
+ }
+ html body #customer-stories .delivery-card.testimonial-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  flex: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+ }
+}
+
+html body #customer-stories .delivery-card.testimonial-card:hover {
+ transform: translateY(-3px) scale(1.01) !important;
+ border-color: color-mix(in srgb, var(--blue, #496a83) 45%, var(--line)) !important;
+ box-shadow: 0 12px 26px rgba(16, 32, 51, 0.1) !important;
+}
+
+html[data-theme=dark] body #customer-stories .delivery-card.testimonial-card {
+ box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28) !important;
+}
+
+html[data-theme=dark] body #customer-stories .delivery-card.testimonial-card:hover {
+ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.48) !important;
+}
+
+html body #customer-stories .testimonial-photo-btn {
+ position: relative !important;
+ width: 100% !important;
+ aspect-ratio: 16 / 10 !important;
+ max-height: 155px !important;
+ padding: 0 !important;
+ border: 0 !important;
+ border-radius: 0 !important;
+ overflow: hidden !important;
+ background: #0d1219 !important;
+ display: block !important;
+ cursor: pointer !important;
+}
+
+html body #customer-stories .testimonial-photo-btn img {
+ width: 100% !important;
+ height: 100% !important;
+ object-fit: cover !important;
+ object-position: 50% 58% !important;
+ display: block !important;
+ transition: transform 0.35s ease !important;
+}
+
+html body #customer-stories .delivery-card.testimonial-card:hover .testimonial-photo-btn img {
+ transform: scale(1.04) !important;
+}
+
+html body #customer-stories .testimonial-model-tag {
+ position: absolute !important;
+ left: 8px !important;
+ bottom: 8px !important;
+ z-index: 2 !important;
+ padding: 3px 8px !important;
+ border-radius: 6px !important;
+ background: rgba(11, 16, 26, 0.82) !important;
+ color: #f8fafc !important;
+ border: 1px solid rgba(255, 255, 255, 0.18) !important;
+ backdrop-filter: blur(6px) !important;
+ -webkit-backdrop-filter: blur(6px) !important;
+ font-size: 10px !important;
+ font-weight: 700 !important;
+ letter-spacing: 0.02em !important;
+ line-height: 1.2 !important;
+ pointer-events: none !important;
+}
+
+html body #customer-stories .testimonial-body {
+ padding: 11px 13px 12px !important;
+ display: flex !important;
+ flex-direction: column !important;
+ gap: 6px !important;
+ flex: 1 !important;
+ background: var(--surface) !important;
+}
+
+html body #customer-stories .testimonial-rating-row {
+ display: flex !important;
+ align-items: center !important;
+ justify-content: space-between !important;
+ gap: 6px !important;
+}
+
+html body #customer-stories .testimonial-stars {
+ color: #d99b26 !important;
+ font-size: 12px !important;
+ letter-spacing: 0.08em !important;
+ line-height: 1 !important;
+}
+
+html[data-theme=dark] body #customer-stories .testimonial-stars {
+ color: #f6dfa4 !important;
+}
+
+html body #customer-stories .testimonial-verified {
+ font-size: 10px !important;
+ font-weight: 600 !important;
+ color: var(--muted) !important;
+ letter-spacing: 0.02em !important;
+}
+
+html body #customer-stories .testimonial-quote {
+ margin: 0 !important;
+ font-size: 12.5px !important;
+ line-height: 1.45 !important;
+ color: var(--ink) !important;
+ font-style: normal !important;
+ display: -webkit-box !important;
+ -webkit-line-clamp: 3 !important;
+ -webkit-box-orient: vertical !important;
+ overflow: hidden !important;
+}
+
+html body #customer-stories .testimonial-meta {
+ margin-top: auto !important;
+ padding-top: 7px !important;
+ border-top: 1px solid var(--line) !important;
+ display: flex !important;
+ align-items: baseline !important;
+ justify-content: space-between !important;
+ gap: 8px !important;
+ font-size: 11px !important;
+ line-height: 1.25 !important;
+}
+
+html body #customer-stories .testimonial-meta strong {
+ font-weight: 700 !important;
+ color: var(--ink) !important;
+ white-space: nowrap !important;
+}
+
+html body #customer-stories .testimonial-meta span {
+ color: var(--muted) !important;
+ font-size: 10.5px !important;
+ text-align: right !important;
+ overflow: hidden !important;
+ text-overflow: ellipsis !important;
+ white-space: nowrap !important;
+}
+
+/* 3. CSS Selector 1: #contact — Clean Non-Repetitive Layout (Danny Photo Left, Compact WhatsApp Bar + Full-Width Map Right) */
+main:nth-of-type(1) > section#contact:nth-of-type(4),
+html body #contact.about-section {
+ display: grid !important;
+ grid-template-columns: 300px minmax(0, 1fr) !important;
+ gap: 22px !important;
+ align-items: stretch !important;
+ padding: 18px 0 22px !important;
+ margin-top: 0 !important;
+ border-top: 0 !important;
+ min-height: 0 !important;
+}
+
+@media (max-width: 980px) {
+ main:nth-of-type(1) > section#contact:nth-of-type(4),
+ html body #contact.about-section {
+  grid-template-columns: 260px minmax(0, 1fr) !important;
+  gap: 16px !important;
+ }
+}
+
+@media (max-width: 720px) {
+ main:nth-of-type(1) > section#contact:nth-of-type(4),
+ html body #contact.about-section {
+  grid-template-columns: 1fr !important;
+  gap: 14px !important;
+  padding: 14px 0 18px !important;
+ }
+}
+
+/* Left Column: Danny's Portrait & Specialist Card (No Repeated Address) */
+html body #contact .about-image,
+html body #contact .about-image.boutique-concierge-card,
+html body #contact .boutique-concierge-card {
+ position: relative !important;
+ inset: auto !important;
+ z-index: auto !important;
+ width: 100% !important;
+ height: auto !important;
+ max-height: none !important;
+ aspect-ratio: auto !important;
+ align-self: stretch !important;
+ display: flex !important;
+ flex-direction: column !important;
+ background: var(--surface) !important;
+ border: 1px solid var(--line) !important;
+ border-radius: 12px !important;
+ overflow: hidden !important;
+ mask-image: none !important;
+ -webkit-mask-image: none !important;
+ box-shadow: 0 3px 14px rgba(15, 28, 46, 0.04) !important;
+}
+
+html body #contact .concierge-portrait-frame {
+ position: relative !important;
+ width: 100% !important;
+ height: 220px !important;
+ flex: 1 1 210px !important;
+ min-height: 195px !important;
+ max-height: 245px !important;
+ overflow: hidden !important;
+ background: #0d1219 !important;
+}
+
+html body #contact .concierge-portrait-frame img {
+ width: 100% !important;
+ height: 100% !important;
+ object-fit: cover !important;
+ object-position: 72% 52% !important;
+ display: block !important;
+ transition: transform 0.35s ease, filter 0.35s ease !important;
+}
+
+html body #contact .boutique-concierge-card:hover .concierge-portrait-frame img {
+ transform: scale(1.02);
+}
+
+html body #contact .concierge-badge-overlay {
+ position: absolute !important;
+ left: 10px !important;
+ bottom: 10px !important;
+ z-index: 3 !important;
+ display: inline-flex !important;
+ align-items: center !important;
+ gap: 6px !important;
+ padding: 4px 9px !important;
+ border-radius: 999px !important;
+ background: rgba(11, 16, 26, 0.86) !important;
+ color: #f8fafc !important;
+ border: 1px solid rgba(255, 255, 255, 0.2) !important;
+ backdrop-filter: blur(8px) !important;
+ -webkit-backdrop-filter: blur(8px) !important;
+ font-size: 9px !important;
+ font-weight: 700 !important;
+ letter-spacing: 0.08em !important;
+ text-transform: uppercase !important;
+ pointer-events: none !important;
+}
+
+html body #contact .concierge-verified-dot {
+ width: 6px !important;
+ height: 6px !important;
+ border-radius: 50% !important;
+ background: #36b37e !important;
+ flex-shrink: 0 !important;
+}
+
+html body #contact .concierge-card-meta {
+ padding: 11px 14px 12px !important;
+ display: flex !important;
+ flex-direction: column !important;
+ gap: 7px !important;
+ background: var(--surface) !important;
+}
+
+html body #contact .concierge-title-row {
+ display: flex !important;
+ align-items: baseline !important;
+ justify-content: space-between !important;
+ gap: 8px !important;
+ padding-bottom: 6px !important;
+ border-bottom: 1px solid var(--line) !important;
+}
+
+html body #contact .concierge-title-row strong {
+ font-size: 15.5px !important;
+ font-weight: 750 !important;
+ color: var(--ink) !important;
+ line-height: 1.2 !important;
+}
+
+html body #contact .concierge-title-row span {
+ font-size: 9px !important;
+ font-weight: 700 !important;
+ letter-spacing: 0.1em !important;
+ color: var(--gold, #496a83) !important;
+ text-transform: uppercase !important;
+}
+
+html body #contact .concierge-specs {
+ display: flex !important;
+ flex-direction: column !important;
+ gap: 6px !important;
+ margin: 0 !important;
+ padding: 0 !important;
+}
+
+html body #contact .concierge-specs > div {
+ display: flex !important;
+ flex-direction: column !important;
+ gap: 1px !important;
+ margin: 0 !important;
+}
+
+html body #contact .concierge-specs dt {
+ font-size: 9.5px !important;
+ font-weight: 700 !important;
+ letter-spacing: 0.08em !important;
+ text-transform: uppercase !important;
+ color: var(--muted) !important;
+ margin: 0 !important;
+}
+
+html body #contact .concierge-specs dd {
+ font-size: 11.5px !important;
+ font-weight: 550 !important;
+ line-height: 1.35 !important;
+ color: var(--ink) !important;
+ margin: 0 !important;
+}
+
+/* Right Column: Compact Header + Horizontal WhatsApp Strip + Full-Width Dedicated Map */
+main:nth-of-type(1) > section#contact:nth-of-type(4) > div:nth-of-type(2),
+html body #contact > .about-copy {
+ display: flex !important;
+ flex-direction: column !important;
+ gap: 8px !important;
+ min-width: 0 !important;
+ width: auto !important;
+ margin: 0 !important;
+ padding: 0 !important;
+}
+
+html body #contact .about-copy .eyebrow {
+ margin: 0 !important;
+}
+
+html body #contact .about-copy h2 {
+ margin: 0 !important;
+ font-size: clamp(22px, 2.2vw, 28px) !important;
+}
+
+html body #contact .about-copy #profileIntro {
+ margin: 0 0 2px !important;
+ font-size: 13px !important;
+ line-height: 1.45 !important;
+ color: var(--muted) !important;
+ max-width: 72ch !important;
+}
+
+/* Stacked Contact Blocks: No 50/50 split so WhatsApp bar has zero empty space & Map gets full width */
+main:nth-of-type(1) > section#contact:nth-of-type(4) > div:nth-of-type(2) .contact-blocks,
+html body #contact .contact-blocks {
+ display: flex !important;
+ flex-direction: column !important;
+ gap: 10px !important;
+ margin: 0 !important;
+}
+
+html body #contact .contact-block {
+ padding: 10px 14px !important;
+ border-radius: 11px !important;
+ border: 1px solid var(--line) !important;
+ background: var(--surface) !important;
+ box-shadow: 0 2px 10px rgba(15, 28, 46, 0.03) !important;
+ margin: 0 !important;
+ height: auto !important;
+}
+
+/* Top Strip: Horizontal Direct WhatsApp + Phone + Social Bar */
+html body #contact .contact-block.contact-primary {
+ display: flex !important;
+ flex-direction: row !important;
+ align-items: center !important;
+ justify-content: space-between !important;
+ flex-wrap: wrap !important;
+ gap: 10px 14px !important;
+}
+
+html body #contact .contact-primary-main {
+ display: flex !important;
+ align-items: center !important;
+ flex-wrap: wrap !important;
+ gap: 10px 14px !important;
+}
+
+html body #contact .contact-primary .button.whatsapp-action {
+ width: auto !important;
+ min-width: 165px !important;
+ min-height: 38px !important;
+ padding: 7px 15px !important;
+ font-size: 13px !important;
+ font-weight: 700 !important;
+ border-radius: 8px !important;
+ gap: 7px !important;
+ margin: 0 !important;
+}
+
+html body #contact .contact-secondary {
+ display: inline-flex !important;
+ flex-direction: row !important;
+ align-items: center !important;
+ flex-wrap: wrap !important;
+ gap: 8px 14px !important;
+ margin: 0 !important;
+ padding: 0 !important;
+ border: 0 !important;
+ font-size: 12.5px !important;
+}
+
+html body #contact .contact-secondary a {
+ display: inline-flex !important;
+ align-items: center !important;
+ gap: 5px !important;
+ color: var(--ink) !important;
+ font-weight: 600 !important;
+ min-height: 30px !important;
+ padding: 0 !important;
+}
+
+html body #contact .contact-secondary a .icon {
+ width: 14px !important;
+ height: 14px !important;
+ color: var(--muted) !important;
+}
+
+html body #contact .social-row {
+ display: inline-flex !important;
+ align-items: center !important;
+ flex-wrap: wrap !important;
+ gap: 6px !important;
+ margin: 0 !important;
+}
+
+html body #contact .social-row > a {
+ display: inline-flex !important;
+ align-items: center !important;
+ gap: 5px !important;
+ border: 1px solid var(--line) !important;
+ background: var(--surface-2) !important;
+ border-radius: 7px !important;
+ padding: 4px 9px !important;
+ min-height: 30px !important;
+ font-size: 11.5px !important;
+ font-weight: 600 !important;
+}
+
+/* Bottom Card: Dedicated Full-Width Showroom Map Card */
+html body #contact .contact-block.location-block.contact-map-card {
+ display: flex !important;
+ flex-direction: column !important;
+ gap: 9px !important;
+ padding: 11px 14px 12px !important;
+}
+
+html body #contact .contact-map-header {
+ display: flex !important;
+ align-items: center !important;
+ justify-content: space-between !important;
+ flex-wrap: wrap !important;
+ gap: 6px 12px !important;
+}
+
+html body #contact .contact-map-title-group {
+ display: flex !important;
+ align-items: center !important;
+ flex-wrap: wrap !important;
+ gap: 6px 10px !important;
+ min-width: 0 !important;
+}
+
+html body #contact .contact-section-label {
+ display: inline-flex !important;
+ align-items: center !important;
+ gap: 5px !important;
+ font-size: 10px !important;
+ font-weight: 750 !important;
+ letter-spacing: 0.08em !important;
+ text-transform: uppercase !important;
+ color: var(--muted) !important;
+ margin: 0 !important;
+}
+
+html body #contact .contact-section-label .icon {
+ width: 13px !important;
+ height: 13px !important;
+ color: var(--blue, #496a83) !important;
+}
+
+html body #contact .contact-location {
+ display: inline-block !important;
+ font-size: 13px !important;
+ font-weight: 700 !important;
+ color: var(--ink) !important;
+ margin: 0 !important;
+ text-decoration: none !important;
+}
+
+html body #contact .contact-location:hover {
+ text-decoration: underline !important;
+}
+
+html body #contact .location-actions {
+ display: inline-flex !important;
+ align-items: center !important;
+ gap: 6px !important;
+ flex-wrap: wrap !important;
+ margin: 0 !important;
+ padding: 0 !important;
+ border: 0 !important;
+}
+
+html body #contact .location-actions :is(a, button) {
+ display: inline-flex !important;
+ align-items: center !important;
+ justify-content: center !important;
+ min-height: 27px !important;
+ padding: 3px 9px !important;
+ font-size: 11px !important;
+ font-weight: 600 !important;
+ border-radius: 6px !important;
+ border: 1px solid var(--line) !important;
+ background: var(--surface-2) !important;
+ color: var(--ink) !important;
+ text-decoration: none !important;
+ cursor: pointer !important;
+}
+
+html body #contact .location-actions :is(a, button):hover {
+ border-color: var(--blue, #496a83) !important;
+}
+
+html body #contact .contact-map-viewport,
+.contact-map-viewport,
+#contactMapContainer {
+ position: relative !important;
+ width: 100% !important;
+ height: 182px !important;
+ min-height: 165px !important;
+ max-height: 220px !important;
+ border-radius: 9px !important;
+ overflow: hidden !important;
+ border: 1px solid var(--line, rgba(15, 28, 46, 0.14)) !important;
+ background: #0f1c2e !important;
+ box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Semi-transparent dark overlay gradient with pointer-events-none */
+#contactMapContainer::after,
+.contact-map-viewport::after {
+ content: "" !important;
+ position: absolute !important;
+ inset: 0 !important;
+ pointer-events: none !important;
+ background: radial-gradient(circle at 50% 50%, rgba(14, 23, 36, 0.22) 0%, rgba(8, 14, 24, 0.42) 100%) !important;
+ border-radius: inherit !important;
+ transition: opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1) !important;
+ opacity: 1 !important;
+ z-index: 2 !important;
+}
+
+html[data-theme=dark] #contactMapContainer::after,
+html[data-theme=dark] .contact-map-viewport::after {
+ background: radial-gradient(circle at 50% 50%, rgba(6, 10, 18, 0.35) 0%, rgba(3, 6, 12, 0.58) 100%) !important;
+}
+
+/* On hover over the parent #contactMapContainer, fade the overlay for better interactivity */
+#contactMapContainer:hover::after,
+.contact-map-viewport:hover::after {
+ opacity: 0.12 !important;
+}
+
+/* Contact map iframe default: slightly desaturated and balanced */
+main:nth-of-type(1) > section#contact:nth-of-type(4) > div:nth-of-type(2) > div#contactBlocks:nth-of-type(1) > div:nth-of-type(2) > div#contactMapContainer:nth-of-type(2) > iframe#contactMapFrame:nth-of-type(1),
+#contactMapFrame,
+.contact-map-iframe {
+ position: absolute !important;
+ inset: 0 !important;
+ width: 100% !important;
+ height: 100% !important;
+ border: 0 !important;
+ display: block !important;
+ filter: grayscale(0.7) brightness(0.96) contrast(1.04);
+ transition: filter 0.38s cubic-bezier(0.22, 1, 0.36, 1), transform 0.38s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+/* Light mode hover: increase brightness and reduce saturation to draw user attention */
+#contactMapContainer:hover #contactMapFrame,
+.contact-map-viewport:hover .contact-map-iframe {
+ filter: grayscale(0.2) brightness(1.05) contrast(1.02) !important;
+ transform: scale(1.01) !important;
+}
+
+/* Dark mode filter: grayscale(0.8) invert(0.9) hue-rotate(180deg) consistent with website dark theme */
+html[data-theme=dark] main:nth-of-type(1) > section#contact:nth-of-type(4) > div:nth-of-type(2) > div#contactBlocks:nth-of-type(1) > div:nth-of-type(2) > div#contactMapContainer:nth-of-type(2) > iframe#contactMapFrame:nth-of-type(1),
+html[data-theme=dark] #contactMapFrame,
+html[data-theme=dark] .contact-map-iframe {
+ filter: grayscale(0.8) invert(0.9) hue-rotate(180deg) brightness(0.88) contrast(1.1) !important;
+}
+
+/* Dark mode hover: smoothly increase brightness and reduce saturation on parent hover */
+html[data-theme=dark] #contactMapContainer:hover #contactMapFrame,
+html[data-theme=dark] .contact-map-viewport:hover .contact-map-iframe {
+ filter: grayscale(0.55) invert(0.86) hue-rotate(180deg) brightness(1.02) contrast(1.06) !important;
+ transform: scale(1.01) !important;
+}
+
+/* Rhythmic Pulsating Dealership Pin Marker Overlay on top of iframe#contactMapFrame */
+main:nth-of-type(1) > section#contact:nth-of-type(4) > div:nth-of-type(2) > div#contactBlocks:nth-of-type(1) > div:nth-of-type(2) > div#contactMapContainer:nth-of-type(2) > iframe#contactMapFrame:nth-of-type(1) + .contact-map-pin-overlay,
+#contactMapContainer > .contact-map-pin-overlay,
+.contact-map-pin-overlay {
+ position: absolute !important;
+ top: 50% !important;
+ left: 50% !important;
+ transform: translate(-50%, -56%) !important;
+ z-index: 4 !important;
+ display: flex !important;
+ flex-direction: column !important;
+ align-items: center !important;
+ justify-content: center !important;
+ pointer-events: none !important;
+ transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1), transform 0.32s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+#contactMapContainer:hover > .contact-map-pin-overlay {
+ opacity: 0.28 !important;
+ transform: translate(-50%, -62%) scale(0.92) !important;
+}
+
+.contact-map-pin-pulse,
+.contact-map-pin-ring {
+ position: absolute !important;
+ top: 18px !important;
+ left: 50% !important;
+ width: 36px !important;
+ height: 36px !important;
+ margin-left: -18px !important;
+ margin-top: -18px !important;
+ border-radius: 50% !important;
+ background: radial-gradient(circle, rgba(200, 169, 126, 0.48) 0%, rgba(200, 169, 126, 0.08) 70%, transparent 100%) !important;
+ border: 1.5px solid rgba(200, 169, 126, 0.72) !important;
+ pointer-events: none !important;
+ animation: dealership-pin-pulse 2.6s cubic-bezier(0.22, 1, 0.36, 1) infinite !important;
+}
+
+.contact-map-pin-ring {
+ animation-delay: 1.3s !important;
+ border-color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.contact-map-pin-marker {
+ position: relative !important;
+ z-index: 2 !important;
+ width: 34px !important;
+ height: 34px !important;
+ border-radius: 50% !important;
+ display: inline-flex !important;
+ align-items: center !important;
+ justify-content: center !important;
+ background: rgba(15, 20, 28, 0.92) !important;
+ color: #f6dfa4 !important;
+ border: 1.5px solid rgba(246, 223, 164, 0.78) !important;
+ box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), 0 0 0 3px rgba(200, 169, 126, 0.22) !important;
+ backdrop-filter: blur(8px) !important;
+ -webkit-backdrop-filter: blur(8px) !important;
+ animation: dealership-pin-bob 2.6s ease-in-out infinite !important;
+}
+
+.contact-map-pin-badge {
+ margin-top: 6px !important;
+ padding: 3px 9px !important;
+ border-radius: 999px !important;
+ background: rgba(12, 17, 25, 0.88) !important;
+ color: #f8fafc !important;
+ border: 1px solid rgba(246, 223, 164, 0.42) !important;
+ font-size: 10px !important;
+ font-weight: 700 !important;
+ letter-spacing: 0.06em !important;
+ text-transform: uppercase !important;
+ white-space: nowrap !important;
+ box-shadow: 0 4px 14px rgba(0, 0, 0, 0.38) !important;
+ backdrop-filter: blur(8px) !important;
+ -webkit-backdrop-filter: blur(8px) !important;
+}
+
+@keyframes dealership-pin-pulse {
+ 0% {
+  transform: scale(0.75);
+  opacity: 0.92;
+ }
+ 75% {
+  transform: scale(2.35);
+  opacity: 0;
+ }
+ 100% {
+  transform: scale(2.45);
+  opacity: 0;
+ }
+}
+
+@keyframes dealership-pin-bob {
+ 0%, 100% {
+  transform: translateY(0);
+ }
+ 50% {
+  transform: translateY(-4px);
+ }
+}
+
+/* Mobile responsive aspect ratio rules */
+@media (max-width: 680px) {
+ html body #contact .contact-map-viewport,
+ .contact-map-viewport,
+ #contactMapContainer {
+  height: auto !important;
+  aspect-ratio: 16 / 9 !important;
+  min-height: 175px !important;
+  max-height: 230px !important;
+ }
+}
+
+@media (max-width: 440px) {
+ html body #contact .contact-map-viewport,
+ .contact-map-viewport,
+ #contactMapContainer {
+  aspect-ratio: 16 / 10 !important;
+  min-height: 165px !important;
+ }
+}
+
+/* 4. CSS Selector 3: strong#heroStockCount — Clean Theme Typography (No Weird Circle Badge) */
+main:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div#heroStock:nth-of-type(2) > span:nth-of-type(2) > strong#heroStockCount:nth-of-type(1),
+html body #heroStock strong#heroStockCount,
+html body #heroStock .hero-stock-count {
+ display: inline !important;
+ min-width: 0 !important;
+ padding: 0 !important;
+ margin: 0 2px 0 0 !important;
+ border: 0 !important;
+ border-radius: 0 !important;
+ background: transparent !important;
+ box-shadow: none !important;
+ color: var(--navy, #102033) !important;
+ font-weight: 800 !important;
+ font-size: 14.5px !important;
+ letter-spacing: -0.02em !important;
+ font-variant-numeric: tabular-nums !important;
+ transform: none !important;
+}
+
+html[data-theme=dark] main:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div#heroStock:nth-of-type(2) > span:nth-of-type(2) > strong#heroStockCount:nth-of-type(1),
+html[data-theme=dark] body #heroStock strong#heroStockCount,
+html[data-theme=dark] body #heroStock .hero-stock-count {
+ background: transparent !important;
+ border: 0 !important;
+ box-shadow: none !important;
+ color: var(--gold, #f6dfa4) !important;
+}
+
+/* 5. CSS Selector 4 & Inventory Grid Cards — Subtle Scale-Up & Drop-Shadow on Hover */
+html body #inventoryGrid > article.stock-card,
+html body #inventory .stock-card.reveal-on-scroll {
+ transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.24s ease !important;
+ will-change: transform, box-shadow;
+}
+
+html body #inventoryGrid > article.stock-card:hover,
+html body #inventory .stock-card.reveal-on-scroll:hover {
+ transform: translateY(-3px) scale(1.015) !important;
+ box-shadow: 0 14px 32px rgba(16, 32, 51, 0.12), 0 4px 12px rgba(16, 32, 51, 0.06) !important;
+ border-color: color-mix(in srgb, var(--blue, #496a83) 45%, var(--line)) !important;
+ z-index: 2;
+}
+
+html[data-theme=dark] body #inventoryGrid > article.stock-card:hover,
+html[data-theme=dark] body #inventory .stock-card.reveal-on-scroll:hover {
+ box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.32) !important;
+}
+
+main:nth-of-type(1) > section#inventory:nth-of-type(2) > div#inventoryGrid:nth-of-type(5) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(5),
+html body #inventoryGrid > article.stock-card .stock-card-footer {
+ border-radius: 8px;
+ transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.22s ease !important;
+}
+
+main:nth-of-type(1) > section#inventory:nth-of-type(2) > div#inventoryGrid:nth-of-type(5) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(5):hover,
+html body #inventoryGrid > article.stock-card:hover .stock-card-footer {
+ transform: scale(1.015);
+ box-shadow: 0 4px 12px rgba(16, 32, 51, 0.06);
+}
+
+/* 6. CSS Selector 2: header#top Header Bar */
+header#top:nth-of-type(1),
+html body header#top.showroom-header {
+ backdrop-filter: blur(14px) !important;
+ -webkit-backdrop-filter: blur(14px) !important;
+ border-bottom: 1px solid var(--line) !important;
+ transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.28s ease !important;
+}
+
+/* 7. CSS Selector 1: header#top > nav > a:nth-of-type(3) (Services & Tint link) */
+header#top:nth-of-type(1) > nav:nth-of-type(1) > a:nth-of-type(3),
+html body header#top nav a[href*="services"] {
+ position: relative;
+ font-weight: 600 !important;
+ letter-spacing: -0.01em !important;
+ transition: color 0.2s ease, opacity 0.2s ease, transform 0.2s ease !important;
+}
+
+header#top:nth-of-type(1) > nav:nth-of-type(1) > a:nth-of-type(3):hover,
+html body header#top nav a[href*="services"]:hover {
+ color: var(--gold, #496a83) !important;
+ transform: translateY(-1px);
+}
+
+/* 8. CSS Selector 3: #resetPublic Reset Button & Visual Flash Feedback */
+main:nth-of-type(1) > section#inventory:nth-of-type(2) > div#inventoryControls:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > button#resetPublic:nth-of-type(1),
+html body #resetPublic,
+html body .pill-reset {
+ position: relative !important;
+ transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease !important;
+ will-change: transform, box-shadow;
+}
+
+main:nth-of-type(1) > section#inventory:nth-of-type(2) > div#inventoryControls:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > button#resetPublic:nth-of-type(1):hover,
+html body #resetPublic:hover,
+html body .pill-reset:hover {
+ transform: translateY(-1px) scale(1.02) !important;
+ border-color: var(--blue, #496a83) !important;
+}
+
+main:nth-of-type(1) > section#inventory:nth-of-type(2) > div#inventoryControls:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > button#resetPublic:nth-of-type(1):active,
+html body #resetPublic:active,
+html body .pill-reset:active {
+ transform: scale(0.96) !important;
+}
+
+/* Button Flash Animation when clicked */
+main:nth-of-type(1) > section#inventory:nth-of-type(2) > div#inventoryControls:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > button#resetPublic:nth-of-type(1).is-reset-flashing,
+html body #resetPublic.is-reset-flashing,
+html body .pill-reset.is-reset-flashing {
+ animation: reset-btn-flash 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+@keyframes reset-btn-flash {
+ 0% {
+  transform: scale(0.92);
+  background-color: var(--navy, #102033) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(73, 106, 131, 0.4) !important;
+ }
+ 45% {
+  transform: scale(1.07);
+  background-color: var(--blue, #496a83) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 6px rgba(73, 106, 131, 0.22), 0 4px 14px rgba(16, 32, 51, 0.2) !important;
+ }
+ 100% {
+  transform: scale(1);
+  box-shadow: 0 0 0 0 transparent !important;
+ }
+}
+
+html[data-theme=dark] @keyframes reset-btn-flash {
+ 0% {
+  transform: scale(0.92);
+  background-color: var(--gold, #f6dfa4) !important;
+  color: #0b101a !important;
+  box-shadow: 0 0 0 3px rgba(246, 223, 164, 0.45) !important;
+ }
+ 45% {
+  transform: scale(1.07);
+  background-color: #ffe8b5 !important;
+  color: #0b101a !important;
+  box-shadow: 0 0 0 7px rgba(246, 223, 164, 0.24), 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+ }
+ 100% {
+  transform: scale(1);
+  box-shadow: 0 0 0 0 transparent !important;
+ }
+}
+
+/* 9. Visual Toast Notification Confirmation */
+#publicToast.toast {
+ position: fixed !important;
+ bottom: 26px !important;
+ left: 50% !important;
+ transform: translateX(-50%) !important;
+ background: rgba(13, 20, 32, 0.94) !important;
+ color: #f8fafc !important;
+ border: 1px solid rgba(255, 255, 255, 0.16) !important;
+ border-radius: 999px !important;
+ padding: 9px 20px !important;
+ font-size: 13px !important;
+ font-weight: 600 !important;
+ letter-spacing: 0.01em !important;
+ box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28), 0 2px 8px rgba(0, 0, 0, 0.18) !important;
+ backdrop-filter: blur(12px) !important;
+ -webkit-backdrop-filter: blur(12px) !important;
+ z-index: 9999 !important;
+ pointer-events: none !important;
+ animation: toast-slide-up 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+ max-width: calc(100vw - 32px) !important;
+ text-align: center !important;
+ white-space: nowrap !important;
+}
+
+html[data-theme=dark] #publicToast.toast {
+ background: rgba(22, 32, 48, 0.95) !important;
+ border-color: rgba(246, 223, 164, 0.25) !important;
+ color: #ffffff !important;
+ box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(246, 223, 164, 0.12) !important;
+}
+
+@keyframes toast-slide-up {
+ from {
+  opacity: 0;
+  transform: translate(-50%, 14px) scale(0.96);
+ }
+ to {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+ }
+}
+
+/* 10. Official Danny Recon Select Brand Logo Integration */
+.brand-logo {
+ display: inline-flex !important;
+ align-items: center !important;
+ justify-content: center !important;
+ vertical-align: middle !important;
+ flex-shrink: 0 !important;
+ line-height: 1 !important;
+ margin: 0 !important;
+ padding: 0 !important;
+}
+
+.brand-logo-img {
+ display: block !important;
+ width: auto !important;
+ height: 26px !important;
+ object-fit: contain !important;
+ flex-shrink: 0 !important;
+ transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), filter 0.25s ease !important;
+}
+
+/* Theme-adaptive logo switching: Dark glyph for light backgrounds, White glyph for dark backgrounds */
+.brand-logo-img.logo-dark {
+ display: block !important;
+}
+.brand-logo-img.logo-light {
+ display: none !important;
+}
+
+html[data-theme=dark] .brand-logo-img.logo-dark {
+ display: none !important;
+}
+html[data-theme=dark] .brand-logo-img.logo-light {
+ display: block !important;
+}
+
+@media (prefers-color-scheme: dark) {
+ html:not([data-theme=light]) .brand-logo-img.logo-dark {
+  display: none !important;
+ }
+ html:not([data-theme=light]) .brand-logo-img.logo-light {
+  display: block !important;
+ }
+}
+
+/* Header Wordmark: Left (Logo) + Right (Stacked DANNY + RECON SELECT) */
+header#top:nth-of-type(1) > a:nth-of-type(1),
+header#top .wordmark,
+.showroom-header .wordmark,
+.wordmark,
+div#root:nth-of-type(1) > main:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1) {
+ display: inline-flex !important;
+ flex-direction: row !important;
+ align-items: center !important;
+ gap: 10px !important;
+ text-decoration: none !important;
+ line-height: 1 !important;
+ white-space: nowrap !important;
+ flex-wrap: nowrap !important;
+}
+
+.wordmark .brand-logo {
+ display: inline-flex !important;
+ align-items: center !important;
+ justify-content: center !important;
+ flex-shrink: 0 !important;
+}
+
+.wordmark .brand-logo-img {
+ height: 34px !important;
+ width: auto !important;
+ flex-shrink: 0 !important;
+}
+
+.wordmark .brand-wordmark-text,
+.wordmark .brand-text {
+ display: flex !important;
+ flex-direction: column !important;
+ justify-content: center !important;
+ align-items: flex-start !important;
+ gap: 2px !important;
+ line-height: 1 !important;
+ white-space: nowrap !important;
+}
+
+.wordmark .brand-wordmark-text > span,
+.wordmark > span:not(.brand-logo) {
+ font-size: 21px !important;
+ font-weight: 900 !important;
+ letter-spacing: 0.04em !important;
+ line-height: 1 !important;
+ color: #0b101a !important;
+ text-transform: uppercase !important;
+ white-space: nowrap !important;
+ display: block !important;
+}
+
+.wordmark .brand-wordmark-text > small,
+.wordmark > small {
+ font-size: 8.5px !important;
+ font-weight: 700 !important;
+ letter-spacing: 0.36em !important;
+ line-height: 1 !important;
+ margin: 0 !important;
+ padding: 0 !important;
+ color: #0b101a !important;
+ text-transform: uppercase !important;
+ white-space: nowrap !important;
+ display: block !important;
+}
+
+html[data-theme=dark] .wordmark .brand-wordmark-text > span,
+html[data-theme=dark] .wordmark > span:not(.brand-logo) {
+ color: #ffffff !important;
+}
+
+html[data-theme=dark] .wordmark .brand-wordmark-text > small,
+html[data-theme=dark] .wordmark > small {
+ color: #ffffff !important;
+}
+
+header#top a.wordmark:hover .brand-logo-img,
+.wordmark:hover .brand-logo-img {
+ transform: scale(1.05) !important;
+}
+
+/* Footer Brand Title: Left (Logo) + Right (Stacked DANNY + RECON SELECT) */
+.footer-title,
+.minimal-footer .footer-title,
+.select-footer-brand {
+ display: inline-flex !important;
+ flex-direction: row !important;
+ align-items: center !important;
+ gap: 9px !important;
+ text-decoration: none !important;
+ line-height: 1 !important;
+ white-space: nowrap !important;
+ flex-wrap: nowrap !important;
+}
+
+.footer-title .brand-logo {
+ display: inline-flex !important;
+ align-items: center !important;
+ justify-content: center !important;
+ flex-shrink: 0 !important;
+}
+
+.footer-title .brand-logo-img {
+ height: 28px !important;
+ width: auto !important;
+ flex-shrink: 0 !important;
+}
+
+.footer-title .brand-wordmark-text,
+.footer-title .brand-text {
+ display: flex !important;
+ flex-direction: column !important;
+ justify-content: center !important;
+ align-items: flex-start !important;
+ gap: 2px !important;
+ line-height: 1 !important;
+ white-space: nowrap !important;
+}
+
+.footer-title .brand-wordmark-text > span,
+.footer-title > span:not(.brand-logo),
+footer#siteFooter:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > a:nth-of-type(1) > span:nth-of-type(2) > span:nth-of-type(1) {
+ font-size: 18px !important;
+ font-weight: 900 !important;
+ letter-spacing: 0.04em !important;
+ line-height: 1 !important;
+ color: #000000 !important;
+ text-transform: uppercase !important;
+ white-space: nowrap !important;
+ display: block !important;
+}
+
+.footer-title .brand-wordmark-text > small,
+.footer-title > small {
+ font-size: 7.5px !important;
+ font-weight: 700 !important;
+ letter-spacing: 0.32em !important;
+ line-height: 1 !important;
+ margin: 0 !important;
+ padding: 0 !important;
+ color: #0b101a !important;
+ text-transform: uppercase !important;
+ white-space: nowrap !important;
+ display: block !important;
+}
+
+html[data-theme=dark] .footer-title .brand-wordmark-text > span,
+html[data-theme=dark] .footer-title > span:not(.brand-logo) {
+ color: #ffffff !important;
+}
+
+html[data-theme=dark] .footer-title .brand-wordmark-text > small,
+html[data-theme=dark] .footer-title > small {
+ color: #ffffff !important;
+}
+
+.footer-title:hover .brand-logo-img {
+ transform: scale(1.05) !important;
+}
+
+/* Concierge Card Specialist Badge in #contact: Left to Right */
+.concierge-brand-tag {
+ display: inline-flex !important;
+ flex-direction: row !important;
+ align-items: center !important;
+ gap: 6px !important;
+ white-space: nowrap !important;
+}
+
+.concierge-brand-tag .brand-logo-img {
+ height: 18px !important;
+}
+
+/* Mobile Detail Modal Topline Wordmark: Left to Right */
+.mobile-detail-wordmark {
+ display: inline-flex !important;
+ flex-direction: row !important;
+ align-items: center !important;
+ gap: 8px !important;
+ text-decoration: none !important;
+ line-height: 1 !important;
+ white-space: nowrap !important;
+ flex-wrap: nowrap !important;
+}
+
+.mobile-detail-wordmark .brand-logo-img {
+ height: 24px !important;
+}
+
+.mobile-detail-wordmark .brand-wordmark-text {
+ display: flex !important;
+ flex-direction: column !important;
+ align-items: flex-start !important;
+ gap: 1px !important;
+}
+
+.mobile-detail-wordmark > span:not(.brand-logo),
+.mobile-detail-wordmark .brand-wordmark-text > span {
+ display: block !important;
+ font-size: 16px !important;
+ font-weight: 900 !important;
+ color: #0b101a !important;
+ white-space: nowrap !important;
+}
+
+.mobile-detail-wordmark small,
+.mobile-detail-wordmark .brand-wordmark-text > small {
+ display: block !important;
+ font-size: 7px !important;
+ font-weight: 700 !important;
+ letter-spacing: 0.3em !important;
+ color: #0b101a !important;
+ margin: 0 !important;
+ white-space: nowrap !important;
+}
+
+html[data-theme=dark] .mobile-detail-wordmark > span:not(.brand-logo),
+html[data-theme=dark] .mobile-detail-wordmark .brand-wordmark-text > span,
+html[data-theme=dark] .mobile-detail-wordmark small,
+html[data-theme=dark] .mobile-detail-wordmark .brand-wordmark-text > small {
+ color: #ffffff !important;
+}
+
+/* Workbench & Dashboard Welcome: Left to Right */
+.wb-sidebar .wordmark {
+ display: inline-flex !important;
+ flex-direction: row !important;
+ align-items: center !important;
+ gap: 8px !important;
+ white-space: nowrap !important;
+}
+
+.wb-sidebar .wordmark .brand-logo-img {
+ height: 24px !important;
+}
+
+.wb-sidebar .wordmark .brand-wordmark-text {
+ display: flex !important;
+ flex-direction: column !important;
+ align-items: flex-start !important;
+ gap: 1px !important;
+}
+
+.wb-sidebar .wordmark .brand-wordmark-text > span {
+ font-size: 16px !important;
+ font-weight: 900 !important;
+ color: #0b101a !important;
+}
+
+.wb-sidebar .wordmark .brand-wordmark-text > small {
+ font-size: 7px !important;
+ letter-spacing: 0.3em !important;
+ color: #0b101a !important;
+ margin-left: 0 !important;
+}
+
+html[data-theme=dark] .wb-sidebar .wordmark .brand-wordmark-text > span,
+html[data-theme=dark] .wb-sidebar .wordmark .brand-wordmark-text > small {
+ color: #ffffff !important;
+}
+
+.dashboard-welcome-brand {
+ display: inline-flex !important;
+ flex-direction: row !important;
+ align-items: center !important;
+ justify-content: center !important;
+ gap: 8px !important;
+ white-space: nowrap !important;
+}
+
+.dashboard-welcome-brand .brand-logo-img {
+ height: 28px !important;
+}
+
+.dashboard-welcome-brand .brand-wordmark-text {
+ display: flex !important;
+ flex-direction: column !important;
+ align-items: flex-start !important;
+ gap: 1px !important;
+}
+
+.dashboard-welcome-brand .brand-wordmark-text > span {
+ font-size: 18px !important;
+ font-weight: 900 !important;
+ color: #0b101a !important;
+}
+
+.dashboard-welcome-brand .brand-wordmark-text > small {
+ font-size: 7.5px !important;
+ letter-spacing: 0.3em !important;
+ color: #0b101a !important;
+}
+
+html[data-theme=dark] .dashboard-welcome-brand .brand-wordmark-text > span,
+html[data-theme=dark] .dashboard-welcome-brand .brand-wordmark-text > small {
+ color: #ffffff !important;
+}
+
+.brand-eyebrow {
+ display: inline-flex !important;
+ flex-direction: row !important;
+ align-items: center !important;
+ gap: 6px !important;
+ white-space: nowrap !important;
+}
+
+.brand-eyebrow .brand-logo-img {
+ height: 13px !important;
+}
+
+/* Responsive Wordmark Scaling: Always horizontal Left to Right without clipping */
+@media (max-width: 580px) {
+ header#top .wordmark,
+ .showroom-header .wordmark,
+ .wordmark {
+  gap: 6px !important;
+ }
+ .wordmark .brand-logo-img {
+  height: 20px !important;
+ }
+ .wordmark .brand-wordmark-text {
+  gap: 5px !important;
+ }
+ .wordmark .brand-wordmark-text > span {
+  font-size: 17px !important;
+ }
+ .wordmark .brand-wordmark-text > small {
+  font-size: 8.5px !important;
+  letter-spacing: 0.12em !important;
+ }
+}
+
+@media (max-width: 380px) {
+ .wordmark .brand-logo-img {
+  height: 18px !important;
+ }
+ .wordmark .brand-wordmark-text > span {
+  font-size: 15px !important;
+ }
+ .wordmark .brand-wordmark-text > small {
+  font-size: 7.5px !important;
+  letter-spacing: 0.1em !important;
+ }
+}

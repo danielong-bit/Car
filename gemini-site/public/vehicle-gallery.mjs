@@ -20,7 +20,7 @@ export function galleryMarkup(photos,title,lang){
  if(!photos.length)return `<section class="vehicle-gallery" id="vehicleGallery"><div class="gallery-empty">${tr('Photos will be added soon.','照片待上传。','Foto akan ditambah.')}</div></section>`;
  const groups=[...new Set(photos.map(m=>photoCategory(m.category)))];
  const firstUrl=staticSrc(photos[0]?.url);
- return `<section class="vehicle-gallery" id="vehicleGallery" aria-label="${tr('Photo gallery','车辆图库','Galeri foto')}" tabindex="0"><div class="gallery-stage"><button class="detail-main-photo" id="mainPhoto" aria-label="${tr('Enlarge photo','放大照片','Besarkan foto')}" ${photos.length?'':'disabled'}><img id="activePhoto" ${firstUrl?`src="${esc(firstUrl)}"`:''} alt="${esc(title)}" fetchpriority="high" decoding="async"></button><button type="button" class="gallery-arrow gallery-prev" id="galleryPrevious" aria-label="${tr('Previous photo','上一张照片','Foto sebelumnya')}" ${photos.length<2?'disabled hidden':''}>‹</button><button type="button" class="gallery-arrow gallery-next" id="galleryNext" aria-label="${tr('Next photo','下一张照片','Foto seterusnya')}" ${photos.length<2?'disabled hidden':''}>›</button><span class="gallery-enlarge" aria-hidden="true">↗ ${tr('tap to enlarge','点击放大','ketik untuk besarkan')}</span><span class="gallery-stage-counter" id="galleryStageCount" aria-hidden="true">1 / ${photos.length}</span></div><div class="gallery-caption"><span id="galleryCaption"></span><span id="galleryCount" role="status" aria-live="polite" aria-atomic="true"></span></div>${groups.length>1?`<div class="gallery-categories" aria-label="${tr('Photo categories','照片分类','Kategori foto')}">${['all',...groups].map(group=>`<button type="button" data-photo-category-filter="${group}" aria-pressed="${group==='all'}">${labels[group]} <span>${group==='all'?photos.length:photos.filter(m=>photoCategory(m.category)===group).length}</span></button>`).join('')}</div>`:''}<div class="detail-thumbs" id="galleryThumbnails" ${photos.length<2?'hidden':''}></div></section>`;
+ return `<section class="vehicle-gallery" id="vehicleGallery" aria-label="${tr('Photo gallery','车辆图库','Galeri foto')}" tabindex="0"><div class="gallery-stage"><button class="detail-main-photo" id="mainPhoto" aria-label="${tr('Enlarge photo','放大照片','Besarkan foto')}" ${photos.length?'':'disabled'}><img id="activePhoto" ${firstUrl?`src="${esc(firstUrl)}"`:''} alt="${esc(title)}" fetchpriority="high" decoding="async"></button><button type="button" class="gallery-arrow gallery-prev" id="galleryPrevious" aria-label="${tr('Previous photo','上一张照片','Foto sebelumnya')}" ${photos.length<2?'disabled hidden':''}><svg class="gallery-arrow-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><button type="button" class="gallery-arrow gallery-next" id="galleryNext" aria-label="${tr('Next photo','下一张照片','Foto seterusnya')}" ${photos.length<2?'disabled hidden':''}><svg class="gallery-arrow-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button><span class="gallery-enlarge" aria-hidden="true">↗ ${tr('tap to enlarge','点击放大','ketik untuk besarkan')}</span><span class="gallery-stage-counter" id="galleryStageCount" aria-hidden="true">1 / ${photos.length}</span></div><div class="gallery-caption"><span id="galleryCaption"></span><span id="galleryCount" role="status" aria-live="polite" aria-atomic="true"></span></div>${groups.length>1?`<div class="gallery-categories" aria-label="${tr('Photo categories','照片分类','Kategori foto')}">${['all',...groups].map(group=>`<button type="button" data-photo-category-filter="${group}" aria-pressed="${group==='all'}">${labels[group]} <span>${group==='all'?photos.length:photos.filter(m=>photoCategory(m.category)===group).length}</span></button>`).join('')}</div>`:''}<div class="detail-thumbs" id="galleryThumbnails" ${photos.length<2?'hidden':''}></div></section>`;
 }
 
 export function bindGallery(photos,title,lang,base,openPhoto){
@@ -31,9 +31,43 @@ export function bindGallery(photos,title,lang,base,openPhoto){
  function thumbs(){
   const strip=document.getElementById('galleryThumbnails');
   strip.hidden=filtered.length<2;
-  strip.innerHTML=filtered.map((index,i)=>{const s=staticSrc(photos[index].url,base);return `<button type="button" data-photo="${i}" aria-label="${tr('Photo','照片','Foto')} ${i+1}" aria-pressed="${i===position}"><img ${s?`src="${esc(s)}"`:''} data-source="${esc(photos[index].url)}" alt="${esc(photos[index].category||title)}" loading="${i<6?'eager':'lazy'}" decoding="async"></button>`;}).join('');
-  stage.querySelectorAll('[data-photo]').forEach(button=>button.onclick=()=>select(Number(button.dataset.photo)));
-  stage.querySelectorAll('img[data-source]').forEach(async img=>{try{img.src=await photoUrl(img.dataset.source,base);}catch{img.alt=tr('Photo unavailable','照片暂不可用','Foto tidak tersedia');}});
+  strip.innerHTML=filtered.map((index,i)=>{const s=staticSrc(photos[index].url,base);return `<button type="button" data-photo="${i}" aria-label="${tr('Photo','照片','Foto')} ${i+1}" aria-pressed="${i===position}"><img ${s?`src="${esc(s)}"`:''} data-source="${esc(photos[index].url)}" alt="${esc(photos[index].category||title)}" loading="eager" decoding="sync"></button>`;}).join('');
+  stage.querySelectorAll('[data-photo]').forEach(button=>button.onclick=()=>{if(strip.dataset.dragMoved==='true')return;select(Number(button.dataset.photo));});
+  stage.querySelectorAll('img[data-source]').forEach(async img=>{if(img.getAttribute('src'))return;try{img.src=await photoUrl(img.dataset.source,base);}catch{img.alt=tr('Photo unavailable','照片暂不可用','Foto tidak tersedia');}});
+ }
+ const thumbStrip=document.getElementById('galleryThumbnails');
+ if(thumbStrip&&!thumbStrip.dataset.dragBound){
+  thumbStrip.dataset.dragBound='true';
+  let dragStartX=0,dragScrollLeft=0,isDragging=false;
+  thumbStrip.addEventListener('pointerdown',e=>{
+   if(e.pointerType==='mouse'&&e.button===0){
+    isDragging=true;
+    thumbStrip.dataset.dragMoved='false';
+    dragStartX=e.clientX;
+    dragScrollLeft=thumbStrip.scrollLeft;
+   }
+  });
+  window.addEventListener('pointermove',e=>{
+   if(!isDragging)return;
+   const dx=e.clientX-dragStartX;
+   if(Math.abs(dx)>5){
+    thumbStrip.dataset.dragMoved='true';
+    thumbStrip.classList.add('is-dragging');
+    thumbStrip.scrollLeft=dragScrollLeft-dx;
+   }
+  });
+  window.addEventListener('pointerup',()=>{
+   if(!isDragging)return;
+   isDragging=false;
+   thumbStrip.classList.remove('is-dragging');
+   setTimeout(()=>{thumbStrip.dataset.dragMoved='false';},40);
+  });
+  thumbStrip.addEventListener('wheel',e=>{
+   if(Math.abs(e.deltaY)>Math.abs(e.deltaX)&&thumbStrip.scrollWidth>thumbStrip.clientWidth){
+    e.preventDefault();
+    thumbStrip.scrollLeft+=e.deltaY;
+   }
+  },{passive:false});
  }
  function modalState(source){
   if(!dialog.open||dialog.dataset.gallery!=='true')return;
