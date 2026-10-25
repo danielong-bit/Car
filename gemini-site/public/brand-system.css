@@ -1,0 +1,38 @@
+/* The supplied full wordmarks already contain the emblem and both text lines. */
+html body .brand-logo.full-brand{display:inline-flex!important;position:relative!important;align-items:center!important;justify-content:center!important;width:168px!important;height:43px!important;min-width:0!important;flex:0 0 auto!important;overflow:visible!important}
+html body .brand-logo.full-brand>img.brand-logo-img{width:100%!important;height:100%!important;max-width:none!important;object-fit:contain!important;object-position:center!important;filter:none!important;opacity:1!important}
+html body .brand-logo.full-brand+span{display:none!important}
+html:not([data-theme=dark]) body .brand-logo.full-brand>img.logo-dark{display:block!important}
+html:not([data-theme=dark]) body .brand-logo.full-brand>img.logo-light{display:none!important}
+html[data-theme=dark] body .brand-logo.full-brand>img.logo-dark{display:none!important}
+html[data-theme=dark] body .brand-logo.full-brand>img.logo-light{display:block!important}
+html:not([data-theme=dark]) body #siteFooter .brand-logo.full-brand>img.logo-dark{display:block!important}
+html:not([data-theme=dark]) body #siteFooter .brand-logo.full-brand>img.logo-light{display:none!important}
+html[data-theme=dark] body #siteFooter .brand-logo.full-brand>img.logo-dark{display:none!important}
+html[data-theme=dark] body #siteFooter .brand-logo.full-brand>img.logo-light{display:block!important}
+html body .owner-wordmark .brand-logo.full-brand,html body #siteFooter .brand-logo.full-brand{width:200px!important;height:51px!important}
+html body .concierge-brand-tag .brand-logo.full-brand{width:130px!important;height:33px!important}
+html body.workbench .owner-sidebar-brand .wordmark{display:flex!important;flex-direction:row!important;max-width:176px!important;min-width:0!important}
+html body.workbench .owner-sidebar-brand .brand-logo.full-brand{width:152px!important;height:39px!important}
+html body.workbench.sidebar-collapsed .owner-sidebar-brand .brand-logo.full-brand{width:56px!important;height:24px!important}
+html body #top .wordmark{min-width:0!important}
+@media(max-width:700px){html body #top .brand-logo.full-brand{width:134px!important;height:34px!important}}
+@media(max-width:380px){html body #top .brand-logo.full-brand{width:108px!important;height:28px!important}}
+/* Contact begins with its own heading and a clear boundary after deliveries. */
+html body main section#contact.about-section.section-wrap{position:relative!important;clear:both!important;margin-top:48px!important;padding:40px 0 32px!important;border-top:1px solid var(--line)!important;row-gap:24px!important;overflow:visible!important;isolation:isolate}
+html body #contact>.contact-section-heading{grid-column:1/-1!important;position:static!important;margin:0!important;padding:0!important;min-width:0!important}
+html body #contact>.contact-section-heading h2{margin:0 0 10px!important}
+html body #contact>.contact-section-heading #profileIntro{max-width:640px;color:var(--muted)}
+html body #contact>.boutique-concierge-card{margin:0!important;transform:none!important;align-self:start!important}
+html body #contact .concierge-portrait-frame{flex:none!important}
+html body #contact .concierge-card-meta{margin-top:0!important;border-top:1px solid var(--line)!important}
+html body #contact>.about-copy{padding-top:0!important;margin:0!important}
+@media(max-width:720px){html body main section#contact.about-section.section-wrap{margin-top:36px!important;padding-top:28px!important;row-gap:20px!important}html body #contact>.boutique-concierge-card{max-width:440px!important;margin-inline:auto!important}html body #contact>.contact-section-heading{width:100%!important}}
+/* Keep the real logout action visible at the bottom and in the mobile toolbar. */
+html body.workbench .wb-sidebar{overflow-y:auto!important}
+html body.workbench .wb-sidebar-bottom{flex-shrink:0!important}
+html body.workbench .owner-logout{color:var(--ink)!important;min-height:44px!important;white-space:nowrap}
+@media(max-width:1000px){html body.workbench .owner-mobile-controls{display:flex!important;z-index:4}html body.workbench .owner-mobile-controls .owner-logout{min-height:40px!important}}
+html body .login-brand-row{flex-wrap:wrap!important;row-gap:12px!important}
+html body.workbench .wb-sidebar-bottom{margin-top:auto!important;position:sticky;bottom:0;z-index:3;background:var(--surface);padding-top:14px!important}
+@media(max-width:1000px){html body.workbench .owner-sidebar-brand{padding-right:0!important}html body.workbench .owner-mobile-controls{position:static!important;justify-content:flex-end!important;margin-top:12px!important;padding:0!important}html body.workbench .owner-mobile-controls .theme-control{position:static!important}html body.workbench .wb-sidebar-bottom{display:none!important}}

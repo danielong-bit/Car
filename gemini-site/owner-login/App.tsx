@@ -91,9 +91,9 @@ export default function App(){
      <div className="login-card-content">
       <div className="login-brand-row">
        <a href="/" className="owner-wordmark" aria-label="Danny Recon Select home">
-        <span className="brand-logo" aria-hidden="true">
-         <img className="brand-logo-img logo-dark" src="/assets/logo-danny-dark.png" alt="" width="34" height="24" decoding="async"/>
-         <img className="brand-logo-img logo-light" src="/assets/logo-danny-light.png" alt="" width="34" height="24" decoding="async"/>
+        <span className="brand-logo full-brand" aria-hidden="true">
+         <img className="brand-logo-img logo-dark" src="/assets/brand-wordmark-black.png" alt="" width="34" height="24" decoding="async"/>
+         <img className="brand-logo-img logo-light" src="/assets/brand-wordmark-white.png" alt="" width="34" height="24" decoding="async"/>
         </span>
         <span className="brand-wordmark-text"><span>DANNY</span><small>RECON SELECT</small></span>
        </a>
