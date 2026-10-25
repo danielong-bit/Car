@@ -326,3 +326,5 @@ html body .theme-control--simple:focus-visible{outline:2px solid var(--blue);out
 @media(max-width:700px){html body #top .theme-control--simple{min-width:38px;width:38px;padding:8px!important}html body #top .theme-control--simple .theme-label,html body #top .theme-control--simple .theme-track{display:none!important}}
 @media(min-width:1001px){html body.workbench.sidebar-collapsed .theme-control--simple{min-width:44px;width:44px}html body.workbench.sidebar-collapsed .theme-control--simple .theme-label,html body.workbench.sidebar-collapsed .theme-control--simple .theme-track{display:none!important}}
 @media(prefers-reduced-motion:reduce){html body .theme-control--simple .theme-track::after{transition:none}}
+
+.preview-editor-notice{margin:0 0 24px;padding:12px 16px;border-left:3px solid var(--blue);background:var(--surface);color:var(--ink);font-size:13px;line-height:1.5}

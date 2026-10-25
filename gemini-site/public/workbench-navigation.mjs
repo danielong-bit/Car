@@ -12,8 +12,9 @@ export function ownerNavigationMarkup(active='overview'){
 }
 
 export function ownerSidebarMarkup(base='/',active='overview'){
- const logout=`<form action="/api/owner/logout" method="post"><button type="submit" class="owner-logout">Log out</button></form>`;
- return `<aside class="wb-sidebar"><div class="owner-sidebar-brand"><button type="button" class="owner-sidebar-toggle" aria-label="Collapse sidebar" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button><a href="${base}" class="wordmark">DANNY<small>RECON SELECT</small></a><p class="wb-context">Owner workspace</p></div><nav aria-label="Workbench">${ownerNavigationMarkup(active)}</nav><div class="wb-sidebar-bottom"><a class="owner-website-link" href="${base}">View website ${icon('external')}</a><div class="owner-sidebar-controls">${themeButtonMarkup()}${logout}</div></div><div class="owner-mobile-controls">${themeButtonMarkup()}${logout}</div></aside>`;
+ const preview=typeof window!=='undefined'&&window.DANNY_PREVIEW_EDITOR===true;
+ const logout=preview?`<a class="owner-logout" href="${base}">Exit preview</a>`:`<form action="/api/owner/logout" method="post"><button type="submit" class="owner-logout">Log out</button></form>`;
+ return `<aside class="wb-sidebar"><div class="owner-sidebar-brand"><button type="button" class="owner-sidebar-toggle" aria-label="Collapse sidebar" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button><a href="${base}" class="wordmark">DANNY<small>RECON SELECT</small></a><p class="wb-context">${preview?'Preview workspace':'Owner workspace'}</p></div><nav aria-label="Workbench">${ownerNavigationMarkup(active)}</nav><div class="wb-sidebar-bottom"><a class="owner-website-link" href="${base}">View website ${icon('external')}</a><div class="owner-sidebar-controls">${themeButtonMarkup()}${logout}</div></div><div class="owner-mobile-controls">${themeButtonMarkup()}${logout}</div></aside>`;
 }
 
 export function bindSidebarToggle(){

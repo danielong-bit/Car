@@ -14,6 +14,8 @@ const requestedBase = process.env.PAGES_BASE_PATH || defaultBase;
 const segments=requestedBase.split('/').filter(Boolean);
 const basePath = segments.length ? `/${segments.join('/')}/` : '/';
 const baseWithoutTrailingSlash = basePath.slice(0, -1);
+const previewEditor=process.env.PREVIEW_EDITOR==='1';
+if(previewEditor&&(process.env.OWNER_WORKER_BUILD==='1'||outputDirectory!==path.join(projectRoot,'dist-preview')))throw new Error('The preview editor may only be built into dist-preview.');
 import {publicDocument} from '../lib/cms/contracts.mjs';
 import {normalizeDocument} from '../public/inventory-domain.mjs';
 import {prepareExhibition} from './prepare-exhibition.mjs';
@@ -130,7 +132,7 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
   const canonicalPath = route ? `${basePath}${route.replace(/^\/+|\/+$/g, '')}/` : basePath;
   const canonicalUrl = `https://danielong-bit.github.io${canonicalPath}`;
   const metadata = `<link rel="canonical" href="${canonicalUrl}"><meta property="og:site_name" content="Danny Recond Select"><meta property="og:type" content="website"><meta property="og:url" content="${canonicalUrl}">`;
-  const runtime = `<base href="${basePath}"><script>window.SITE_BASE=${safeInlineJson(basePath)};window.GITHUB_PAGES_STATIC=true;window.CMS_DATA=${safeInlineJson(publicData)};</script>`;
+  const runtime = `<base href="${basePath}"><script>window.SITE_BASE=${safeInlineJson(basePath)};window.GITHUB_PAGES_STATIC=true;window.DANNY_PREVIEW_EDITOR=${previewEditor};window.CMS_DATA=${safeInlineJson(publicData)};</script>`;
   if (!/<head(?:\s[^>]*)?>/i.test(html) || !/<\/body>/i.test(html)) {
     throw new Error(`Template ${templateName} is missing its document head or body.`);
   }
@@ -147,6 +149,7 @@ async function dashboardPage() {
   const page = await renderTemplate('workbench.html', {route:'studio',title:'Inventory workbench · Danny Recond Select'});
   return page
     .replace(/<aside class="wb-sidebar">[\s\S]*?<\/aside>/,()=>ownerSidebarMarkup('/'))
+    .replace('<div id="workspaceContent">', (previewEditor?'<p class="preview-editor-notice" role="status">Preview workspace · Changes are saved in this browser. The live website stays unchanged.</p>':'')+'<div id="workspaceContent">')
     .replace('</head>', '<link rel="stylesheet" href="/assets/workbench-ui.css?v=owner-ui-20261024d"><link rel="stylesheet" href="/workbench-hierarchy.css?v=owner-nav-20261023b"></head>')
     .replace('</body>', '<div id="workbenchUiMount"></div><script type="module" src="/assets/workbench-ui.js?v=owner-ui-20261024d"></script></body>');
 }
@@ -171,7 +174,7 @@ if (process.env.KEEP_OUTPUT !== '1' && (outputDirectory !== path.resolve(project
 await mkdir(outputDirectory, {recursive: true});
 await prepareExhibition();
 await copyPublicAssets();
-await buildUiIslands(outputDirectory, {includeOwner: process.env.OWNER_WORKER_BUILD === '1'});
+await buildUiIslands(outputDirectory, {includeOwner: process.env.OWNER_WORKER_BUILD === '1'||previewEditor});
 await writeFile(path.join(outputDirectory,'published-baseline.json'),JSON.stringify({document:publicData}));
 const pages = [
   {template:'tools.html',file:'tools/index.html',route:'tools',title:'Calculator & JPJ · Danny Recon Select'},
@@ -208,11 +211,15 @@ const calculatorAlias = await readFile(path.join(outputDirectory, 'calculator', 
 await writeFile(path.join(outputDirectory, 'calculator.html'), calculatorAlias);
 await mkdir(path.join(outputDirectory, 'studio'), {recursive: true});
 if(process.env.OWNER_WORKER_BUILD!=='1')await writeFile(path.join(outputDirectory,'inventory-workbench.json'),JSON.stringify({document:publicData}));
-const dashboard = process.env.OWNER_WORKER_BUILD === '1' ? await dashboardPage() : `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=https://car-recond-japan.danielong2005.workers.dev/studio/"><title>Owner Log In - Danny Recon Select</title></head><body><a href="https://car-recond-japan.danielong2005.workers.dev/studio/">Continue to Owner Log In</a></body></html>`;
+const dashboard = process.env.OWNER_WORKER_BUILD === '1'||previewEditor ? await dashboardPage() : `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=https://car-recond-japan.danielong2005.workers.dev/studio/"><title>Owner Log In - Danny Recon Select</title></head><body><a href="https://car-recond-japan.danielong2005.workers.dev/studio/">Continue to Owner Log In</a></body></html>`;
 await writeFile(path.join(outputDirectory, 'studio', 'index.html'), dashboard);
 await mkdir(path.join(outputDirectory, 'admin'), {recursive: true});
 await writeFile(path.join(outputDirectory, 'admin', 'index.html'), dashboard);
 await writeFile(path.join(outputDirectory,'admin.html'),dashboard);
+if(previewEditor){
+ await mkdir(path.join(outputDirectory,'owner-login'),{recursive:true});
+ await writeFile(path.join(outputDirectory,'owner-login','index.html'),'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/studio/"><title>Preview editor</title></head><body><a href="/studio/">Open preview editor</a></body></html>');
+}
 await writeFile(
   path.join(outputDirectory, '404.html'),
   `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="${basePath}"><title>Page not found · Danny Recond Select</title><link rel="stylesheet" href="design-system.css"></head><body><main class="public-cms-wrap"><section class="public-panel"><p class="stories-eyebrow">DANNY RECOND SELECT</p><h1 class="public-title">We couldn’t find this page.</h1><p class="public-muted">Browse the current vehicles or return to the home page.</p><div class="public-actions"><a href="${basePath}#inventory">Browse inventory</a><a class="secondary" href="${basePath}">Home</a></div></section></main></body></html>`,

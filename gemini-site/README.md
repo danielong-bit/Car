@@ -2,20 +2,26 @@
 
 Public website: https://danielong-bit.github.io/Car-Recond-Japan/
 
-This is a GitHub Pages exhibition website with **Simple Inventory Workbench V2 (`/studio/`)**. The owner explicitly chose manual inventory editing in the browser (`IndexedDB`) with **no cloud database, Excel workflow, or login**; updates are published by exporting the GitHub update ZIP and committing to GitHub Pages.
+The production website and protected dashboard run on [Cloudflare](https://car-recond-japan.danielong2005.workers.dev/). GitHub Pages remains a public showroom and sends owner access to Cloudflare.
 
-## Preview locally
+## Gemini AI Studio and local preview
 
-Use Node.js 22.13+:
+Use Node.js 22.13 or later. You can start from the repository root or from `gemini-site/`:
 
 ```sh
 npm ci --ignore-scripts
-npm run build:preview
-npm run preview:local
+npm run dev
 ```
 
-Open http://127.0.0.1:4173/ and http://127.0.0.1:4173/studio/.
-`/admin/` and `/admin.html` also open the same workbench.
+The preview server listens on `PORT` (default 3000), supports `--port`, and binds to `0.0.0.0` for Gemini AI Studio. From the repository root, the launcher installs the active project's dependencies if needed. The build finishes before the preview starts serving pages.
+
+Open `/studio/` in the preview to edit vehicles, prices, photos, homepage content and tint packages directly. `/owner-login/`, `/admin/` and `/admin.html` also open this preview editor without redirecting to Cloudflare.
+
+**This is a browser draft workspace, not a connection to the production account.** The editor uses a separate IndexedDB/localStorage namespace. Preview changes never publish to the live site. Use **Preview showroom** to view your saved changes on the same origin. Clearing browser data or moving to another preview URL loses access to those browser drafts, so download a backup first. Live visitor counts require the Cloudflare dashboard.
+
+For production publication, download a site backup, sign in to the Cloudflare dashboard, import the backup under Website settings, then review and publish there. The preview cannot log in to, save to, or publish to the production account.
+
+`npm run build:preview` creates `dist-preview/` with the editor. `npm run build:pages` keeps the GitHub Pages redirect. `npm run build:cloudflare` retains the protected production dashboard. Preview mode is rejected for any build directory other than `dist-preview/`.
 
 ## Manage stock
 

@@ -1,4 +1,5 @@
-const DB='danny-exhibition-v1',STORE='files',LS_PREFIX='danny-wb-v1:';
+const previewEditor=typeof window!=='undefined'&&window.DANNY_PREVIEW_EDITOR===true;
+const DB=previewEditor?'danny-preview-editor-v1':'danny-exhibition-v1',STORE='files',LS_PREFIX=previewEditor?'danny-preview-wb-v1:':'danny-wb-v1:';
 const memoryStore=new Map();
 let connection,idbFailed=false;
 function open(){

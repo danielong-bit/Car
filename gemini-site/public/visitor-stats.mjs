@@ -12,6 +12,7 @@ export async function recordVisit(){
 }
 let report,loading;
 export function loadVisitorStats(){
+ if(window.DANNY_PREVIEW_EDITOR===true){const host=document.getElementById('ownerVisitorStats');if(host)host.textContent='Live visitor statistics are available in the connected Cloudflare dashboard.';return;}
  const host=document.getElementById('ownerVisitorStats');if(!host)return;
  const refresh=document.getElementById('refreshVisitorStats');if(refresh)refresh.onclick=()=>{report=undefined;loadVisitorStats();};
  if(report&&Date.now()-Date.parse(report.updatedAt)<60000){paint(host,report);return;}
