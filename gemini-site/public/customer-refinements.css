@@ -1,0 +1,52 @@
+/* Customer-facing refinements: readable controls and consistent stock states. */
+html body #service-care .tint-vlt-btn{background:var(--surface)!important;color:var(--ink)!important;border:1px solid var(--line)!important;box-shadow:none!important;min-height:54px;padding:8px 12px}
+html body #service-care .tint-vlt-btn :is(strong,small){color:inherit!important;opacity:1!important}
+html:not([data-theme=dark]) body #service-care .tint-vlt-btn[aria-pressed=true]{background:#176b4a!important;color:#fff!important;border-color:#176b4a!important}
+html[data-theme=dark] body #service-care .tint-vlt-btn[aria-pressed=true]{background:#c8a97e!important;color:#101419!important;border-color:#c8a97e!important}
+html body #service-care .tint-vlt-btn:focus-visible{outline:2px solid var(--price-accent)!important;outline-offset:3px}
+html body #service-care .tint-sim-header{align-items:center;gap:18px}
+html body #service-care .tint-sim-header h2{font-size:clamp(23px,2.6vw,30px)!important;line-height:1.2}
+html body #service-care .tint-sim-body{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)!important;gap:22px!important}
+html body #service-care .tint-sim-stage{height:260px!important;aspect-ratio:auto!important;min-width:0}
+html body #service-care .tint-shade-note{font-size:14px;line-height:1.6;color:var(--muted);margin:10px 0 18px}
+html body #service-care .tint-sim-copy h3{font-size:20px!important}
+html body #service-care .tint-sim-copy>p{font-size:14px!important;margin:8px 0}
+html body #service-care .tint-intro>p{max-width:660px}
+html body #inventory .photo-status:is(.available,[data-status=available]){background:#087f5b!important;color:#fff!important;border-color:#087f5b!important}
+html body #inventory .photo-status:is(.reserved,.sold,[data-status=reserved],[data-status=sold]){background:#bd3138!important;color:#fff!important;border-color:#bd3138!important}
+html body #inventoryGrid article:is([data-status=reserved],[data-status=sold]) :is(.stock-photo,.compact-thumb) img{filter:grayscale(1)!important}
+html body #inventoryGrid article:is([data-status=reserved],[data-status=sold]) .stock-price{color:var(--muted)!important}
+html body #inventoryGrid article:is([data-status=reserved],[data-status=sold]) .stock-price s{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:currentColor}
+html body #inventoryGrid article:is([data-status=reserved],[data-status=sold]) .monthly-price{color:var(--muted)!important}
+html body #customer-stories .testimonial-meta{justify-content:flex-start!important}
+html body #contact .concierge-title-row{display:block!important;padding-bottom:12px!important}
+html body #contact .concierge-title-row .concierge-name{font-size:23px!important;line-height:1.2!important;letter-spacing:-.025em;color:var(--ink)!important}
+html body #contact .contact-map-title-group{min-width:0}
+html body #contact .contact-location{white-space:normal!important;overflow-wrap:anywhere;line-height:1.5!important}
+html body .tools-car-picker{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);min-width:0}
+html body .tools-car-picker label{display:grid;gap:8px;font-size:13px;line-height:1.5}
+html body .tools-car-picker select{width:100%;min-width:0;max-width:100%;font-size:13px}
+html body .tool-car-link{font-size:12px;color:var(--ink);text-decoration:underline;text-underline-offset:3px;width:fit-content}
+html body #buyingLoan{min-width:0}
+/* This smaller hero is isolated here so its height is easy to revert. */
+html body.exhibition-home main>.showroom-hero.mountain-hero{height:clamp(500px,41vw,600px)!important;min-height:0!important}
+@media(max-width:1000px){html body #service-care .tint-sim-body{grid-template-columns:minmax(0,1fr)!important}html body #service-care .tint-sim-stage{height:280px!important}}
+@media(max-width:700px){
+ html body.exhibition-home main>.showroom-hero.mountain-hero{height:540px!important}
+ html body .mountain-hero .mountain-scene{inset:245px 0 0!important;height:auto!important}
+ html body .mountain-hero .mountain-copy{padding-top:100px!important}
+ html body .mountain-hero .mountain-copy h1{font-size:clamp(31px,8vw,38px)!important;max-width:360px!important}
+ html body #service-care .tint-sim-stage{height:210px!important}
+ html body #service-care .tint-sim-shades{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;gap:7px}
+ html body #service-care .tint-vlt-btn{min-width:0!important;padding:8px 5px!important}
+ html body #service-care .tint-vlt-btn small{font-size:10px!important;line-height:1.3!important}
+ html body #service-care .tint-sim-header{display:flex;flex-direction:column;align-items:stretch!important}
+ html body #service-care .tint-simulator-card{padding:16px!important}
+ html body #contact .concierge-name{font-size:22px!important}
+}
+@media(max-width:700px){
+ html body .mountain-hero .mountain-copy .actions{flex-wrap:wrap!important;gap:8px!important}
+ html body .mountain-hero .mountain-copy .actions .button{min-width:0!important;max-width:100%;padding-inline:12px!important}
+ html body #contact .contact-map-header{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:12px!important}
+ html body #contact .location-actions{display:flex!important;flex-wrap:wrap!important;gap:7px!important}
+}

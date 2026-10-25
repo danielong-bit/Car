@@ -22,7 +22,7 @@ export function renderBuyingTools(host,doc={},lang='en'){
  const money=n=>'RM '+Number(n).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
  const phone=doc.profile?.phone||'60125686528';
  const base=window.SITE_BASE||'/';
- const cars=(doc.vehicles||[]).filter(v=>v.status!=='sold'&&v.priceRm!=null);
+ const cars=(doc.vehicles||[]).filter(v=>['available','reserved'].includes(v.status)&&v.priceRm!=null);
  const requestedId=new URLSearchParams(location.search).get('vehicle')||'';
  const presetCar=cars.find(v=>v.id===requestedId||v.stockId===requestedId)||null;
  const initialPrice=presetCar?.priceRm??200000;
@@ -32,18 +32,15 @@ export function renderBuyingTools(host,doc={},lang='en'){
  host.innerHTML=`<p class="eyebrow">${tr('PLAN YOUR PURCHASE','规划购车预算','RANCANG PEMBELIAN')}</p>
  <h1>${tr('Calculator & JPJ Utilities','月供计算器与 JPJ 路税工具','Kalkulator & Utiliti JPJ')}</h1>
  <p class="tools-lead">${tr('Estimate Malaysian hire-purchase monthly installments, check official Peninsular Malaysia JPJ road tax (LKM), and access verified vehicle ownership utilities before you commit.','在决定购车前，清晰测算马来西亚汽车贷款月供、查询西马 JPJ 官方路税（LKM），并浏览官方拥车实用工具。','Anggarkan ansuran bulanan sewa beli Malaysia, semak cukai jalan rasmi JPJ Semenanjung Malaysia (LKM), dan akses utiliti pemilikan kereta rasmi sebelum membuat keputusan.')}</p>
- ${cars.length?`<div class="tools-preset-bar"><label for="buyingCarPreset">${tr('Quick-fill from available showroom stock','从展厅现车快速填入数据','Isi pantas daripada stok showroom tersedia')}</label><div class="tools-preset-controls"><select id="buyingCarPreset"><option value="">${tr('Custom amount / enter manually','自定义金额／手动输入','Amaun tersuai / masukkan manual')}</option>${cars.map(v=>{const title=[v.year,v.make,v.model,v.variant].filter(Boolean).join(' ');return `<option value="${esc(v.id)}" ${presetCar?.id===v.id?'selected':''}>${esc(title)} — RM ${Number(v.priceRm).toLocaleString('en-MY')} (${inferEngineCc(v)} cc)</option>`;}).join('')}</select><a class="button quiet small" id="buyingPresetLink" href="${presetCar?`${base}vehicle/${encodeURIComponent(presetCar.id)}/`:`${base}#inventory`}">${presetCar?tr('View selected car →','查看该车辆 →','Lihat kereta dipilih →'):tr('Browse showroom →','浏览现车 →','Lihat showroom →')}</a></div></div>`:''}
  <div class="tools-grid">
   <section class="tool-panel" id="loanTool">
    <div class="tool-panel-head">
     <h2>${tr('Monthly payment','月供估算','Ansuran bulanan')}</h2>
     <span class="tool-panel-badge">${tr('Malaysian Hire-Purchase','马来西亚车贷测算','Sewa Beli Malaysia')}</span>
    </div>
-   <div class="tool-quick-chips" role="group" aria-label="${tr('Quick vehicle price presets','快捷车价选择','Tetapan harga pantas')}">
-    ${[[180000,'RM 180k'],[250000,'RM 250k'],[320000,'RM 320k'],[420000,'RM 420k'],[580000,'RM 580k']].map(([val,labelText])=>`<button type="button" class="tool-chip" data-quick-price="${val}">${labelText}</button>`).join('')}
-   </div>
    <form id="buyingLoan" novalidate>
-    <label>${tr('Vehicle price (RM)','车价（RM）','Harga kereta (RM)')}<input name="price" type="number" min="0" max="10000000" step="1000" value="${initialPrice}" required></label>
+    <div class="tools-car-picker"><label for="buyingCarPreset">${tr('Choose a car or enter your own price','选择库存车，或自行输入车价','Pilih kereta atau masukkan harga sendiri')}<select id="buyingCarPreset"><option value="">${tr('Custom price — enter below','自定车价 — 在下方输入','Harga sendiri — masukkan di bawah')}</option>${cars.map(v=>`<option value="${esc(v.id)}" ${presetCar?.id===v.id?'selected':''}>${esc([v.year,v.make,v.model,v.variant].filter(Boolean).join(' '))} · ${esc(v.stockId||'')} — RM ${Number(v.priceRm).toLocaleString('en-MY')}${v.status==='reserved'?' · '+tr('Booked','已预订','Ditempah'):''}</option>`).join('')}</select></label><a class="tool-car-link" id="buyingPresetLink" href="${presetCar?`${base}vehicle/${encodeURIComponent(presetCar.id)}/`:`${base}#inventory`}">${presetCar?tr('View selected car →','查看该车辆 →','Lihat kereta dipilih →'):tr('Browse showroom →','浏览现车 →','Lihat showroom →')}</a></div>
+    <label>${tr('Vehicle price (RM)','车价（RM）','Harga kereta (RM)')}<input name="price" type="number" min="0" max="10000000" step="0.01" value="${initialPrice}" required></label>
     <label>${tr('Down payment (%)','首付（%）','Deposit (%)')}<input name="down" type="number" min="0" max="100" step="1" value="${f.downPayment}" required></label>
     <div class="tool-quick-chips is-compact" role="group" aria-label="${tr('Quick deposit percentage','快捷首付比例','Peratusan deposit pantas')}">
      ${[10,15,20,30].map(pct=>`<button type="button" class="tool-chip" data-quick-down="${pct}">${pct}% ${tr('Down','首付','Deposit')}</button>`).join('')}
@@ -198,7 +195,8 @@ export function renderBuyingTools(host,doc={},lang='en'){
   }
  };
  loan.onsubmit=runLoan;
- loan.oninput=()=>runLoan();
+ const clearCarSelection=()=>{if(presetSelect)presetSelect.value='';if(presetLink){presetLink.href=`${base}#inventory`;presetLink.textContent=tr('Browse showroom →','浏览现车 →','Lihat showroom →');}};
+ loan.oninput=event=>{if(event.target===loan.elements.price)clearCarSelection();runLoan();};
  loan.onchange=()=>runLoan();
  tax.onsubmit=runTax;
  tax.oninput=()=>runTax();

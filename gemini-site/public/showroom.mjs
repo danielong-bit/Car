@@ -1,3 +1,4 @@
+import {showroomLocation} from './showroom-location.mjs';
 import {renderContactFaq} from './contact-faq.mjs';
 import {recordVisit} from './visitor-stats.mjs';
 import {renderShell} from './site-shell.mjs';
@@ -145,7 +146,7 @@ function badgeClusterMarkup(v,{inline=false}={}){
   return pills.length?`<div class="detail-badge-cluster">${pills.join('')}</div>`:'';
  }
  const state=v.status==='sold'?'SOLD':v.status==='reserved'?'BOOKED':'AVAILABLE';
- return `<span class="photo-status" data-status="${esc(v.status||'available')}">${esc(t(state))}</span>`;
+ return `<span class="photo-status ${esc(v.status||'available')}" data-status="${esc(v.status||'available')}">${esc(t(state))}</span>`;
 }
 function photoMarkup(v){
  const srcAttr=staticImgSrc(v.coverImageUrl);
@@ -156,9 +157,9 @@ function listingFacts(v){
  return `<strong>${v.year||'—'}</strong><strong>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</strong>${grade?`<span class="listing-grade" aria-label="${esc(t('Grade')+' '+grade)}"><span class="listing-grade-label">${t('Grade')} </span><strong>${esc(grade)}</strong>${c.example?`<sup title="${esc(t('Example'))}" aria-label="${esc(t('Example'))}">*</sup>`:''}</span>`:`<span class="listing-grade"><strong>${esc(t(v.transmission||'Auto'))}</strong></span>`}`;
 }
 function listingPrice(v){
- if(v.status==='sold')return esc(t('SOLD'));
- return v.status==='reserved'&&v.priceRm!=null?`<s>${money(v.priceRm)}</s>`:money(v.priceRm);
+ return ['reserved','sold'].includes(v.status)&&v.priceRm!=null?`<s>${money(v.priceRm)}</s>`:money(v.priceRm);
 }
+
 function listingCompare(v){return `<label class="compare-check"><input type="checkbox" data-compare="${esc(v.id)}" ${compare.includes(v.id)?'checked':''}><span>${t('Compare')}</span></label>`;}
 function card(v,idx=0){
  const monthly=estimate(v,d.finance);
@@ -290,7 +291,7 @@ function renderShowroomConciergeCard(host){
  const portraitSrc=url('assets/danny-recon-profile.png');
  host.classList.remove('contact-lanyard-host');
  host.classList.add('boutique-concierge-card');
- host.innerHTML=`<div class="concierge-portrait-frame"><img id="profilePhoto" src="${esc(portraitSrc)}" class="is-loaded" alt="${esc(tr('Danny at the Shah Alam showroom','Danny 于 Shah Alam 展厅','Danny di showroom Shah Alam'))}" loading="eager" fetchpriority="high" decoding="sync"><div class="concierge-badge-overlay"><span class="concierge-verified-dot"></span><span>${esc(tr('VERIFIED RECON SPECIALIST','认证日本进口车顾问','PAKAR KERETA RECOND DISAHKAN'))}</span></div></div><div class="concierge-card-meta"><div class="concierge-title-row"><strong>Danny Ong</strong><span class="concierge-brand-tag"><span class="brand-logo full-brand" aria-hidden="true"><img class="brand-logo-img brand-wordmark logo-dark" src="${esc(url('assets/brand-wordmark-black.png'))}" alt="" width="18" height="13" decoding="async"><img class="brand-logo-img brand-wordmark logo-light" src="${esc(url('assets/brand-wordmark-white.png'))}" alt="" width="18" height="13" decoding="async"></span><span>DANNY RECON SELECT</span></span></div><dl class="concierge-specs"><div><dt>${esc(tr('Viewing hours','看车时间','Waktu lawatan'))}</dt><dd>${esc(tr('Mon – Sun · 10:00 AM – 7:00 PM','周一至周日 · 10:00 AM – 7:00 PM','Isn – Ahd · 10:00 AM – 7:00 PM'))}</dd></div><div><dt>${esc(tr('Assurance','购车保障','Jaminan'))}</dt><dd>${esc(tr('Original Auction Sheet · Pre-Purchase Inspection','原始拍卖报告核对 · 支持第三方验车','Laporan Lelong Asal · Pemeriksaan Bebas'))}</dd></div></dl></div>`;
+ host.innerHTML=`<div class="concierge-portrait-frame"><img id="profilePhoto" src="${esc(portraitSrc)}" class="is-loaded" alt="${esc(tr('Danny at the Shah Alam showroom','Danny 于 Shah Alam 展厅','Danny di showroom Shah Alam'))}" loading="eager" fetchpriority="high" decoding="sync"><div class="concierge-badge-overlay"><span class="concierge-verified-dot"></span><span>${esc(tr('VERIFIED RECON SPECIALIST','认证日本进口车顾问','PAKAR KERETA RECOND DISAHKAN'))}</span></div></div><div class="concierge-card-meta"><div class="concierge-title-row"><strong class="concierge-name">Danny Ong</strong></div><dl class="concierge-specs"><div><dt>${esc(tr('Viewing hours','看车时间','Waktu lawatan'))}</dt><dd>${esc(tr('Mon – Sun · 10:00 AM – 7:00 PM','周一至周日 · 10:00 AM – 7:00 PM','Isn – Ahd · 10:00 AM – 7:00 PM'))}</dd></div><div><dt>${esc(tr('Assurance','购车保障','Jaminan'))}</dt><dd>${esc(tr('Original Auction Sheet · Pre-Purchase Inspection','原始拍卖报告核对 · 支持第三方验车','Laporan Lelong Asal · Pemeriksaan Bebas'))}</dd></div></dl></div>`;
 }
 function syncHeroStockBadge(countOverride){
  const host=$('#heroStock');
@@ -327,48 +328,12 @@ window.addEventListener('danny:inventory-counts',event=>{
   syncHeroStockBadge(activeAvail);
  }
 });
-const TESTIMONIAL_PRESETS=[
- {
-  model:'2023 Porsche 911 Carrera',
-  customer:{en:'Marcus Tan · Mont Kiara',zh:'Marcus Tan · 满家乐',ms:'Marcus Tan · Mont Kiara'},
-  rating:5,
-  quote:{
-   en:'Danny walked me through the original Japanese auction sheet line by line. Cabin and paintwork matched the 4.5A grade on arrival.',
-   zh:'Danny 逐项带我核对日本原始拍卖报告，实车内饰和漆面状态与 4.5A 评分完全一致，交车非常省心。',
-   ms:'Danny menerangkan laporan lelong Jepun asal secara terperinci. Keadaan kabin dan cat tepat seperti gred 4.5A.'
-  }
- },
- {
-  model:'2024 Honda Civic Type R (FL5)',
-  customer:{en:'Jason Lim · Subang Jaya',zh:'Jason Lim · 梳邦再也',ms:'Jason Lim · Subang Jaya'},
-  rating:5,
-  quote:{
-   en:'Transparent pricing, genuine low mileage, and welcome to bring my own workshop inspector before booking. Highly recommended.',
-   zh:'价格透明、真实低里程，下订前还支持带第三方师傅上门验车，专业度满分。',
-   ms:'Harga telus, perbatuan rendah tulen, dan terbuka untuk pemeriksaan bengkel bebas sebelum tempahan.'
-  }
- },
- {
-  model:'2024 Toyota Alphard 2.5 Z',
-  customer:{en:'Dato’ Azman · Shah Alam',zh:'Dato’ Azman · 莎阿南',ms:'Dato’ Azman · Shah Alam'},
-  rating:5,
-  quote:{
-   en:'Smooth family MPV handover from loan approval to JPJ registration and detailing. The car was spotless on collection day.',
-   zh:'从贷款审批、JPJ 注册到交车美容全程安排妥当，提车当天整车状态干净如新。',
-   ms:'Proses serahan MPV keluarga sangat lancar dari kelulusan pinjaman hingga pendaftaran JPJ.'
-  }
- },
- {
-  model:'2024 Lexus RX 500h F Sport',
-  customer:{en:'Kelvin Wong · Petaling Jaya',zh:'Kelvin Wong · 八打灵再也',ms:'Kelvin Wong · Petaling Jaya'},
-  rating:5,
-  quote:{
-   en:'No hard selling—just honest advice comparing specs and grades. Found the exact F Sport unit my family wanted.',
-   zh:'没有任何硬推销，只有客观诚恳的配置与拍卖等级对比，帮我们选到了最理想的 F Sport 现车。',
-   ms:'Tiada paksaan menjual—hanya nasihat jujur membandingkan spesifikasi dan gred sehingga jumpa unit F Sport terbaik.'
-  }
- }
+const EXAMPLE_FEEDBACK=[
+ {en:'Clear pricing. No pressure to buy.',zh:'价格透明，不硬推销。',ms:'Harga jelas. Tiada paksaan membeli.'},
+ {en:'Compare the car, its condition and price at your own pace.',zh:'慢慢比较车况、配置和价格。',ms:'Bandingkan kereta, keadaan dan harga mengikut keselesaan anda.'},
+ {en:'Ask questions before deciding. Danny can explain the details.',zh:'决定前先问清楚，Danny 为你讲解细节。',ms:'Tanya dahulu sebelum membuat keputusan. Danny boleh terangkan butirannya.'}
 ];
+
 function renderHome(){
  const tr=translator(lang);
  if($('#findYourCar'))$('#findYourCar').onclick=()=>openCarFinder($('#carFinder'),{vehicles:d.vehicles,lang,details,wa,hydrate:()=>{hydrateImages();styleWhatsAppActions();}});
@@ -379,14 +344,14 @@ function renderHome(){
  const stories=(d.stories||[]).filter(s=>s.published!==false&&(s.consent==='approved'||d.staticSite));
  $('#deliveryRail').innerHTML=stories.filter(s=>s.image).map((s,idx)=>{
   const sSrc=staticImgSrc(s.image);
-  const preset=TESTIMONIAL_PRESETS[idx%TESTIMONIAL_PRESETS.length];
   const linkedCar=s.vehicleId?d.vehicles.find(v=>v.id===s.vehicleId):null;
-  const carModel=s.vehicleModel||(linkedCar?[linkedCar.year,linkedCar.make,linkedCar.model].filter(Boolean).join(' '):preset.model);
-  const starsCount=Math.min(5,Math.max(1,Number(s.rating)||preset.rating||5));
-  const stars='★'.repeat(starsCount);
-  const quoteText=s.quote||(preset.quote?.[lang]||preset.quote.en);
-  const customerLabel=s.customerName||(preset.customer?.[lang]||preset.customer.en);
-  return `<article class="delivery-card testimonial-card reveal-on-scroll is-visible"><button type="button" class="testimonial-photo-btn" data-story="${esc(s.id)}" aria-label="${esc(s.title||carModel)}"><img ${sSrc?`src="${esc(sSrc)}" `:''}data-source="${esc(s.image)}" class="is-loaded" alt="${esc(s.title||carModel)}" loading="eager" fetchpriority="high" decoding="sync"><span class="testimonial-model-tag">${esc(carModel)}</span></button><div class="testimonial-body"><div class="testimonial-rating-row"><span class="testimonial-stars" aria-label="${starsCount} out of 5 stars">${stars}</span><span class="testimonial-verified">${esc(tr('Verified Owner','认证车主交车','Pemilik Disahkan'))}</span></div><blockquote class="testimonial-quote">“${esc(quoteText)}”</blockquote><footer class="testimonial-meta"><strong>${esc(customerLabel)}</strong><span>${esc(carModel)}</span></footer></div></article>`;
+  const brand=(linkedCar?.make||String(s.vehicleModel||s.title||'').match(/Porsche|Toyota|Lexus|Honda|Audi|Nissan|BMW|Mercedes(?:-Benz)?/i)?.[0]||tr('Collection day','交车记录','Hari serahan'));
+  const verified=s.reviewVerified===true&&typeof s.quote==='string'&&s.quote.trim().length>0;
+  const starsCount=verified?Math.min(5,Math.max(1,Number(s.rating)||5)):5;
+  const quoteText=verified?s.quote:EXAMPLE_FEEDBACK[idx%EXAMPLE_FEEDBACK.length][lang]||EXAMPLE_FEEDBACK[0].en;
+  const label=verified?tr('Verified owner','已核实车主','Pemilik disahkan'):tr('Example review','示例评价','Contoh ulasan');
+  const starsLabel=verified?`${starsCount} out of 5 stars`:tr('Five-star example, not a customer rating','五星展示示例，非真实顾客评分','Contoh lima bintang, bukan penilaian pelanggan');
+  return `<article class="delivery-card testimonial-card reveal-on-scroll is-visible"><button type="button" class="testimonial-photo-btn" data-story="${esc(s.id)}" aria-label="${esc(brand)}"><img ${sSrc?`src="${esc(sSrc)}" `:''}data-source="${esc(s.image)}" class="is-loaded" alt="${esc(brand)}" loading="lazy" decoding="async"><span class="testimonial-model-tag">${esc(brand)}</span></button><div class="testimonial-body"><div class="testimonial-rating-row"><span class="testimonial-stars" aria-label="${esc(starsLabel)}">${'★'.repeat(starsCount)}</span><span class="testimonial-verified">${esc(label)}</span></div><blockquote class="testimonial-quote">${esc(quoteText)}</blockquote><footer class="testimonial-meta"><strong>${esc(brand)}</strong></footer></div></article>`;
  }).join('');
  document.querySelectorAll('[data-story]').forEach(b=>b.onclick=async()=>{const s=stories.find(s=>s.id===b.dataset.story);if(s)openPhoto(await photoUrl(s.image,base),s.title);});
  for(const [id,step] of [['deliveryPrev',-1],['deliveryNext',1]]){const btn=$('#'+id);if(btn){btn.hidden=stories.length<=2;btn.onclick=()=>$('#deliveryRail').scrollBy({left:step*$('#deliveryRail').clientWidth*.8,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});}}
@@ -394,8 +359,8 @@ function renderHome(){
  const p=d.profile;$('#profileIntro').textContent=p.intro||tr('Personally inspected for auction grade authenticity, cabin condition, and mechanical integrity before handover.','每一辆车均由 Danny 亲自核对原始拍卖报告、车厢成色与机械状态，透明安心交车。','Disemak sendiri oleh Danny untuk ketulenan gred lelong, keadaan kabin dan mekanikal sebelum serahan.');
  renderShowroomConciergeCard($('#contact .about-image'),p);
  renderContactFaq(document.getElementById('contactFaq'),lang,d.homepage.showContact!==false);
- const locationText='Bukit Jelutong, Glenmarie, Shah Alam';
- const fullLocationQuery=encodeURIComponent(p.location||locationText);
+ const locationText=showroomLocation(p);
+ const fullLocationQuery=encodeURIComponent(locationText);
  const locationUrl='https://www.google.com/maps/search/?api=1&query='+fullLocationQuery;
  const wazeUrl='https://waze.com/ul?q='+fullLocationQuery+'&navigate=yes';
  const mapEmbedUrl=`https://maps.google.com/maps?q=${encodeURIComponent(locationText)}&t=m&z=14&output=embed&iwloc=near`;
@@ -835,7 +800,7 @@ if(new URLSearchParams(location.search).get('local-preview')==='1'){
 
 d.vehicles=d.vehicles.filter(v=>['available','reserved','sold'].includes(v.status)&&(v.status!=='sold'||d.homepage.showSoldVehicles));
 // Preserve the preview across detail and calculator links without affecting ordinary visitors.
-const render=()=>{applyTheme();document.body.dataset.homeLayout=d.homepage.layout||'showroom';const defaultCar=d.vehicles.find(v=>v.status==='available'&&v.priceRm!=null)||d.vehicles[0];document.querySelectorAll('[data-payment-link]').forEach(a=>a.href=(document.body.classList.contains('exhibition-home')||document.body.classList.contains('exhibition-services'))?(defaultCar?details(defaultCar)+'#vehicleCalculator':url('#inventory')):location.pathname+location.search+'#vehicleCalculator');renderShell(lang);syncFooter();if(document.body.classList.contains('exhibition-home'))renderHome();else if(document.body.classList.contains('exhibition-services')){renderServiceCare($('#service-care'),d.vehicles,lang,wa,d.tintPackages);observeScrollReveal();}else if(document.body.classList.contains('exhibition-tools'))renderBuyingTools($('#buyingTools'),d,lang);else renderDetail();translate();syncMobileWaFab();styleWhatsAppActions();if(new URLSearchParams(location.search).get('local-preview')==='1')document.querySelectorAll('a[href]').forEach(a=>{const parsed=new URL(a.href,location.origin);if(parsed.origin===location.origin&&(parsed.pathname===base||parsed.pathname===base.replace(/\/$/,'')||parsed.pathname.includes('/vehicle/')||parsed.pathname.endsWith('/calculator/')||parsed.pathname.endsWith('/services/')||parsed.pathname.endsWith('/tools/'))){parsed.searchParams.set('local-preview','1');a.href=parsed.href;}});};
+const render=()=>{d.profile.location=showroomLocation(d.profile);applyTheme();document.body.dataset.homeLayout=d.homepage.layout||'showroom';const defaultCar=d.vehicles.find(v=>v.status==='available'&&v.priceRm!=null)||d.vehicles[0];document.querySelectorAll('[data-payment-link]').forEach(a=>a.href=(document.body.classList.contains('exhibition-home')||document.body.classList.contains('exhibition-services'))?(defaultCar?details(defaultCar)+'#vehicleCalculator':url('#inventory')):location.pathname+location.search+'#vehicleCalculator');renderShell(lang);syncFooter();if(document.body.classList.contains('exhibition-home'))renderHome();else if(document.body.classList.contains('exhibition-services')){renderServiceCare($('#service-care'),d.vehicles,lang,wa,d.tintPackages);observeScrollReveal();}else if(document.body.classList.contains('exhibition-tools'))renderBuyingTools($('#buyingTools'),d,lang);else renderDetail();translate();syncMobileWaFab();styleWhatsAppActions();if(new URLSearchParams(location.search).get('local-preview')==='1')document.querySelectorAll('a[href]').forEach(a=>{const parsed=new URL(a.href,location.origin);if(parsed.origin===location.origin&&(parsed.pathname===base||parsed.pathname===base.replace(/\/$/,'')||parsed.pathname.includes('/vehicle/')||parsed.pathname.endsWith('/calculator/')||parsed.pathname.endsWith('/services/')||parsed.pathname.endsWith('/tools/'))){parsed.searchParams.set('local-preview','1');a.href=parsed.href;}});};
 document.querySelectorAll('a[href^="#"]').forEach(a=>a.href=location.pathname+location.search+a.getAttribute('href'));
 $('#languageSelect').onchange=e=>{lang=e.target.value;try{localStorage.setItem('danny-language',lang);localStorage.setItem('danny-site-language',lang);}catch{}render();};initSmartHeader();render();
 

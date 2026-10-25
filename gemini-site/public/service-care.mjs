@@ -3,66 +3,10 @@ import {icon} from './stock-icons.mjs';
 import {tintPackages as defaultTintPackages} from './tint-packages.mjs';
 
 const VLT_PRESETS=[
- {
-  vlt:70,
-  code:'70% VLT',
-  opacity:0.18,
-  irr:94,
-  tser:62,
-  uvr:99.9,
-  cabinTemp:'-6°C',
-  tag:{en:'JPJ Front Windscreen Compliant',zh:'符合 JPJ 前挡风玻璃标准',ms:'Lulus Cermin Hadapan JPJ'},
-  desc:{
-   en:'Crystal-clear night visibility with high infrared rejection. Ideal for front windscreens and drivers who prefer an factory-clear look.',
-   zh:'夜间视野清晰透亮，同时阻隔高达 94% 红外线热量，最适合前挡风玻璃与喜欢原厂通透感的车主。',
-   ms:'Penglihatan malam yang jelas dengan penolakan inframerah tinggi. Sesuai untuk cermin hadapan mengikut spesifikasi JPJ.'
-  }
- },
- {
-  vlt:50,
-  code:'50% VLT',
-  opacity:0.38,
-  irr:96,
-  tser:68,
-  uvr:99.9,
-  cabinTemp:'-8°C',
-  tag:{en:'JPJ Front Side Windows Compliant',zh:'符合 JPJ 前侧窗标准',ms:'Lulus Tingkap Sisi Hadapan JPJ'},
-  desc:{
-   en:'Refined neutral smoked tone that cuts tropical glare while maintaining effortless side-mirror visibility in rain and night driving.',
-   zh:'自然柔和的烟熏色调，有效消减马来西亚正午刺眼眩光，雨夜看后视镜依然清晰从容。',
-   ms:'Tona lembut yang mengurangkan silau matahari tropika sambil mengekalkan kejelasan cermin sisi pada waktu malam.'
-  }
- },
- {
-  vlt:30,
-  code:'30% VLT',
-  opacity:0.62,
-  irr:98,
-  tser:74,
-  uvr:99.9,
-  cabinTemp:'-10°C',
-  tag:{en:'Executive Rear Privacy & Glare Shield',zh:'行政级后排隐私与高效隔热',ms:'Privasi Eksekutif & Penebat Haba'},
-  desc:{
-   en:'Boutique showroom look with strong cabin privacy and superior heat rejection for rear passengers and leather upholstery protection.',
-   zh:'展厅级高质感深色视觉，兼具出色的车厢隐私度与高效隔热，保护后排家人与真皮座椅。',
-   ms:'Gaya eksklusif dengan privasi kabin tinggi serta perlindungan haba optimum untuk penumpang belakang.'
-  }
- },
- {
-  vlt:15,
-  code:'15% VLT',
-  opacity:0.82,
-  irr:99,
-  tser:79,
-  uvr:99.9,
-  cabinTemp:'-12°C',
-  tag:{en:'VIP MPV / Rear Cabin Maximum Privacy',zh:'VIP 级后排高隐私 · 极致隔热',ms:'Privasi Maksimum Kabin Belakang VIP'},
-  desc:{
-   en:'Deep obsidian privacy shade popular on Alphard, Vellfire, and luxury SUVs for rear glass—keeping the cabin cool even parked under the sun.',
-   zh:'深受 Alphard、Vellfire 及豪华 SUV 车主喜爱的曜石黑高隐私后排膜，烈日停放也能显著降低车内温度。',
-   ms:'Tona gelap privasi penuh yang popular untuk MPV mewah dan SUV bagi memastikan kabin kekal sejuk di bawah matahari.'
-  }
- }
+ {vlt:70,code:'70% VLT',opacity:.18,tag:{en:'Light',zh:'浅色',ms:'Cerah'},desc:{en:'More light comes through.',zh:'透光较多。',ms:'Lebih banyak cahaya masuk.'}},
+ {vlt:50,code:'50% VLT',opacity:.38,tag:{en:'Medium',zh:'中等',ms:'Sederhana'},desc:{en:'A medium shade.',zh:'中等深浅。',ms:'Tona sederhana.'}},
+ {vlt:30,code:'30% VLT',opacity:.62,tag:{en:'Dark',zh:'深色',ms:'Gelap'},desc:{en:'Less light comes through.',zh:'透光较少。',ms:'Kurang cahaya masuk.'}},
+ {vlt:15,code:'15% VLT',opacity:.82,tag:{en:'Very dark',zh:'更深',ms:'Sangat gelap'},desc:{en:'The darkest preview.',zh:'此处最深的预览。',ms:'Pratonton paling gelap.'}}
 ];
 
 export function renderServiceCare(host,_vehicles,lang,wa,customPackages){
@@ -90,29 +34,25 @@ export function renderServiceCare(host,_vehicles,lang,wa,customPackages){
   host.innerHTML=`<header class="tint-intro reveal-on-scroll is-visible">
    <div class="tint-intro-top">
     <p class="eyebrow">${tr('WINDOW TINTING · WITH DANNY','隔热膜配套 · DANNY 为你安排','FILEM TINGKAP · BERSAMA DANNY')}</p>
-    <div class="tint-assurance-pills">
-     <span>✓ ${tr('100% Authentic XPEL & 3M Authorised Film','100% 正品授权 XPEL 与 3M 隔热膜','100% Filem Tulen XPEL & 3M')}</span>
-     <span>✓ ${tr('JPJ VLT Compliant Options','符合 JPJ 透光度规范','Pilihan Lulus Spesifikasi JPJ')}</span>
-     <span>✓ ${tr('Dust-Free Cleanroom Installation','无尘车间专业施工','Pemasangan Bilik Bersih Bebas Habuk')}</span>
-    </div>
+
    </div>
    <h1>${tr('Your car. A cooler next drive.','选好隔热膜，舒服出发。','Kereta anda. Pemanduan lebih selesa.')}</h1>
-   <p>${tr('Choose an XPEL or 3M tint package. Preview shade levels interactively below and speak with Danny for your quote and installation slot before or after car collection.','选择 XPEL 或 3M 隔热膜配套。可在下方互动预览不同透光度（VLT）隔热效果，并向 Danny 咨询报价与提车贴膜安排。','Pilih pakej filem XPEL atau 3M. Pratonton tahap gelap VLT di bawah dan hubungi Danny untuk sebut harga serta slot pemasangan.')}</p>
+   <p>${tr('Choose XPEL or 3M. Try a shade, compare packages, then ask Danny for a quote.','选择 XPEL 或 3M，看看深浅、比较配套，再向 Danny 询价。','Pilih XPEL atau 3M. Cuba tona, bandingkan pakej dan minta sebut harga Danny.')}</p>
    <div class="tint-process">
-    <span><strong>01</strong> ${tr('Simulate VLT & choose package','预览透光度并选择配套','Simulasi VLT & pilih pakej')}</span>
-    <span><strong>02</strong> ${tr('Confirm vehicle category with Danny','向 Danny 确认车型与报价','Sahkan kategori bersama Danny')}</span>
-    <span><strong>03</strong> ${tr('Cleanroom installation before handover','交车前无尘施工交付','Pemasangan rapi sebelum serahan')}</span>
+    <span><strong>01</strong> ${tr('Choose a shade','选择深浅','Pilih tona')}</span>
+    <span><strong>02</strong> ${tr('Confirm the quote','确认报价','Sahkan harga')}</span>
+    <span><strong>03</strong> ${tr('Arrange installation','安排安装','Atur pemasangan')}</span>
    </div>
   </header>
 
   <section class="tint-simulator-card reveal-on-scroll is-visible" aria-labelledby="tintSimTitle">
    <div class="tint-sim-header">
     <div>
-     <p class="eyebrow">${tr('INTERACTIVE CABIN COMFORT & SHADE STUDIO','互动透光度（VLT）与隔热模拟器','STUDIO INTERAKTIF TONA & HABA KABIN')}</p>
-     <h2 id="tintSimTitle">${tr('Compare VLT Shade & Solar Heat Rejection','实时体验不同透光度（VLT）与隔热表现','Bandingkan Tona VLT & Penolakan Haba Suria')}</h2>
+
+     <h2 id="tintSimTitle">${tr('Try a tint shade','看看隔热膜深浅','Cuba tahap gelap cermin')}</h2>
     </div>
     <div class="tint-sim-shades" role="group" aria-label="${tr('Select VLT shade percentage','选择透光度比例','Pilih peratusan VLT')}">
-     ${VLT_PRESETS.map(item=>`<button type="button" class="tint-vlt-btn ${item.vlt===sim.vlt?'is-active':''}" data-vlt="${item.vlt}" aria-pressed="${item.vlt===sim.vlt}"><strong>${item.vlt}%</strong><small>VLT</small></button>`).join('')}
+     ${VLT_PRESETS.map(item=>`<button type="button" class="tint-vlt-btn ${item.vlt===sim.vlt?'is-active':''}" data-vlt="${item.vlt}" aria-pressed="${item.vlt===sim.vlt}"><strong>${item.vlt}%</strong><small>${esc(item.tag[lang]||item.tag.en)}</small></button>`).join('')}
     </div>
    </div>
    <div class="tint-sim-body">
@@ -121,7 +61,7 @@ export function renderServiceCare(host,_vehicles,lang,wa,customPackages){
      <div class="tint-sim-glass-layer" aria-hidden="true"></div>
      <div class="tint-sim-stage-badges">
       <span class="tint-sim-vlt-pill">${esc(sim.code)} · ${esc(sim.tag[lang]||sim.tag.en)}</span>
-      <span class="tint-sim-temp-pill">❄️ ${tr('Cabin feel','体感降温','Suhu kabin')} <strong>${esc(sim.cabinTemp)}</strong></span>
+
      </div>
     </div>
     <div class="tint-sim-metrics">
@@ -129,20 +69,7 @@ export function renderServiceCare(host,_vehicles,lang,wa,customPackages){
       <h3>${esc(sim.code)} — ${esc(sim.tag[lang]||sim.tag.en)}</h3>
       <p>${esc(sim.desc[lang]||sim.desc.en)}</p>
      </div>
-     <div class="tint-sim-bars">
-      <div class="tint-sim-bar-row">
-       <div class="tint-sim-bar-label"><span>${tr('Infrared Heat Rejection (IRR)','红外线热能阻隔率 (IRR)','Penolakan Haba Inframerah (IRR)')}</span><strong>${sim.irr}%</strong></div>
-       <div class="tint-sim-bar-track"><span style="width:${sim.irr}%"></span></div>
-      </div>
-      <div class="tint-sim-bar-row">
-       <div class="tint-sim-bar-label"><span>${tr('Total Solar Energy Rejected (TSER)','总太阳能阻隔率 (TSER)','Jumlah Tenaga Suria Ditolak (TSER)')}</span><strong>${sim.tser}%</strong></div>
-       <div class="tint-sim-bar-track"><span style="width:${sim.tser}%"></span></div>
-      </div>
-      <div class="tint-sim-bar-row">
-       <div class="tint-sim-bar-label"><span>${tr('UV Ray Protection (UVR)','紫外线阻隔率 (UVR)','Perlindungan Sinar UV (UVR)')}</span><strong>${sim.uvr}%</strong></div>
-       <div class="tint-sim-bar-track"><span style="width:100%"></span></div>
-      </div>
-     </div>
+     <p class="tint-shade-note">${tr('VLT means how much light passes through. Lower % = darker glass. Shade preview only; heat protection depends on the film you choose.','VLT 是透光率。数字越低，颜色越深。这里只预览深浅；隔热效果取决于所选膜款。','VLT ialah jumlah cahaya yang masuk. % lebih rendah = lebih gelap. Pratonton tona sahaja; perlindungan haba bergantung pada filem pilihan.')}</p>
      <div class="tint-sim-actions">
       <a class="button whatsapp-action" href="${esc(simWaMsg)}" target="_blank" rel="noopener">${icon('wa')}<span>${tr(`Ask Danny about ${sim.code} tint`,`向 Danny 咨询 ${sim.code} 隔热方案`,`Tanya Danny tentang filem ${sim.code}`)}</span>${icon('arrow')}</a>
      </div>
