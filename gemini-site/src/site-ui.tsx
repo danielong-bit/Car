@@ -53,7 +53,7 @@ function MinimalFooter({container,dashboardHref}:{container:HTMLElement;dashboar
   return <>{fibers&&<FooterFibers container={container} dark={dark}/>}
     <div className="footer-layout">
       <div className="footer-center">
-        <a className="footer-title" href={base} aria-label="Danny Recon Select"><span className="brand-logo full-brand" aria-hidden="true"><img className="brand-logo-img logo-dark" src={`${base}assets/brand-wordmark-black.png`} alt="" width="32" height="22" decoding="async" /><img className="brand-logo-img logo-light" src={`${base}assets/brand-wordmark-white.png`} alt="" width="32" height="22" decoding="async" /></span><span className="brand-wordmark-text"><span>DANNY</span><small>RECON SELECT</small></span></a>
+        <a className="footer-title" href={base} aria-label="Danny Recon Select"><span className="brand-logo full-brand" aria-hidden="true"><img className="brand-logo-img brand-wordmark logo-dark" src={`${base}assets/brand-wordmark-black.png`} alt="" width="32" height="22" decoding="async" /><img className="brand-logo-img brand-wordmark logo-light" src={`${base}assets/brand-wordmark-white.png`} alt="" width="32" height="22" decoding="async" /></span><span className="brand-wordmark-text"><span>DANNY</span><small>RECON SELECT</small></span></a>
         <nav className="footer-quick-links" aria-label={navCopy.aria}>
           <a href={`${base}#inventory`}>{navCopy.stock}</a>
           <a href={`${base}tools/`}>{navCopy.tools}</a>

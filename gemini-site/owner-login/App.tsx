@@ -1,12 +1,11 @@
 import {applyTheme,saveWorkbenchTheme} from '../public/site-theme.mjs';
 import {useState,useEffect,type FormEvent,type ReactNode,type ChangeEvent} from 'react';
 import {createRoot} from 'react-dom/client';
-import {ArrowLeft,ArrowRight,Eye,EyeOff,LockKeyhole,LoaderCircle,ShieldCheck,Sparkles,CheckCircle2} from 'lucide-react';
+import {ArrowLeft,ArrowRight,Eye,EyeOff,LockKeyhole,LoaderCircle,ShieldCheck,Sparkles} from 'lucide-react';
 import Galaxy from '../src/components/react-bits/Galaxy';
 
 export default function App(){
  const [visible,setVisible]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
- const [welcoming,setWelcoming]=useState(false);
  const [values,setValues]=useState({username:'',password:''});
  const [touched,setTouched]=useState({username:false,password:false});
  const [submitted,setSubmitted]=useState(false);
@@ -19,13 +18,6 @@ export default function App(){
   document.addEventListener('danny-theme-change',sync);
   return()=>document.removeEventListener('danny-theme-change',sync);
  },[]);
- useEffect(()=>{
-  if(!welcoming)return;
-  const timer=setTimeout(()=>{
-   window.location.assign('/studio/');
-  },1850);
-  return()=>clearTimeout(timer);
- },[welcoming]);
  const usernameEmpty=!values.username.trim();
  const passwordEmpty=!values.password;
  const usernameError=(touched.username||submitted)&&usernameEmpty?tr('Please enter your owner name.','请输入店主账号。','Sila masukkan nama pemilik.'):'';
@@ -38,15 +30,14 @@ export default function App(){
  function handleBlur(field:'username'|'password'){
   setTouched(prev=>({...prev,[field]:true}));
  }
- function triggerWelcomeCeremony(){
+ function openDashboard(){
   try{
    sessionStorage.setItem('danny-dashboard-welcome',String(Date.now()));
   }catch{}
-  setBusy(false);
-  setWelcoming(true);
+  window.location.replace('/studio/');
  }
  async function login(event:FormEvent<HTMLFormElement>){
-  event.preventDefault();if(busy||welcoming)return;
+  event.preventDefault();if(busy)return;
   setSubmitted(true);
   setTouched({username:true,password:true});
   if(usernameEmpty||passwordEmpty){
@@ -59,7 +50,7 @@ export default function App(){
    const response=await fetch('/api/owner/login',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:values.username.trim(),password:values.password})});
    const result=await response.json().catch(()=>({}));
    if(response.ok&&result.ok){
-    triggerWelcomeCeremony();
+    openDashboard();
     return;
    }
   }catch{}
@@ -86,38 +77,20 @@ export default function App(){
     </div>
    </div>
    <section className="login-wrapper" aria-labelledby="ownerLoginTitle">
-    <div className={`login-card${welcoming?' is-welcoming':''}`}>
+    <div className="login-card">
      <span className="login-glow" aria-hidden="true"/>
      <div className="login-card-content">
       <div className="login-brand-row">
        <a href="/" className="owner-wordmark" aria-label="Danny Recon Select home">
         <span className="brand-logo full-brand" aria-hidden="true">
-         <img className="brand-logo-img logo-dark" src="/assets/brand-wordmark-black.png" alt="" width="34" height="24" decoding="async"/>
-         <img className="brand-logo-img logo-light" src="/assets/brand-wordmark-white.png" alt="" width="34" height="24" decoding="async"/>
+         <img className="brand-logo-img brand-wordmark logo-dark" src="/assets/brand-wordmark-black.png" alt="" width="34" height="24" decoding="async"/>
+         <img className="brand-logo-img brand-wordmark logo-light" src="/assets/brand-wordmark-white.png" alt="" width="34" height="24" decoding="async"/>
         </span>
         <span className="brand-wordmark-text"><span>DANNY</span><small>RECON SELECT</small></span>
        </a>
        <span className="login-vip-pill"><Sparkles size={13} aria-hidden="true"/>{tr('OWNER SUITE','店主专属空间','SUITE PEMILIK')}</span>
       </div>
-      {welcoming?(
-       <div className="owner-welcome-ceremony" role="status" aria-live="polite">
-        <div className="welcome-ceremony-seal" aria-hidden="true">
-         <CheckCircle2 size={28}/>
-        </div>
-        <p className="welcome-ceremony-kicker">{tr('WELCOME BACK · WELCOME OWNER','欢迎回来 · 尊贵店主','SELAMAT KEMBALI · PEMILIK SHOWROOM')}</p>
-        <h1 id="ownerLoginTitle">{tr('Welcome back, Danny Ong.','欢迎回来，Danny Ong。','Selamat kembali, Danny Ong.')}</h1>
-        <p className="welcome-ceremony-copy">{tr('Preparing your private showroom command center, live inventory analytics, and spotlight tuner…','正在为你开启私人展厅控制台、实时库存分析与 3D 展车聚光灯…','Menyediakan pusat kawalan showroom peribadi dan analitik inventori anda…')}</p>
-        <div className="welcome-ceremony-checks">
-         <span>✓ {tr('Owner access verified','店主身份已验证','Akses pemilik disahkan')}</span>
-         <span>✓ {tr('Opening your workspace','正在打开工作台','Membuka ruang kerja')}</span>
-        </div>
-        <div className="welcome-ceremony-progress" aria-hidden="true"><span/></div>
-        <div className="welcome-ceremony-actions">
-         <a href="/studio/" className="login-submit welcome-enter-now">{tr('Enter Dashboard Now','立即进入控制台','Masuk Dashboard Sekarang')}<ArrowRight size={18} aria-hidden="true"/></a>
-        </div>
-       </div>
-      ):(
-       <>
+
         <div className="login-heading">
          <div className="login-heading-top">
           <span className="login-lock" aria-hidden="true"><LockKeyhole size={20}/></span>
@@ -133,8 +106,7 @@ export default function App(){
          <button disabled={busy} type="submit" className="login-submit">{busy?<><LoaderCircle size={18} className="login-spinner" aria-hidden="true"/>{tr('Verifying Owner…','正在验证店主身份…','Mengesahkan Pemilik…')}</>:<>{tr('Unlock Owner Studio','解锁进入店主工作台','Buka Studio Pemilik')}<ArrowRight size={18} aria-hidden="true"/></>}</button>
         </form>
         <p className="login-private"><ShieldCheck size={15} aria-hidden="true"/>{tr('Private access for the showroom owner · Encrypted session','仅限店主专属访问 · 安全加密会话','Akses peribadi untuk pemilik showroom')}</p>
-       </>
-      )}
+
      </div>
     </div>
    </section>
