@@ -791,7 +791,7 @@ if(new URLSearchParams(location.search).get('local-preview')==='1'){
  }else if(!window.CMS_CONTENT_CURRENT){
  publishedContentPromise=(async()=>{
   const publicHost=location.hostname.endsWith('.github.io')||location.hostname.endsWith('.workers.dev')||['localhost','127.0.0.1'].includes(location.hostname);
-  const endpoint=publicHost?(location.hostname.endsWith('.github.io')?'https://car-recond-japan.danielong2005.workers.dev':'')+'/api/content/published':window.CMS_API_BASE?window.CMS_API_BASE.replace(/\/$/,'')+'/api/cms/public':null;
+  const endpoint=publicHost?(location.hostname.endsWith('.github.io')?'https://car-recond-japan.dannyreconstocklist.workers.dev':'')+'/api/content/published':window.CMS_API_BASE?window.CMS_API_BASE.replace(/\/$/,'')+'/api/cms/public':null;
   if(!endpoint)return null;
   const response=await fetch(endpoint,{cache:'no-store',signal:AbortSignal.timeout(4000)});
   return response.ok?(await response.json()).document:null;

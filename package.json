@@ -6,6 +6,7 @@
     "node": ">=22.13.0"
   },
   "scripts": {
+    "postinstall": "npm ci --prefix gemini-site --include=dev --no-audit --no-fund",
     "install:ci": "node scripts/install-ci.mjs",
     "dev": "node scripts/run-showroom.mjs dev",
     "build": "node scripts/run-showroom.mjs build",
