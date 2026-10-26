@@ -697,7 +697,7 @@ html[data-theme=dark] .owner-live-status[data-state="offline"] strong{color:#ffa
 @media(prefers-reduced-motion:reduce){.wb-toast-item .swipe-toast__card{scroll-behavior:auto}}
 
 /* A single welcome after a successful login, then a shared fade into the workspace. */
-html body.workbench>:is(.wb-sidebar,.wb-main){transition:opacity .45s ease}
+html body.workbench>:is(.wb-sidebar,.wb-main){transition:opacity .65s ease}
 html.owner-welcoming body.workbench>:is(.wb-sidebar,.wb-main){opacity:0;visibility:hidden}
 .dashboard-welcome{position:fixed;inset:0;z-index:20000;display:grid;place-items:center;padding:24px;background:var(--page,#faf9f6);color:var(--ink,#14233b);pointer-events:auto}
 .dashboard-welcome-content{display:grid;justify-items:center;gap:38px;width:100%;text-align:center}

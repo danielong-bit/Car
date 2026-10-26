@@ -14,10 +14,12 @@ export function initializeDashboardWelcome(win,doc,now=Date.now()){
 
 export const welcomeCriticalCss=`
 html.owner-welcoming,html.owner-welcoming body{overflow:hidden}
-html body.workbench>:is(.wb-sidebar,.wb-main){transition:opacity .45s ease}
+html body.workbench>:is(.wb-sidebar,.wb-main){transition:opacity .65s ease}
 html.owner-welcoming body.workbench>:is(.wb-sidebar,.wb-main){opacity:0;visibility:hidden}
 .dashboard-welcome{position:fixed;inset:0;z-index:20000;display:grid;place-items:center;padding:24px;background:var(--page,#faf9f6);color:var(--ink,#14233b)}
 .dashboard-welcome-content{display:grid;justify-items:center;gap:38px;width:100%;text-align:center}
+html.owner-welcoming .dashboard-welcome-content{animation:dashboard-welcome-enter .65s ease both;animation-delay:var(--welcome-enter-delay,0ms)}
+@keyframes dashboard-welcome-enter{from{opacity:0}to{opacity:1}}
 .dashboard-welcome-brand{display:flex;flex-direction:column;gap:7px;font-size:25px;font-weight:800;letter-spacing:.13em;line-height:1}
 .dashboard-welcome-brand small{font-size:7px;font-weight:700;letter-spacing:.24em;color:var(--muted)}
 .dashboard-welcome-heading{margin:0!important;font-size:clamp(28px,4.2vw,52px)!important;font-weight:750;line-height:1.2;letter-spacing:-.035em}
@@ -28,7 +30,7 @@ html.owner-welcoming body.workbench>:is(.wb-sidebar,.wb-main){opacity:0;visibili
 #dashboardWelcomeInitial{display:none}
 html.owner-welcoming #dashboardWelcomeInitial{display:grid}
 @media(max-width:480px){.layout-text-flip{flex-direction:column;gap:12px}.dashboard-welcome-content{gap:30px}}
-@media(prefers-reduced-motion:reduce){html body.workbench>:is(.wb-sidebar,.wb-main){transition:none}}
+@media(prefers-reduced-motion:reduce){html body.workbench>:is(.wb-sidebar,.wb-main){transition:none}html.owner-welcoming .dashboard-welcome-content{animation-duration:.15s}}
 `;
 
 export const welcomeInitialMarkup=`<div id="dashboardWelcomeInitial" class="dashboard-welcome" role="status" aria-label="Welcome to Dashboard"><div class="dashboard-welcome-content"><div class="dashboard-welcome-brand" aria-hidden="true"><span class="brand-logo full-brand" aria-hidden="true"><img class="brand-logo-img brand-wordmark logo-dark" src="/assets/brand-wordmark-black.png" alt="" width="34" height="24" decoding="async"><img class="brand-logo-img brand-wordmark logo-light" src="/assets/brand-wordmark-white.png" alt="" width="34" height="24" decoding="async"></span><span>DANNY<small>RECON SELECT</small></span></div><p style="margin:0 0 8px;font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--champagne,#c8a97e)">WELCOME BACK · WELCOME OWNER</p><h1 class="dashboard-welcome-heading"><span class="layout-text-flip"><span class="layout-text-flip-label">Welcome to</span><span class="layout-text-flip-word"><span class="layout-text-flip-value">Dashboard</span></span></span></h1></div></div>`;
