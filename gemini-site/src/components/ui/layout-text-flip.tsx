@@ -12,7 +12,7 @@ export function LayoutTextFlip({text,words,duration=3000}:{text:string;words:str
  },[duration,words.length]);
  return <span className="layout-text-flip">
   <motion.span layout className="layout-text-flip-label">{text}</motion.span>
-  <motion.span layout className="layout-text-flip-word"><AnimatePresence mode="popLayout" initial>
+  <motion.span layout className="layout-text-flip-word"><AnimatePresence mode="popLayout" initial={false}>
    <motion.span key={index} className="layout-text-flip-value" initial={reduced?{opacity:0}:{y:-32,filter:'blur(8px)',opacity:0}} animate={{y:0,filter:'blur(0px)',opacity:1}} exit={reduced?{opacity:0}:{y:32,filter:'blur(8px)',opacity:0}} transition={{duration:reduced?.15:.5}}>{words[index%Math.max(words.length,1)]||''}</motion.span>
   </AnimatePresence></motion.span>
  </span>;

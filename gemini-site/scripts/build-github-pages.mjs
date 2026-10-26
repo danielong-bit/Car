@@ -22,6 +22,7 @@ import {prepareExhibition} from './prepare-exhibition.mjs';
 import {buildUiIslands} from './build-ui-islands.mjs';
 import {ownerSidebarMarkup} from '../public/workbench-navigation.mjs';
 import {initialVehicleMarkup} from '../public/vehicle-initial.mjs';
+import {welcomeHeadMarkup,welcomeInitialMarkup} from '../public/dashboard-welcome-boot.mjs';
 const publicDataPath = path.resolve(projectRoot, process.env.PAGES_SNAPSHOT_PATH || 'data/public-site.json');
 const publicAssetsPath = path.join(projectRoot, 'public');
 const templatesPath = path.join(projectRoot, 'out');
@@ -224,6 +225,8 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
 async function dashboardPage() {
   const page = await renderTemplate('workbench.html', {route:'studio',title:'Inventory workbench · Danny Recond Select'});
   return page
+    .replace(/<head(?:\s[^>]*)?>/i,match=>match+welcomeHeadMarkup)
+    .replace(/<body\b[^>]*>/i,match=>match+welcomeInitialMarkup)
     .replace(/<aside class="wb-sidebar">[\s\S]*?<\/aside>/,()=>ownerSidebarMarkup('/'))
     .replace('<div id="workspaceContent">', (previewEditor?'<p class="preview-editor-notice" role="status">Preview workspace · Changes are saved in this browser. The live website stays unchanged.</p>':'')+'<div id="workspaceContent">')
     .replace('</head>', '<link rel="stylesheet" href="/assets/workbench-ui.css?v=owner-ui-20261026a"><link rel="stylesheet" href="/workbench-hierarchy.css?v=owner-nav-20261023b"></head>')
