@@ -863,16 +863,17 @@ html[data-theme=dark] body #heroStock .hero-stock-count {
  color: var(--gold, #f6dfa4) !important;
 }
 
-/* 5. CSS Selector 4 & Inventory Grid Cards — Subtle Scale-Up & Drop-Shadow on Hover */
+/* Keep card text at its native size; hover feedback uses the border and shadow. */
 html body #inventoryGrid > article.stock-card,
 html body #inventory .stock-card.reveal-on-scroll {
- transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.24s ease !important;
- will-change: transform, box-shadow;
+ transition: opacity 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease !important;
+ transform: none !important;
+ will-change: auto;
 }
 
 html body #inventoryGrid > article.stock-card:hover,
 html body #inventory .stock-card.reveal-on-scroll:hover {
- transform: translateY(-3px) scale(1.015) !important;
+ transform: none !important;
  box-shadow: 0 14px 32px rgba(16, 32, 51, 0.12), 0 4px 12px rgba(16, 32, 51, 0.06) !important;
  border-color: color-mix(in srgb, var(--blue, #496a83) 45%, var(--line)) !important;
  z-index: 2;
@@ -886,12 +887,12 @@ html[data-theme=dark] body #inventory .stock-card.reveal-on-scroll:hover {
 main:nth-of-type(1) > section#inventory:nth-of-type(2) > div#inventoryGrid:nth-of-type(5) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(5),
 html body #inventoryGrid > article.stock-card .stock-card-footer {
  border-radius: 8px;
- transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.22s ease !important;
+ transition: box-shadow 0.22s ease, background-color 0.22s ease !important;
 }
 
 main:nth-of-type(1) > section#inventory:nth-of-type(2) > div#inventoryGrid:nth-of-type(5) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(5):hover,
 html body #inventoryGrid > article.stock-card:hover .stock-card-footer {
- transform: scale(1.015);
+ transform: none;
  box-shadow: 0 4px 12px rgba(16, 32, 51, 0.06);
 }
 

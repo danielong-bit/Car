@@ -191,4 +191,11 @@ html body #customer-stories .delivery-controls button:hover{background:var(--sur
 html body #customer-stories .delivery-controls button:focus-visible{outline:2px solid var(--price-accent,var(--ink));outline-offset:1px}
 html body #customer-stories .delivery-controls button svg{width:17px;height:17px;display:block}
 html body #customer-stories .delivery-controls #deliveryPause{color:var(--price-accent,var(--ink))!important}
-@media(max-width:700px){html body #customer-stories .delivery-controls button{width:44px!important;height:44px!important;min-height:44px!important}}
+@media(max-width:700px){
+ html body #customer-stories .section-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 12px;text-align:left}
+ html body #customer-stories .section-heading>div:first-child{display:contents}
+ html body #customer-stories .section-heading .eyebrow{grid-column:1/-1;margin:0!important}
+ html body #customer-stories .section-heading h2{grid-column:1;grid-row:2;margin:0!important}
+ html body #customer-stories .section-heading .delivery-controls{grid-column:2;grid-row:2;justify-self:end;margin:0}
+ html body #customer-stories .delivery-controls button{width:44px!important;height:44px!important;min-height:44px!important}
+}

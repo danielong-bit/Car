@@ -640,10 +640,10 @@ html body #inventory .stock-card{
  border-radius:12px;
  background:var(--surface);
  overflow:hidden;
- transition:transform .24s cubic-bezier(.22,1,.36,1),border-color .24s ease,box-shadow .24s ease;
+ transition:border-color .24s ease,box-shadow .24s ease;
 }
 html body #inventory .stock-card:hover{
- transform:translateY(-3px);
+ transform:none;
  border-color:color-mix(in srgb,var(--champagne,#c8a97e) 68%,transparent);
  box-shadow:0 12px 32px -8px rgba(0,0,0,.35),
             0 0 20px 2px color-mix(in srgb,var(--champagne,#c8a97e) 30%,transparent),

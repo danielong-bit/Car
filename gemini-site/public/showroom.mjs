@@ -159,7 +159,7 @@ function photoMarkup(v){
 }
 function listingFacts(v){
  const c=conditionValues(v),grade=[c.auctionGrade,c.interiorGrade].filter(Boolean).join('/');
- return `<strong>${v.year||'—'}</strong><strong>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</strong>${grade?`<span class="listing-grade" aria-label="${esc(t('Grade')+' '+grade)}"><span class="listing-grade-label">${t('Grade')} </span><strong>${esc(grade)}</strong>${c.example?`<sup title="${esc(t('Example'))}" aria-label="${esc(t('Example'))}">*</sup>`:''}</span>`:`<span class="listing-grade"><strong>${esc(t(v.transmission||'Auto'))}</strong></span>`}`;
+ return `<strong>${v.year||'—'}</strong><strong>${v.mileageKm==null?'—':Number(v.mileageKm).toLocaleString()+' km'}</strong>${grade?`<span class="listing-grade" aria-label="${esc(t('Grade')+' '+grade)}"><span class="listing-grade-label">${t('Grade')} </span><strong>${esc(grade)}</strong>${c.example?`<sup title="${esc(t('Example'))}" aria-label="${esc(t('Example'))}">*</sup>`:''}</span>`:''}`;
 }
 function listingPrice(v){
  return ['reserved','sold'].includes(v.status)&&v.priceRm!=null?`<s>${money(v.priceRm)}</s>`:money(v.priceRm);

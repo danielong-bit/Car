@@ -9,6 +9,7 @@ for(const width of [1280,390])test(`homepage at ${width}px renders stock states,
  const fixture=JSON.parse(readFileSync(new URL('../../data/public-site.json',import.meta.url),'utf8')).document;
  const car=fixture.vehicles[0];
  fixture.vehicles=['available','reserved','sold'].map((status,i)=>({...car,id:`fixture-${status}`,stockId:`CHECK-${i}`,status,priceRm:200000+i*1000}));
+ Object.assign(fixture.vehicles[0],{auctionGrade:'',interiorGrade:'',conditionExample:false,transmission:'AMG SPEEDSHIFT 9G automatic'});
  fixture.homepage.showSoldVehicles=true;
  fixture.profile.location='Bukit Jelutong, Glenmarie, Shah Alam';
  const dom=new JSDOM(template,{url:'https://preview.test/',pretendToBeVisual:true});
@@ -23,6 +24,10 @@ for(const width of [1280,390])test(`homepage at ${width}px renders stock states,
  await new Promise(resolve=>setImmediate(resolve));
  const style=win.document.createElement('style');style.textContent=css;win.document.head.append(style);
  const all=[...win.document.querySelectorAll('#inventoryGrid .stock-card')];assert.equal(all.length,3);
+ const ungraded=win.document.querySelector('[data-id="fixture-available"] .spec-row');
+ assert.doesNotMatch(ungraded.textContent,/AMG|SPEEDSHIFT|automatic/);
+ assert.equal(ungraded.querySelector('.listing-grade'),null);
+ assert.match(win.document.querySelector('[data-id="fixture-reserved"] .spec-row').textContent,/Grade.*4.5\/B/);
  for(const card of all){
   const status=card.dataset.status,badge=card.querySelector('.photo-status');
   assert.equal(badge.dataset.status,status);
@@ -42,5 +47,6 @@ for(const width of [1280,390])test(`homepage at ${width}px renders stock states,
  }
  const compact=win.document.querySelector('[data-view="compact"]');compact.click();
  const rows=[...win.document.querySelectorAll('#inventoryGrid .compact-row')];assert.equal(rows.length,3);
+ assert.doesNotMatch(win.document.querySelector('[data-id="fixture-available"] .compact-meta').textContent,/AMG|SPEEDSHIFT|automatic/);
  for(const row of rows)assert.equal(Boolean(row.querySelector('.stock-price s')),row.dataset.status!=='available');
 });
