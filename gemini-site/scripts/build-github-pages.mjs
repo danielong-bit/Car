@@ -214,7 +214,7 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
   if (!/<head(?:\s[^>]*)?>/i.test(html) || !/<\/body>/i.test(html)) {
     throw new Error(`Template ${templateName} is missing its document head or body.`);
   }
-  html = html.replace(/<head(?:\s[^>]*)?>/i, match => `${match}${runtime}${metadata}`);
+  html = html.replace(/<head(?:\s[^>]*)?>/i, match => `${match}${runtime}${metadata}<link rel="stylesheet" href="/choice-controls.css?v=choices-20261026a"><link rel="stylesheet" href="/layout-refinements.css?v=layout-20261026a">`);
   if (vehicle) {
     html = html.replace(/(<main[^>]*id="vehicleContent"[^>]*>)[\s\S]*?(<\/main>)/, (_match, open, close) => open + initialVehicleMarkup(vehicle, publicData, {base: basePath, pathname: canonicalPath}) + close);
   }

@@ -32,17 +32,8 @@ export function renderServiceCare(host,_vehicles,lang,wa,customPackages){
    'Please advise the best tint package and installation slot.'
   ].join('\n'));
   host.innerHTML=`<header class="tint-intro reveal-on-scroll is-visible">
-   <div class="tint-intro-top">
-    <p class="eyebrow">${tr('WINDOW TINTING · WITH DANNY','隔热膜配套 · DANNY 为你安排','FILEM TINGKAP · BERSAMA DANNY')}</p>
-
-   </div>
-   <h1>${tr('Your car. A cooler next drive.','选好隔热膜，舒服出发。','Kereta anda. Pemanduan lebih selesa.')}</h1>
+   <h1>${tr('Window tinting','汽车隔热膜','Tinted kereta')}</h1>
    <p>${tr('Choose XPEL or 3M. Try a shade, compare packages, then ask Danny for a quote.','选择 XPEL 或 3M，看看深浅、比较配套，再向 Danny 询价。','Pilih XPEL atau 3M. Cuba tona, bandingkan pakej dan minta sebut harga Danny.')}</p>
-   <div class="tint-process">
-    <span><strong>01</strong> ${tr('Choose a shade','选择深浅','Pilih tona')}</span>
-    <span><strong>02</strong> ${tr('Confirm the quote','确认报价','Sahkan harga')}</span>
-    <span><strong>03</strong> ${tr('Arrange installation','安排安装','Atur pemasangan')}</span>
-   </div>
   </header>
 
   <section class="tint-simulator-card reveal-on-scroll is-visible" aria-labelledby="tintSimTitle">

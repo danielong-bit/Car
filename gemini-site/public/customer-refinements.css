@@ -50,3 +50,12 @@ html body.exhibition-home main>.showroom-hero.mountain-hero{height:clamp(500px,4
  html body #contact .contact-map-header{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:12px!important}
  html body #contact .location-actions{display:flex!important;flex-wrap:wrap!important;gap:7px!important}
 }
+
+/* Keep the autoplaying delivery rail inside the page's mobile viewport. */
+html body #customer-stories #deliveryRail.delivery-rail{display:grid!important;grid-template-columns:none!important;grid-auto-flow:column!important;grid-auto-columns:calc((100% - 42px)/4)!important;gap:14px!important;overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none!important;padding-bottom:0!important}
+html body #deliveryRail .delivery-card{scroll-snap-align:start}
+html body #customer-stories #deliveryRail.delivery-rail::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+@media(max-width:1000px){html body #customer-stories #deliveryRail.delivery-rail{grid-auto-columns:calc((100% - 28px)/3)!important}}
+@media(max-width:700px){html body #customer-stories #deliveryRail.delivery-rail{grid-auto-columns:82%!important}}
+@media(max-width:800px){html body dialog#vehicleDetailModal.vehicle-detail-modal[open]{display:flex!important}}
+@media(max-width:800px){html body.workbench>main.wb-main{overflow-x:clip!important}}

@@ -1,3 +1,5 @@
+import {stockSortChoices,compareStock} from './inventory-order.mjs';
+import './choice-controls.mjs';
 import {loadVisitorStats} from './visitor-stats.mjs';
 import {ownerSidebarMarkup,bindSidebarToggle} from './workbench-navigation.mjs';
 import {themeButtonMarkup,bindThemeControls} from './site-theme.mjs';
@@ -18,7 +20,7 @@ const statusName=s=>s==='reserved'?'Booked':label(s);
 const PRIMARY_KPIS=['available','reserved','sold','draft'];
 let saveQueue=Promise.resolve();
 let serverRevision=0,cloudReady=false,publishedRevision=0,cloudStatus='',lastPublishedAt=null,pendingDraftChanges=true;
-let doc,editing,view='overview',filter='all',issueFilter='',query='',make='',year='',sort='newest',cards=false,moreFilters=false,selection=new Set(),busy=false,toastTimer,editorDirty=false;
+let doc,editing,view='overview',filter='all',issueFilter='',query='',make='',year='',sort='year-new',cards=false,moreFilters=false,selection=new Set(),busy=false,toastTimer,editorDirty=false;
 let overviewChartTab='brands';
 let overviewActivityFilter='all';
 let overviewSpotlightId='';
@@ -268,7 +270,7 @@ function buildHookMarkup(){
   headline=`Available ${avail} · Booked ${booked} · All available stock have cover photos → Ready to preview or export GitHub update`;
   ctaLabel='Export GitHub update ↓';ctaAction='export';
  }
- return `<div class="wb-hook-bar"><div class="wb-hook-copy"><span class="wb-hook-eyebrow">LIVE STOCK PULSE</span><strong>${esc(headline)}</strong></div>${ctaAction?`<div class="wb-hook-actions"><button type="button" class="button small quiet" data-action="${ctaAction}">${esc(ctaLabel)}</button></div>`:''}</div>`;
+ return `<div class="wb-hook-bar"><div class="wb-hook-copy"><strong>${esc(headline)}</strong></div>${ctaAction?`<div class="wb-hook-actions"><button type="button" class="button small quiet" data-action="${ctaAction}">${esc(ctaLabel)}</button></div>`:''}</div>`;
 }
 function inventory(){
  const totals=Object.fromEntries(STATUSES.map(s=>[s,doc.vehicles.filter(v=>v.status===s).length]));
@@ -285,11 +287,11 @@ function inventory(){
   if(year&&String(v.year)!==String(year))return false;
   return [v.stockId,v.make,v.model,v.variant,...(v.specialBadges||[])].join(' ').toLowerCase().includes(query.toLowerCase());
  });
- filtered.sort((a,b)=>sort==='price-up'?(a.priceRm??Infinity)-(b.priceRm??Infinity):sort==='price-down'?(b.priceRm??-1)-(a.priceRm??-1):sort==='mileage'?(a.mileageKm??Infinity)-(b.mileageKm??Infinity):(b.year||0)-(a.year||0));
+ filtered.sort(compareStock(sort==='newest'?'year-new':sort==='mileage'?'mileage-up':sort));
  const hasAttention=missingPhotoCars.length>0||draftCars.length>0||exampleCars.length>0;
  return `${buildHookMarkup()}
  <section class="wb-kpis wb-kpis-4" aria-label="Filter by primary stock status">${PRIMARY_KPIS.map(s=>`<button type="button" data-status-filter="${s}" aria-pressed="${filter===s}"><span>${statusName(s)}</span><strong>${totals[s]||0}</strong></button>`).join('')}</section>
- <section class="wb-panel"><div class="wb-section-head"><div><h2>Your vehicles <span class="count">${filtered.length}</span></h2><p>Update a status inline, or open a car to edit its photos, RS/RF badges, and specifications.</p></div><div class="wb-head-actions">${filter!=='all'||issueFilter||query||make||year?`<button type="button" class="button quiet" data-action="reset-filters">Show all (${doc.vehicles.filter(v=>v.status!=='archived').length})</button>`:''}<button type="button" class="button" data-action="new">${icon('plus')} Add vehicle</button></div></div>
+ <section class="wb-panel wb-vehicles-panel"><div class="wb-section-head"><div><h2>Your vehicles <span class="count">${filtered.length}</span></h2><p>Manage prices, status and photos.</p></div><div class="wb-head-actions">${filter!=='all'||issueFilter||query||make||year?`<button type="button" class="button quiet" data-action="reset-filters">Show all (${doc.vehicles.filter(v=>v.status!=='archived').length})</button>`:''}<button type="button" class="button" data-action="new">${icon('plus')} Add vehicle</button></div></div>
  ${hasAttention?`<div class="stock-attention-bar" role="region" aria-label="Stock attention">
   <span class="attention-label">Stock Attention:</span>
   <div class="attention-chips">
@@ -299,15 +301,15 @@ function inventory(){
    ${issueFilter||filter!=='all'?`<button type="button" class="text-button" data-action="reset-filters">Clear filter</button>`:''}
   </div>
  </div>`:''}
- <div class="wb-toolbar ${moreFilters?'expanded':''}"><label class="search-field">${icon('search')}<input id="stockSearch" type="search" placeholder="Search stock ID, make, model, RS / RF…" value="${esc(query)}" aria-label="Search inventory"></label><label class="compact-field"><span>Make</span><select id="makeFilter"><option value="">All makes</option>${[...new Set(doc.vehicles.map(v=>v.make).filter(Boolean))].sort().map(v=>`<option ${make===v?'selected':''}>${esc(v)}</option>`).join('')}</select></label><label class="compact-field"><span>Sort</span><select id="stockSort">${[['price-up','Price: low to high'],['price-down','Price: high to low'],['mileage','Lowest mileage'],['newest','Newest year']].map(([v,t])=>`<option value="${v}" ${sort===v?'selected':''}>${t}</option>`).join('')}</select></label><button type="button" class="button quiet" data-action="toggle-filters" aria-expanded="${moreFilters}">More Filters ${moreFilters?'▴':'▾'}</button><button type="button" class="button quiet view-toggle" data-action="toggle-view">${cards?'Table view':'Card view'}</button></div>
+ <div class="wb-toolbar ${moreFilters?'expanded':''}"><label class="search-field">${icon('search')}<input id="stockSearch" type="search" placeholder="Search stock ID, make, model, RS / RF…" value="${esc(query)}" aria-label="Search inventory"></label><label class="compact-field"><span>Make</span><select id="makeFilter"><option value="">All makes</option>${[...new Set(doc.vehicles.map(v=>v.make).filter(Boolean))].sort().map(v=>`<option ${make===v?'selected':''}>${esc(v)}</option>`).join('')}</select></label><label class="compact-field"><span>Sort</span><select id="stockSort" data-choice-presentation="select">${stockSortChoices('en').map(([v,t])=>`<option value="${v}" ${sort===v?'selected':''}>${t}</option>`).join('')}</select></label><button type="button" class="button quiet" data-action="toggle-filters" aria-expanded="${moreFilters}">More Filters ${moreFilters?'▴':'▾'}</button><button type="button" class="button quiet view-toggle" data-action="toggle-view">${cards?'Table view':'Card view'}</button></div>
  ${moreFilters?`<div class="wb-more-filters"><label class="compact-field"><span>All Statuses (incl. Archived / Unavailable)</span><select id="statusSelectFilter"><option value="all" ${filter==='all'?'selected':''}>All active (excl. Archived)</option>${STATUSES.map(s=>`<option value="${s}" ${filter===s?'selected':''}>${statusName(s)} (${totals[s]||0})</option>`).join('')}</select></label><label class="compact-field"><span>Year</span><select id="yearFilter"><option value="">All years</option>${years.map(y=>`<option value="${y}" ${String(year)===String(y)?'selected':''}>${y}</option>`).join('')}</select></label><label class="compact-field"><span>Stock Check Filter</span><select id="issueSelectFilter"><option value="" ${!issueFilter?'selected':''}>All vehicles</option><option value="missing-photo" ${issueFilter==='missing-photo'?'selected':''}>Missing cover photo (${missingPhotoCars.length})</option><option value="example-grade" ${issueFilter==='example-grade'?'selected':''}>Using example grade/report (${exampleCars.length})</option></select></label><button type="button" class="button quiet" data-action="reset-filters">Reset all filters</button></div>`:''}
- ${selection.size?`<div class="bulk-bar"><strong>${selection.size} selected</strong><label>Change status <select id="bulkStatus"><option value="">Choose…</option>${STATUSES.map(s=>`<option value="${s}">${statusName(s)}</option>`).join('')}</select></label><button type="button" class="text-button" data-action="bulk-clear">Clear</button></div>`:''}
- <div class="wb-inventory ${cards?'card-layout':''}"><div class="wb-table-head"><label><input type="checkbox" id="selectAll" ${filtered.length&&filtered.every(v=>selection.has(v.id))?'checked':''} aria-label="Select all shown vehicles"></label><span>VEHICLE / STOCK ID</span><span>STATUS &amp; QUICK SWITCH</span><span>PRICE (RM) / LOCATION</span><span>PHOTOS</span><span>ACTIONS</span></div>${filtered.map(v=>{const sp=vehicleSpecialBadges(v,doc.homepage),cSrc=staticWbSrc(v.coverImageUrl);return `<div class="wb-swipe-host" data-swipe-host><article class="wb-row" data-id="${esc(v.id)}"><label class="row-check"><input data-select="${esc(v.id)}" type="checkbox" ${selection.has(v.id)?'checked':''} aria-label="Select ${esc(v.stockId)}"></label><button type="button" class="wb-vehicle" data-edit="${esc(v.id)}">${v.coverImageUrl?`<img ${cSrc?`src="${esc(cSrc)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="lazy" decoding="async">`:`<span class="wb-photo-placeholder">${icon('photo')}</span>`}<span><strong>${v.year||''} ${esc(v.make)} ${esc(v.model)}</strong><small>${esc(v.variant||v.body)} · ${esc(v.transmission)}${v.auctionGrade?` · Grade ${esc(v.auctionGrade)}${esc(v.interiorGrade||'')}`:''}</small><code>${esc(v.stockId)}</code></span></button><div class="row-status-group"><div class="quick-status-pills" role="group" aria-label="Quick status for ${esc(v.stockId)}">${[['available','Available'],['reserved','Booked'],['sold','Sold']].map(([st,lbl])=>`<button type="button" class="quick-status-btn ${v.status===st?'is-active '+st:''}" data-quick-status="${esc(v.id)}" data-status-val="${st}">${lbl}</button>`).join('')}</div><label class="row-status"><span class="sr-only">Status for ${esc(v.stockId)}</span><select class="status-pill ${v.status}" data-status="${esc(v.id)}">${STATUSES.map(s=>`<option value="${s}" ${v.status===s?'selected':''}>${statusName(s)}</option>`).join('')}</select></label>${sp.length?`<div class="wb-badge-chips">${sp.map(b=>`<span class="wb-mini-badge">${esc(b)}</span>`).join('')}</div>`:''}</div><div class="row-price"><label class="quick-price-field" aria-label="Price RM for ${esc(v.stockId)}"><span class="quick-price-prefix">RM</span><input type="number" min="0" step="1000" class="quick-price-input" data-quick-price="${esc(v.id)}" value="${v.priceRm??''}" placeholder="Enquire"></label><small>${esc(v.location||'Glenmarie')}</small></div><button type="button" class="photo-count" data-photos="${esc(v.id)}">${icon('photo')} ${v.gallery.length}</button><div class="row-actions"><button type="button" data-edit="${esc(v.id)}">Edit</button><details><summary aria-label="More actions for ${esc(v.stockId)}">•••</summary><div class="row-menu"><button type="button" data-duplicate="${esc(v.id)}">Duplicate as draft</button><div class="archive-fuse-mount" data-archive-mount="${esc(v.id)}"></div><button type="button" data-delete="${esc(v.id)}" class="danger-text">Delete</button></div></details></div></article></div>`;}).join('')||`<div class="empty-state"><h3>${doc.vehicles.length?'No matching vehicles':'No vehicles in inventory yet'}</h3><p>${doc.vehicles.length?'Try another search or clear the active filter to see your collection.':'Add your first vehicle or restore a JSON backup from Website Settings.'}</p><button type="button" class="button quiet" data-action="${doc.vehicles.length?'reset-filters':'new'}">${doc.vehicles.length?'Reset filters':'+ Add first vehicle'}</button></div>`}</div></section>`;
+ ${selection.size?`<div class="bulk-bar"><strong>${selection.size} selected</strong><label>Change status <select id="bulkStatus" data-choice-kind="command"><option value="">Choose…</option>${STATUSES.map(s=>`<option value="${s}">${statusName(s)}</option>`).join('')}</select></label><button type="button" class="text-button" data-action="bulk-clear">Clear</button></div>`:''}
+ <div class="wb-inventory ${cards?'card-layout':''}"><div class="wb-table-head"><label><input type="checkbox" id="selectAll" ${filtered.length&&filtered.every(v=>selection.has(v.id))?'checked':''} aria-label="Select all shown vehicles"></label><span>VEHICLE / STOCK ID</span><span>STATUS &amp; QUICK SWITCH</span><span>PRICE (RM) / LOCATION</span><span>PHOTOS</span><span>ACTIONS</span></div>${filtered.map(v=>{const sp=vehicleSpecialBadges(v,doc.homepage),cSrc=staticWbSrc(v.coverImageUrl);return `<div class="wb-swipe-host" data-swipe-host><article class="wb-row" data-id="${esc(v.id)}"><label class="row-check"><input data-select="${esc(v.id)}" type="checkbox" ${selection.has(v.id)?'checked':''} aria-label="Select ${esc(v.stockId)}"></label><button type="button" class="wb-vehicle" data-edit="${esc(v.id)}">${v.coverImageUrl?`<img ${cSrc?`src="${esc(cSrc)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="lazy" decoding="async">`:`<span class="wb-photo-placeholder">${icon('photo')}</span>`}<span><strong>${v.year||''} ${esc(v.make)} ${esc(v.model)}</strong><small>${esc(v.variant||v.body)} · ${esc(v.transmission)}${v.auctionGrade?` · Grade ${esc(v.auctionGrade)}${esc(v.interiorGrade||'')}`:''}</small><code>${esc(v.stockId)}</code></span></button><div class="row-status-group"><label class="row-status"><span class="sr-only">Status for ${esc(v.stockId)}</span><select class="status-pill ${v.status}" data-status="${esc(v.id)}">${STATUSES.map(s=>`<option value="${s}" ${v.status===s?'selected':''}>${statusName(s)}</option>`).join('')}</select></label>${sp.length?`<div class="wb-badge-chips">${sp.map(b=>`<span class="wb-mini-badge">${esc(b)}</span>`).join('')}</div>`:''}</div><div class="row-price"><label class="quick-price-field" aria-label="Price RM for ${esc(v.stockId)}"><span class="quick-price-prefix">RM</span><input type="number" min="0" step="1000" class="quick-price-input" data-quick-price="${esc(v.id)}" value="${v.priceRm??''}" placeholder="Enquire"></label><small>${esc(v.location||'Glenmarie')}</small></div><button type="button" class="photo-count" data-photos="${esc(v.id)}">${icon('photo')} ${v.gallery.length}</button><div class="row-actions" role="group" aria-label="Actions for ${esc(v.stockId)}"><button type="button" data-edit="${esc(v.id)}">Edit</button><button type="button" data-duplicate="${esc(v.id)}" title="Duplicate as draft">Duplicate</button><div class="archive-fuse-mount" data-archive-mount="${esc(v.id)}"></div><button type="button" data-delete="${esc(v.id)}" class="danger-text">Delete</button></div></article></div>`;}).join('')||`<div class="empty-state"><h3>${doc.vehicles.length?'No matching vehicles':'No vehicles in inventory yet'}</h3><p>${doc.vehicles.length?'Try another search or clear the active filter to see your collection.':'Add your first vehicle or restore a JSON backup from Website Settings.'}</p><button type="button" class="button quiet" data-action="${doc.vehicles.length?'reset-filters':'new'}">${doc.vehicles.length?'Reset filters':'+ Add first vehicle'}</button></div>`}</div></section>`;
 }
 function editor(){
  const activeTags=new Set((editing.specialBadges||[]).map(t=>String(t).toUpperCase()));
  const currentFeatures=new Set((editing.features||[]).map(f=>f.trim()));
- return `<form id="vehicleForm" class="vehicle-form"><div class="editor-heading"><div><p class="eyebrow">VEHICLE RECORD · SMART 3-STEP EDITOR</p><h2>${editing.stockId?esc((editing.manufactureYear||editing.year||'')+' '+editing.make+' '+editing.model):'Add your next vehicle'}</h2><p>Enter the verified vehicle details, choose its photos, and save a draft. Publish when you are ready.</p></div><button type="button" class="button quiet" data-action="back">← Back to inventory</button></div>
+ return `<form id="vehicleForm" class="vehicle-form"><div class="editor-heading"><div><p class="eyebrow">VEHICLE DETAILS</p><h2>${editing.stockId?esc((editing.manufactureYear||editing.year||'')+' '+editing.make+' '+editing.model):'Add your next vehicle'}</h2><p>Edit vehicle details and photos.</p></div><button type="button" class="button quiet" data-action="back">← Back to inventory</button></div>
  <section class="wb-autofill-bar" aria-label="Smart Auto-Fill Assistant">
   <div class="wb-autofill-head">
    <div>
@@ -690,7 +692,7 @@ function overviewMarkup(){
  const examples=doc.vehicles.filter(v=>v.conditionExample).length;
  const readyCount=availCars.filter(v=>(v.coverImageUrl||v.gallery?.length)&&!v.conditionExample).length;
  const readinessPct=availCars.length?Math.round((readyCount/availCars.length)*100):100;
- const publishedAt=lastPublishedAt?'Last published '+esc(new Date(lastPublishedAt).toLocaleString()):'Local & cloud workspace ready';
+ const publishedAt=lastPublishedAt?'Last published '+esc(new Date(lastPublishedAt).toLocaleString()):'Inventory overview';
 
  // Brand distribution data
  const brandMap=new Map();
@@ -741,7 +743,7 @@ function overviewMarkup(){
  const spotMonthly=spotCar&&spotCar.priceRm?estimate(spotCar,doc.finance):null;
  const spotBadges=spotCar?vehicleSpecialBadges(spotCar,doc.homepage):[];
 
- const spotlightDeckMarkup=spotCar?`<section class="wb-panel wb-spotlight-deck" id="wbSpotlightDeck" aria-label="Interactive Showroom Spotlight Command Deck">
+ const spotlightDeckMarkup=spotCar?`<section class="wb-panel wb-spotlight-deck" id="wbSpotlightDeck" aria-label="Vehicle quick update">
   <div class="wb-spotlight-grid">
    <div class="wb-spotlight-stage" id="wbSpotlightStage">
     <div class="wb-spotlight-glare" aria-hidden="true"></div>
@@ -770,15 +772,15 @@ function overviewMarkup(){
    <div class="wb-spotlight-controls">
     <div class="wb-spotlight-head">
      <div>
-      <span class="wb-widget-eyebrow">✦ INTERACTIVE SHOWROOM COMMAND DECK</span>
-      <h3>Live Vehicle Spotlight &amp; Instant Tuner</h3>
-      <p>Hover the 3D stage to inspect, or tune price &amp; status below — every adjustment updates your live KPIs and logs to Recent Activity automatically.</p>
+
+      <h3>Quick vehicle update</h3>
+
      </div>
      <button type="button" class="button quiet small wb-surprise-btn" data-spotlight-surprise title="Spotlight a random standout vehicle">✦ Surprise Pick</button>
     </div>
     <div class="wb-spotlight-tuner">
      <div class="wb-tuner-box">
-      <span class="wb-tuner-label">Instant Price Adjustment (Logs Trend)</span>
+      <span class="wb-tuner-label">Price</span>
       <div class="wb-tuner-actions">
        <button type="button" class="wb-tune-btn is-down" data-spotlight-price-step="-2000" data-vehicle-id="${esc(spotCar.id)}">▼ −RM 2,000</button>
        <strong class="wb-tuner-current">${money(spotCar.priceRm)}</strong>
@@ -786,7 +788,7 @@ function overviewMarkup(){
       </div>
      </div>
      <div class="wb-tuner-box">
-      <span class="wb-tuner-label">1-Click Status Switch</span>
+      <span class="wb-tuner-label">Status</span>
       <div class="wb-tuner-actions">
        ${[['available','Available'],['reserved','Booked'],['sold','Sold']].map(([st,lbl])=>`<button type="button" class="wb-tune-status ${spotCar.status===st?'is-active '+st:''}" data-spotlight-status="${st}" data-vehicle-id="${esc(spotCar.id)}">${lbl}</button>`).join('')}
       </div>
@@ -817,8 +819,8 @@ function overviewMarkup(){
   activity:`<section class="wb-panel wb-overview-widget" data-overview-widget="activity">
    <div class="wb-widget-head">
     <div>
-     <span class="wb-widget-eyebrow">LIVE AUDIT &amp; MOVEMENT FEED</span>
-     <h3>Recent Activity &amp; Price/Status Trends</h3>
+
+     <h3>Recent activity</h3>
     </div>
     <div class="wb-widget-controls">
      <div class="wb-chart-tabs" role="tablist" aria-label="Filter recent activity">
@@ -1024,9 +1026,9 @@ function overviewMarkup(){
  return `<section class="owner-overview">
   <div class="owner-overview-heading">
    <div>
-    <p class="eyebrow">EXECUTIVE COMMAND CENTER</p>
+
     <h2>Stock at a glance</h2>
-    <p class="owner-last-published">${publishedAt} · Tune live prices in the Spotlight Deck, track movements in Recent Activity, or drag panels to customize.</p>
+    <p class="owner-last-published">${publishedAt}</p>
    </div>
    <div style="display:flex;gap:8px;flex-wrap:wrap">
     <button class="button quiet" data-owner-nav="edit">${icon('plus')} Add vehicle</button>

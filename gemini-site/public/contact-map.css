@@ -1426,3 +1426,8 @@ html body #contact .concierge-hours-lines > span { display: block; }
 html body #contact .concierge-hours-dot { flex: 0 0 8px; width: 8px; height: 8px; margin-top: 4px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 3px rgb(34 197 94 / 12%), 0 0 12px rgb(34 197 94 / 48%); animation: concierge-hours-breathe 1.8s ease-in-out infinite; }
 @keyframes concierge-hours-breathe { 0%, 100% { transform: scale(.82); box-shadow: 0 0 0 2px rgb(34 197 94 / 10%), 0 0 7px rgb(34 197 94 / 35%); } 50% { transform: scale(1.14); box-shadow: 0 0 0 5px rgb(34 197 94 / 14%), 0 0 16px rgb(34 197 94 / 72%); } }
 @media (prefers-reduced-motion: reduce) { html body #contact .concierge-hours-dot { animation: none; } }
+/* Keep the open-hours pulse legible in both themes. */
+html body #contact .concierge-hours-dot { background: var(--contact-hours-color, #16a34a) !important; box-shadow: 0 0 0 3px var(--contact-hours-halo, rgb(22 163 74 / 14%)), 0 0 12px var(--contact-hours-glow, rgb(22 163 74 / 48%)) !important; animation-name: concierge-hours-breathe-theme !important; }
+html[data-theme=dark] body #contact .concierge-hours-dot { --contact-hours-color: #4ade80; --contact-hours-halo: rgb(74 222 128 / 20%); --contact-hours-glow: rgb(74 222 128 / 64%); }
+@keyframes concierge-hours-breathe-theme { 0%, 100% { transform: scale(.84); box-shadow: 0 0 0 2px var(--contact-hours-halo, rgb(22 163 74 / 12%)), 0 0 7px var(--contact-hours-glow, rgb(22 163 74 / 40%)); } 50% { transform: scale(1.12); box-shadow: 0 0 0 5px var(--contact-hours-halo, rgb(22 163 74 / 16%)), 0 0 16px var(--contact-hours-glow, rgb(22 163 74 / 60%)); } }
+@media (prefers-reduced-motion: reduce) { html body #contact .concierge-hours-dot { animation: none !important; } }

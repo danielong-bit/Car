@@ -30,8 +30,8 @@ export function renderBuyingTools(host,doc={},lang='en'){
  const initialCode=presetCar?inferJpjClass(presetCar):'AB';
 
  host.innerHTML=`<p class="eyebrow">${tr('PLAN YOUR PURCHASE','规划购车预算','RANCANG PEMBELIAN')}</p>
- <h1>${tr('Calculator & JPJ Utilities','月供计算器与 JPJ 路税工具','Kalkulator & Utiliti JPJ')}</h1>
- <p class="tools-lead">${tr('Estimate Malaysian hire-purchase monthly installments, check official Peninsular Malaysia JPJ road tax (LKM), and access verified vehicle ownership utilities before you commit.','在决定购车前，清晰测算马来西亚汽车贷款月供、查询西马 JPJ 官方路税（LKM），并浏览官方拥车实用工具。','Anggarkan ansuran bulanan sewa beli Malaysia, semak cukai jalan rasmi JPJ Semenanjung Malaysia (LKM), dan akses utiliti pemilikan kereta rasmi sebelum membuat keputusan.')}</p>
+ <h1>${tr('Loan & road tax','月供与路税','Pinjaman & cukai jalan')}</h1>
+ <p class="tools-lead">${tr('Estimate your monthly payment and annual road tax.','估算月供和年度路税。','Anggarkan ansuran bulanan dan cukai jalan tahunan.')}</p>
  <div class="tools-grid">
   <section class="tool-panel" id="loanTool">
    <div class="tool-panel-head">
@@ -45,7 +45,7 @@ export function renderBuyingTools(host,doc={},lang='en'){
     <div class="tool-quick-chips is-compact" role="group" aria-label="${tr('Quick deposit percentage','快捷首付比例','Peratusan deposit pantas')}">
      ${[10,15,20,30].map(pct=>`<button type="button" class="tool-chip" data-quick-down="${pct}">${pct}% ${tr('Down','首付','Deposit')}</button>`).join('')}
     </div>
-    <label>${tr('Tenure (years)','贷款年限（年）','Tempoh (tahun)')}<select name="years">${[1,2,3,4,5,6,7,8,9].map(y=>`<option value="${y}" ${y===(f.tenure)?'selected':''}>${y} ${tr(y===1?'year':'years','年',y===1?'tahun':'tahun')}</option>`).join('')}</select></label>
+    <label>${tr('Tenure (years)','贷款年限（年）','Tempoh (tahun)')}<input name="years" type="number" min="1" max="9" step="1" inputmode="numeric" value="${f.tenure}" required></label>
     <label>${tr('Annual rate (%)','年利率（%）','Kadar tahunan (%)')}<input name="rate" type="number" min="0" max="30" step=".01" value="${f.rate}" required></label>
     <label>${tr('Calculation method','计算方法','Kaedah pengiraan')}<select name="method"><option value="flat" ${f.method==='flat'?'selected':''}>${tr('Flat rate (comparison only)','平息（对比参考）','Kadar rata (perbandingan sahaja)')}</option><option value="reducing" ${f.method!=='flat'?'selected':''}>${tr('Effective annual rate / reducing balance','实际年利率／递减余额','Kadar efektif / baki berkurangan')}</option></select></label>
     <button class="button" type="submit" style="margin-top:18px">${tr('Calculate','计算','Kira')}</button>
@@ -123,7 +123,7 @@ export function renderBuyingTools(host,doc={},lang='en'){
   try{
    const price=Number(values.price),down=Number(values.down),years=Number(values.years),rate=Number(values.rate),method=values.method;
    if(!Number.isFinite(price)||price<=0||!Number.isFinite(down)||down<0||down>100)throw Error(tr('Check the price and deposit (0%–100%).','请检查车价和首付比例（0%–100%）。','Semak harga kereta dan deposit (0%–100%).'));
-   if(!Number.isFinite(years)||years<1||years>9||!Number.isFinite(rate)||rate<0||rate>30)throw Error(tr('Choose a tenure between 1–9 years and a valid annual rate.','请选择 1–9 年贷款期限及有效年利率。','Pilih tempoh 1–9 tahun dan kadar tahunan yang sah.'));
+   if(!Number.isInteger(years)||years<1||years>9||!Number.isFinite(rate)||rate<0||rate>30)throw Error(tr('Choose a tenure between 1–9 years and a valid annual rate.','请选择 1–9 年贷款期限及有效年利率。','Pilih tempoh 1–9 tahun dan kadar tahunan yang sah.'));
    const depositRm=price*(down/100);
    const principal=Math.max(0,price-depositRm);
    const result=principal===0?{monthly:0,totalInterest:0,totalPaid:0,rows:[]}:loanSchedule(principal,years,rate,method);

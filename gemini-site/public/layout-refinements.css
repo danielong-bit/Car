@@ -1,0 +1,194 @@
+/* Inventory rows and cards have separate layouts; neither inherits fixed columns. */
+html body.workbench .wb-vehicles-panel { container-type: inline-size; padding: 0 !important; }
+html body.workbench .wb-vehicles-panel .wb-section-head { padding: 16px !important; gap: 12px; }
+html body.workbench .wb-vehicles-panel .wb-section-head h2 { font-size: 22px !important; }
+html body.workbench .wb-vehicles-panel .wb-toolbar { padding: 0 16px 14px; }
+html body.workbench .wb-toolbar:has(#stockSort) { grid-template-columns: minmax(160px,1fr) minmax(100px,140px) minmax(150px,200px) auto auto !important; }
+html body.workbench .wb-toolbar .compact-field:has(#stockSort) { grid-column: auto !important; grid-row: auto !important; }
+html body.workbench .wb-toolbar .view-toggle { background: var(--surface) !important; color: var(--ink) !important; border: 1px solid var(--line); white-space: nowrap; }
+html body.workbench .wb-table-head { display: none; }
+html body.workbench .wb-row {
+ display: grid; grid-template-columns: 22px minmax(0,1.5fr) minmax(160px,1fr) minmax(120px,.8fr) 44px;
+ gap: 10px; align-items: center; padding: 14px 16px; min-width: 0; width: 100%; box-sizing: border-box;
+}
+html body.workbench .wb-row > * { min-width: 0; max-width: 100%; }
+html body.workbench .wb-row .row-check { grid-column: 1; grid-row: 1; }
+html body.workbench .wb-row .wb-vehicle { grid-column: 2; grid-row: 1; gap: 10px; }
+html body.workbench .wb-vehicle img { width: 64px; height: 48px; flex: 0 0 64px; }
+html body.workbench .wb-vehicle strong { font-size: 14px; line-height: 1.4; overflow-wrap: normal; }
+html body.workbench .wb-vehicle small { line-height: 1.4; }
+html body.workbench .wb-row .row-status-group { grid-column: 3; grid-row: 1; width: 100%; min-width: 0; gap: 6px; }
+html body.workbench .wb-row .row-status { display: block; width: 100%; min-width: 0; grid-area: auto; }
+html body.workbench .row-status .choice-trigger { width: 100%; min-height: 40px; padding: 8px 10px; font-size: 12px; white-space: nowrap; overflow-wrap: normal; word-break: normal; }
+html body.workbench .wb-row .row-price { grid-column: 4; grid-row: 1; width: 100%; }
+html body.workbench .quick-price-field { display: flex; align-items: center; width: 100%; box-sizing: border-box; min-width: 0; min-height: 40px !important; height: 40px !important; padding: 0 8px !important; }
+html body.workbench .quick-price-input { width: 100%; min-width: 0; min-height: 0 !important; height: 38px !important; padding: 0 4px !important; font-size: 13px; }
+html body.workbench .wb-row .photo-count { grid-column: 5; grid-row: 1; }
+html body.workbench .wb-row .row-actions { grid-column: 2 / -1; grid-row: 2; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+html body.workbench .row-actions > button,
+html body.workbench .row-actions .fuse-button { min-height: 40px; height: 40px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); font-size: 12px; color: var(--ink); justify-content: center; white-space: nowrap; }
+html body.workbench .archive-fuse-mount { min-width: 0; }
+html body.workbench .archive-fuse-mount .fuse-button { --fb-h: 40px; --fb-fs: 12px; --fb-px: 10px; padding: 0 !important; }
+html body.workbench .archive-fuse-mount .fuse-button__face { height: 100% !important; min-height: 0 !important; padding: 0 10px !important; box-sizing: border-box; align-items: center; }
+html body.workbench .wb-badge-chips { display: flex; flex-wrap: wrap; gap: 4px; max-width: 100%; }
+html body.workbench .wb-mini-badge { white-space: nowrap; }
+html body.workbench .card-layout { grid-template-columns: repeat(auto-fit,minmax(min(100%,270px),1fr)); gap: 12px; padding: 14px; }
+html body.workbench .card-layout .wb-row { position: relative; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 12px; padding: 12px; height: 100%; align-content: start; }
+html body.workbench .card-layout .wb-row .wb-vehicle { grid-column: 1 / -1; grid-row: 1; display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
+html body.workbench .card-layout .wb-vehicle img { width: 100%; height: auto; aspect-ratio: 16 / 10; flex: none; object-fit: cover; }
+html body.workbench .card-layout .wb-vehicle strong { font-size: 16px; }
+html body.workbench .card-layout .wb-row .row-check { position: absolute; top: 20px; right: 20px; z-index: 2; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 6px; background: var(--surface); box-shadow: 0 1px 6px #0002; }
+html body.workbench .card-layout .wb-row .row-status-group { grid-column: 1 / -1; grid-row: 2; }
+html body.workbench .card-layout .wb-row .row-price { grid-column: 1; grid-row: 3; }
+html body.workbench .card-layout .wb-row .photo-count { grid-column: 2; grid-row: 3; }
+html body.workbench .card-layout .wb-row .row-actions { grid-column: 1 / -1; grid-row: 4; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; width: 100%; }
+html body.workbench .card-layout .row-actions > button,
+html body.workbench .card-layout .archive-fuse-mount .fuse-button { width: 100%; min-width: 0; box-sizing: border-box; }
+html body.workbench .wb-spotlight-controls { padding: 18px !important; gap: 14px; }
+html body.workbench .wb-spotlight-head h3 { font-size: 22px; line-height: 1.25; }
+@container (max-width: 760px) {
+ html body.workbench .wb-inventory:not(.card-layout) .wb-row { grid-template-columns: 44px minmax(0,1fr) minmax(0,1fr); }
+ html body.workbench .wb-inventory:not(.card-layout) .wb-vehicle { grid-column: 2 / -1; grid-row: 1; }
+ html body.workbench .wb-inventory:not(.card-layout) .row-status-group { grid-column: 2; grid-row: 2; }
+ html body.workbench .wb-inventory:not(.card-layout) .row-price { grid-column: 3; grid-row: 2; }
+ html body.workbench .wb-inventory:not(.card-layout) .photo-count { grid-column: 1; grid-row: 2; padding: 0; font-size: 10px; flex-wrap: wrap; }
+ html body.workbench .wb-inventory:not(.card-layout) .row-actions { grid-column: 2 / -1; grid-row: 3; }
+}
+@media(max-width:700px) {
+ html body.workbench .wb-toolbar:has(#stockSort) { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+ html body.workbench .wb-toolbar .compact-field:has(#stockSort) { grid-column: 1 / -1 !important; }
+ html body.workbench .wb-vehicles-panel .wb-section-head { padding: 14px !important; }
+ html body.workbench .row-actions > button,
+ html body.workbench .row-actions .fuse-button { min-height: 44px; height: 44px; }
+ html body.workbench .archive-fuse-mount .fuse-button { --fb-h: 44px; }
+ html body.workbench .card-layout { padding: 10px; }
+}
+
+/* Compact, stable website navigation and section spacing. */
+html body #top .choice-host[data-language] { width: 64px; }
+html body #top .choice-host[data-language] .choice-trigger { padding: 8px 9px; min-height: 44px; font-size: 12px; white-space: nowrap; }
+html body #top nav { gap: 3px; }
+html body #top nav a { padding-inline: 10px; }
+html body #contactFaq { scroll-margin-top: 90px; }
+html body #service-care .tint-intro { margin: 0 0 20px !important; padding: 18px 0 0 !important; }
+html body #service-care .tint-intro .eyebrow { margin: 0 0 8px !important; }
+html body #service-care .tint-intro h1 { font-size: clamp(28px,3vw,38px) !important; margin: 0 0 10px !important; line-height: 1.15; }
+html body #service-care .tint-intro > p { margin: 0 !important; font-size: 15px !important; line-height: 1.5; max-width: 66ch; }
+html body #customer-stories .section-heading .actions { gap: 6px; }
+html body #deliveryPause { font-size: 14px; }
+html body #customer-stories #deliveryRail.delivery-rail { display: grid !important; grid-template-columns: none !important; grid-auto-flow: column !important; grid-auto-columns: calc((100% - 42px) / 4); gap: 14px !important; overflow-x: auto !important; overflow-y: hidden !important; padding-bottom: 6px !important; scroll-snap-type: x mandatory; }
+html body #deliveryRail .delivery-card { scroll-snap-align: start; }
+@media(max-width:1000px) { html body #customer-stories #deliveryRail.delivery-rail { grid-auto-columns: calc((100% - 28px) / 3); } }
+@media(max-width:700px) { html body #customer-stories #deliveryRail.delivery-rail { grid-auto-columns: 82%; } }
+
+/* Buyer details: clear title, price, four facts, then expandable equipment. */
+html body .purchase-heading h1 { font-size: clamp(26px,2.7vw,34px) !important; line-height: 1.2 !important; margin: 8px 0 !important; font-weight: 750 !important; }
+html body .purchase-heading .vehicle-variant { font-size: 14px; line-height: 1.45; color: var(--muted); margin: 0 0 14px; }
+html body .purchase-heading .stock-price { font-size: clamp(28px,3vw,36px) !important; font-weight: 750 !important; line-height: 1.15; }
+html body .purchase-heading .detail-monthly-est { font-size: 13px !important; margin-top: 5px; }
+html body .purchase-heading .vehicle-stock-ref { font-size: 11px; margin-top: 10px; }
+html body .detail-grid { gap: 16px; }
+html body .purchase-facts { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 12px !important; }
+html body .purchase-facts > div { min-width: 0; padding: 0 !important; }
+html body .purchase-facts small { font-size: 11px !important; color: var(--muted); }
+html body .purchase-facts strong { font-size: 15px !important; font-weight: 650; line-height: 1.4; }
+html body .full-spec-list { margin: 0; }
+html body .full-spec-list > div { display: grid; grid-template-columns: minmax(90px,.7fr) minmax(0,1.3fr); gap: 12px; padding: 12px 0 !important; border-bottom: 1px solid var(--line); }
+html body .full-spec-list dt { font-size: 13px; color: var(--muted); }
+html body .full-spec-list dd { font-size: 14px; line-height: 1.5; color: var(--ink); margin: 0; }
+html body .spec-list-heading { font-size: 19px !important; line-height: 1.3; font-weight: 700; margin: 0 0 10px; }
+html body .more-equipment { margin: 12px 0; border-top: 1px solid var(--line); }
+html body .more-equipment > summary { min-height: 44px; padding: 12px 0; font-size: 14px; font-weight: 600; cursor: pointer; }
+html body #vehicleDetailModal .vehicle-modal-content { transform: none !important; will-change: auto; transition: opacity .2s; }
+html body .vehicle-gallery[data-photo-count="1"] .gallery-caption { display: none !important; }
+@media(max-width:800px) {
+ html body dialog#vehicleDetailModal.vehicle-detail-modal[open] {
+  display: flex !important; flex-direction: column; position: fixed !important; inset: 0 !important;
+  width: 100% !important; height: 100dvh !important; max-height: 100dvh !important; margin: 0 !important;
+  border: 0 !important; border-radius: 0 !important; padding: 0 !important; overflow: hidden !important;
+  background: var(--page) !important; transform: none !important; animation: none !important; will-change: auto !important;
+ }
+ html body #vehicleDetailModal #vehicleModalContent {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scroll-padding-top: 64px;
+  width: 100% !important; max-width: none !important; padding: 0 16px 28px !important; margin: 0 !important; box-sizing: border-box;
+ }
+ html body #vehicleModalContent .detail-topline { position: sticky; top: 0; z-index: 6; min-height: 60px; margin: 0 -16px 12px !important; padding: 6px 16px !important; width: auto !important; background: var(--page); border-bottom: 1px solid var(--line); }
+ html body #vehicleModalContent .detail-topline .detail-back-btn { font-size: 13px; }
+ html body #vehicleModalContent .vehicle-modal-close { min-width: 40px; min-height: 40px; }
+ html body #vehicleModalContent .detail-grid { gap: 12px !important; }
+ html body #vehicleModalContent .vehicle-gallery { overflow: hidden; border-radius: 12px; }
+ html body #vehicleModalContent .gallery-stage { aspect-ratio: 4 / 3; max-height: 360px; }
+ html body #vehicleModalContent :is(.purchase-heading,.purchase-summary,.vehicle-contact,.vehicle-calculator,.vehicle-specifications) { padding: 16px !important; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+ html body #vehicleModalContent .purchase-heading { padding: 2px 0 12px !important; background: transparent; border: 0; }
+ html body #vehicleModalContent .purchase-summary .detail-card-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+ html body #vehicleModalContent .purchase-heading .detail-status { margin: 0 0 6px; }
+ html body #vehicleModalContent .purchase-heading .share-car-btn { font-size: 11px; padding: 8px; }
+ html body #vehicleModalContent .purchase-heading .purchase-price-row { align-items: center; }
+ html body #vehicleModalContent .vehicle-contact .contact-card-copy { font-size: 14px; }
+ html body #vehicleModalContent .vehicle-contact .context-enquiries { display: flex; flex-wrap: wrap; gap: 8px; }
+ html body #vehicleModalContent .other-stock { padding: 20px 0 !important; }
+ html body #vehicleModalContent .other-stock h2 { font-size: 22px; }
+ html body dialog#vehicleDetailModal > #mobileDetailSticky {
+  position: relative !important; inset: auto !important; flex: 0 0 auto; display: flex !important; align-items: center !important;
+  gap: 12px; width: 100% !important; min-height: 76px; padding: 12px 16px max(12px,env(safe-area-inset-bottom)) !important;
+  box-sizing: border-box; border-top: 1px solid var(--line); background: var(--surface) !important; box-shadow: 0 -4px 18px #0000000a; z-index: 8 !important;
+ }
+ html body #mobileDetailSticky .mobile-sticky-meta { min-width: 0; flex: 1; }
+ html body #mobileDetailSticky .mobile-sticky-price { font-size: 20px !important; font-weight: 750; line-height: 1.2; color: var(--ink); white-space: nowrap; }
+ html body #mobileDetailSticky .mobile-sticky-sub { font-size: 10px; margin-top: 4px; color: var(--muted); }
+ html body #mobileDetailSticky .mobile-sticky-enquire { width: auto !important; min-height: 46px !important; padding: 10px 15px !important; flex: 0 0 auto; border-radius: 9px; font-size: 14px; white-space: nowrap; }
+ html body #mobileDetailSticky .mobile-sticky-enquire .wa-brand { width: 21px; height: 21px; }
+ html body #service-care .tint-intro { margin-bottom: 16px !important; padding-top: 10px !important; }
+}
+/* Keep the wordmark inside its own grid column; reserve room for collapse. */
+@media(min-width:1001px){
+ html body.workbench:not(.sidebar-collapsed) .owner-sidebar-brand{grid-template-columns:minmax(0,1fr) 34px!important;padding-inline:0!important;gap:8px!important}
+ html body.workbench:not(.sidebar-collapsed) .owner-sidebar-brand .wordmark{width:100%!important;max-width:100%!important;overflow:hidden}
+ html body.workbench:not(.sidebar-collapsed) .owner-sidebar-brand .brand-logo.full-brand{width:100%!important;max-width:100%!important;height:36px!important;flex:1 1 auto!important}
+ html body.workbench .wb-sidebar{overflow-x:hidden}
+}
+/* Four equal facts, including body style, with visible identifying icons. */
+html body #vehicleDetailModal .purchase-summary .purchase-facts{gap:16px!important;border:0!important;background:transparent!important}
+html body #vehicleDetailModal .purchase-summary .purchase-facts>div{display:flex!important;grid-column:auto!important;gap:10px!important;min-height:48px!important;padding:0!important;border:0!important;align-items:flex-start}
+html body #vehicleDetailModal .purchase-facts>div>.icon{display:block!important;width:18px!important;height:18px!important;flex:0 0 18px;color:var(--price-accent,var(--muted));margin-top:2px}
+html body #vehicleDetailModal .purchase-facts small{letter-spacing:0!important;text-transform:none!important;font-size:12px!important;margin:0 0 4px!important;line-height:1.4}
+html body #vehicleDetailModal .purchase-facts strong{margin:0!important;font-weight:650!important;line-height:1.4!important}
+html body #vehicleDetailModal #vehicleSpecifications{background:var(--surface)!important;border:1px solid var(--line)!important;border-radius:14px!important;padding:22px!important;margin-top:18px!important;color:var(--ink)}
+html body #vehicleDetailModal #vehicleSpecifications .spec-list-heading{color:var(--ink)!important;font-size:20px!important;font-weight:750!important;margin:0 0 8px!important}
+html body #vehicleDetailModal #vehicleSpecifications .full-spec-list>div{background:transparent!important;padding:14px 0!important}
+html body #vehicleDetailModal #vehicleSpecifications dd{font-weight:600;color:var(--ink)!important}
+html body #vehicleDetailModal #vehicleSpecifications .more-equipment{margin:16px 0 8px!important}
+html body #vehicleDetailModal #vehicleSpecifications>a{display:inline-flex;align-items:center;min-height:40px;font-size:12px;color:var(--muted)}
+/* The estimate leads; inputs and the bank rate support it. */
+html body #vehicleDetailModal #vehicleCalculator{display:flex!important;flex-direction:column!important;gap:0!important}
+html body #vehicleDetailModal #vehicleCalculator .tool-heading{order:0!important;margin:0 0 10px!important}
+html body #vehicleDetailModal #vehicleCalculator .tool-heading h2{font-size:20px!important;font-weight:700!important;line-height:1.3!important;margin:0!important}
+html body #vehicleDetailModal #vehicleCalculator .tool-currency,html body #vehicleDetailModal #vehicleCalculator .eyebrow{display:none!important}
+html body #vehicleDetailModal #vehicleCalculator .payment-result{order:1!important;display:flex!important;flex-direction:column!important;gap:4px!important;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;padding:4px 0 16px!important;margin:0 0 16px!important;background:transparent!important}
+html body #vehicleDetailModal #vehicleCalculator .payment-result small{font-size:12px!important;color:var(--muted)!important}
+html body #vehicleDetailModal #vehicleCalculator .payment-result strong{font-size:34px!important;line-height:1.15!important;font-weight:750!important;color:var(--price-accent,var(--ink))!important}
+html body #vehicleDetailModal #vehicleCalculator .payment-result span{font-size:12px!important;color:var(--muted)!important}
+html body #vehicleDetailModal #vehicleCalcForm{order:2!important;display:block!important;margin:0!important}
+html body #vehicleDetailModal #vehicleCalcForm .payment-field{margin:0 0 14px!important}
+html body #vehicleDetailModal #vehicleCalcForm .payment-field label{font-size:13px!important;font-weight:600}
+html body #vehicleDetailModal #vehicleCalcForm .payment-tenure{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;margin:12px 0!important;font-size:13px!important}
+html body #vehicleDetailModal #vehicleCalcForm .payment-tenure .choice-host{width:140px;flex:0 0 140px;min-width:0}
+html body #vehicleDetailModal #vehicleCalcForm .fixed-rate{font-size:11px!important;padding:10px 0!important;margin:0!important;border-top:1px solid var(--line)!important}
+html body #vehicleDetailModal #vehicleCalculator #paymentEnquiry{order:3!important;min-height:44px!important;margin:6px 0 0!important;font-size:13px!important}
+html body #vehicleDetailModal #vehicleCalculator .full-calculator-link{order:4!important;min-height:38px!important;margin-top:8px!important;background:transparent!important;border:0!important;font-size:12px!important;color:var(--muted)!important}
+html body #vehicleDetailModal #vehicleCalculator .calc-caption{order:5!important;font-size:11px!important;line-height:1.5!important;margin:8px 0 0!important}
+html body #vehicleDetailModal #vehicleCalculator>details{order:6!important;margin-top:14px!important}
+@media(max-width:800px){
+ html body #vehicleDetailModal #vehicleSpecifications{padding:18px!important;margin-top:0!important}
+ html body #vehicleDetailModal .purchase-summary{padding:18px!important}
+}
+/* Native swipe remains available without a visible scrollbar. */
+html body #customer-stories #deliveryRail.delivery-rail{scrollbar-width:none!important;-ms-overflow-style:none;padding-bottom:0!important}
+html body #customer-stories #deliveryRail.delivery-rail::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+html body #customer-stories .delivery-controls{display:inline-flex!important;gap:0!important;padding:3px!important;border:1px solid var(--line);border-radius:12px;background:var(--surface);flex-shrink:0}
+html body #customer-stories .delivery-controls button{display:grid;place-items:center;width:38px!important;height:38px!important;min-height:38px!important;border:0!important;border-radius:8px!important;padding:0!important;background:transparent!important;color:var(--ink)!important;box-shadow:none!important}
+html body #customer-stories .delivery-controls button:hover{background:var(--surface-2)!important}
+html body #customer-stories .delivery-controls button:focus-visible{outline:2px solid var(--price-accent,var(--ink));outline-offset:1px}
+html body #customer-stories .delivery-controls button svg{width:17px;height:17px;display:block}
+html body #customer-stories .delivery-controls #deliveryPause{color:var(--price-accent,var(--ink))!important}
+@media(max-width:700px){html body #customer-stories .delivery-controls button{width:44px!important;height:44px!important;min-height:44px!important}}

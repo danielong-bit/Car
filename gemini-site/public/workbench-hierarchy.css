@@ -1,5 +1,5 @@
 /* Owner navigation: one label per task, a quiet group title, one active row. */
-html body.workbench .wb-sidebar{display:flex!important;flex-direction:column;gap:0;width:244px!important;height:100dvh;padding:26px 18px 20px!important;overflow-y:auto;scrollbar-width:thin;backdrop-filter:blur(16px) saturate(140%)!important;-webkit-backdrop-filter:blur(16px) saturate(140%)!important;background:color-mix(in srgb,var(--surface) 88%,transparent)!important;border-right:1px solid color-mix(in srgb,var(--price-accent) 16%,var(--line))!important;transition:width .24s cubic-bezier(.22,1,.36,1),padding .24s ease,background-color .24s ease}
+html body.workbench .wb-sidebar{display:flex!important;flex-direction:column;gap:0;width:220px!important;height:100dvh;padding:26px 18px 20px!important;overflow-y:auto;scrollbar-width:thin;backdrop-filter:blur(16px) saturate(140%)!important;-webkit-backdrop-filter:blur(16px) saturate(140%)!important;background:color-mix(in srgb,var(--surface) 88%,transparent)!important;border-right:1px solid color-mix(in srgb,var(--price-accent) 16%,var(--line))!important;transition:width .24s cubic-bezier(.22,1,.36,1),padding .24s ease,background-color .24s ease}
 html body.workbench .owner-sidebar-brand{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;column-gap:10px!important;row-gap:6px!important;padding:0 6px 22px!important;position:relative!important}
 html body.workbench .owner-sidebar-brand .wordmark{grid-column:1;grid-row:1;display:inline-flex!important;align-items:center!important;gap:10px!important;text-decoration:none!important;font-size:21px!important;font-weight:800!important;color:var(--ink)!important;letter-spacing:-.02em!important;margin:0!important;min-width:0}
 html body.workbench .owner-sidebar-brand .wordmark small{display:block!important;font-size:9px!important;letter-spacing:.16em!important;font-weight:600!important;color:var(--muted)!important;text-transform:uppercase!important}
@@ -49,18 +49,18 @@ html body.workbench .wb-main{
   scroll-behavior:smooth!important;
 }
 html body.workbench .wb-main{
-  --wb-main-pad-top:clamp(24px,3.2vw,44px);
-  --wb-main-pad-x:clamp(18px,3.8vw,48px);
+  --wb-main-pad-top:clamp(20px,2vw,28px);
+  --wb-main-pad-x:clamp(16px,1.8vw,24px);
   --wb-main-pad-bottom:clamp(72px,8vw,104px);
-  --wb-section-gap:clamp(20px,2.4vw,30px);
+  --wb-section-gap:clamp(16px,1.8vw,22px);
   --wb-content-max:1380px;
   display:grid!important;
   grid-template-columns:minmax(0,var(--wb-content-max))!important;
   justify-content:center!important;
   align-content:start!important;
   row-gap:var(--wb-section-gap)!important;
-  margin-left:244px!important;
-  width:calc(100% - 244px)!important;
+  margin-left:220px!important;
+  width:calc(100% - 220px)!important;
   max-width:none!important;
   padding:var(--wb-main-pad-top) var(--wb-main-pad-x) var(--wb-main-pad-bottom)!important;
   box-sizing:border-box!important;

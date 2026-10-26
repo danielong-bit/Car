@@ -7,7 +7,7 @@ export function renderContactFaq(host,language='en',visible=true){
   [tr('What warranty and tint options are available?','有哪些保修与隔热膜配套？','Apakah pilihan waranti dan tinted yang tersedia?'),tr('Warranty coverage and XPEL or 3M tint packages can be arranged before delivery based on the vehicle and body type.','交车前可根据车型与车身类型安排保修方案及 XPEL 或 3M 隔热膜配套。','Perlindungan waranti serta pakej tinted XPEL atau 3M boleh diatur sebelum serahan mengikut kereta dan jenis badan.')],
   [tr('How do I book a showroom viewing in Shah Alam?','如何预约 Shah Alam 看车？','Bagaimanakah cara menempah lawatan showroom di Shah Alam?'),tr('Message Danny on WhatsApp with the car or stock reference so the vehicle can be prepared for your visit in Glenmarie / Bukit Jelutong, Shah Alam.','通过 WhatsApp 发送车型或库存编号给 Danny，即可安排在 Shah Alam 看车。','Mesej Danny di WhatsApp bersama model atau rujukan stok supaya kereta dapat disediakan untuk lawatan anda di Shah Alam.')]
  ];
- const title=document.createElement('h2');title.id='faqTitle';title.textContent=tr('Essential buyer questions','购车常见问题','Soalan utama pembeli');
+ const title=document.createElement('h2');title.id='faqTitle';title.textContent=tr('Frequently asked questions','常见问题','Soalan lazim');
  const list=document.createElement('div');list.className='faq-list';
  for(const [i,[q,a]] of items.entries()){
   const detail=document.createElement('details');detail.name='contact-faq';detail.open=i===0;

@@ -164,7 +164,7 @@ function MobileFilterSheet() {
 
           <section className="mobile-filter-group" aria-labelledby="mobileFilterSortLabel">
             <h3 id="mobileFilterSortLabel">{config.labels.sortBy}</h3>
-            <select id="mobileFilterSort" aria-labelledby="mobileFilterSortLabel" value={draft.sort} onChange={(event) => setDraft((current) => ({ ...current, sort: event.target.value }))}>
+            <select id="mobileFilterSort" data-choice-presentation="select" aria-labelledby="mobileFilterSortLabel" value={draft.sort} onChange={(event) => setDraft((current) => ({ ...current, sort: event.target.value }))}>
               {config.sorts.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </section>

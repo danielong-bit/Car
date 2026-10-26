@@ -1,0 +1,53 @@
+/* Data choices have a visible selected value; commands are explicitly separate. */
+html body select.choice-native { display: none !important; }
+html body .choice-host { min-width: 0; max-width: 100%; width: 100%; font-size: 13px; line-height: 1.4; }
+html body .choice-options { display: flex; flex-wrap: wrap; gap: 5px; padding: 4px; border: 1px solid var(--line, #dedbd4); border-radius: 9px; background: var(--surface, #fff); }
+html body .choice-option { display: flex; align-items: center; justify-content: center; flex: 1 1 70px; min-width: 0; min-height: 44px; padding: 8px 10px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--muted, #606772); font: inherit; line-height: 1.4; text-align: center; white-space: normal; cursor: pointer; }
+html body .choice-option[aria-checked=true] { color: var(--ink, #171c23); background: var(--surface-2, #f0ede6); border-color: var(--line, #dedbd4); font-weight: 700; box-shadow: 0 1px 3px #00000008; }
+html body .choice-options--cards { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+html body .choice-options--cards .choice-option, html body .choice-options--stacked .choice-option { justify-content: flex-start; text-align: left; }
+html body .choice-options--stacked { display: grid; grid-template-columns: minmax(0,1fr); }
+html body .choice-trigger { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line, #dedbd4); border-radius: 9px; color: var(--ink, #171c23); background: var(--surface, #fff); font: inherit; text-align: left; overflow-wrap: anywhere; cursor: pointer; }
+html body .choice-trigger::after { content: ''; flex: 0 0 6px; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); }
+html body :is(.choice-trigger,.choice-option):focus-visible, .choice-panel :is(button,input):focus-visible { outline: 2px solid var(--price-accent, #8a683b); outline-offset: 2px; }
+html body :is(.choice-trigger,.choice-option):disabled { opacity: .45; cursor: not-allowed; }
+html body .choice-error { display: block; color: #bd3138; font-size: 12px; margin-top: 6px; }
+html body .choice-error[hidden] { display: none; }
+html body .is-invalid :is(.choice-options,.choice-trigger) { border-color: #bd3138; }
+html body :is(.language-control,.danny-language):has(.choice-host) { padding: 0 !important; border: 0 !important; background: transparent !important; min-width: 0 !important; }
+html body .choice-host[data-language] { width: auto; }
+html body .choice-host[data-language] .choice-options { flex-wrap: nowrap; gap: 0; padding: 2px; }
+html body .choice-host[data-language] .choice-option { flex: 1 0 auto; min-height: 40px; padding: 7px 6px; font-size: 11px; }
+html body .controls-top-row > [data-sort-control] { width: auto !important; min-width: 0 !important; }
+html body .controls-top-row [data-sort-control] .choice-option { flex-basis: auto; white-space: nowrap; }
+.choice-panel { box-sizing: border-box; position: fixed; z-index: 10020; inset: auto; margin: 0; padding: 8px; max-width: calc(100vw - 24px); max-height: 264px; border: 1px solid var(--line, #dedbd4); border-radius: 12px; background: var(--surface, #fff); color: var(--ink, #171c23); box-shadow: 0 14px 45px #00000024; overflow: hidden; font-family: inherit; font-size: 13px; color-scheme: inherit; }
+html body dialog.choice-panel:is([open],:popover-open) { display: flex !important; pointer-events: auto !important; flex-direction: column; }
+.choice-panel[data-mode=anchored]::backdrop { background: transparent; backdrop-filter: none; pointer-events: none; }
+.choice-panel-heading { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; padding: 0 4px 4px; }
+.choice-panel-heading strong { font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.choice-panel .choice-close { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border: 0; background: transparent; color: var(--muted, #606772); font-size: 24px; cursor: pointer; }
+.choice-panel .choice-search { box-sizing: border-box; flex: 0 0 auto; width: 100%; min-width: 0; height: 40px; margin: 0 0 6px; padding: 8px 10px; border: 1px solid var(--line, #dedbd4); border-radius: 7px; background: var(--surface-2, #f5f3ef); color: var(--ink, #171c23); font: inherit; }
+.choice-list { overflow-y: auto; overscroll-behavior: contain; min-height: 0; flex: 1 1 auto; scrollbar-width: thin; }
+.choice-panel .choice-list-option { display: block; box-sizing: border-box; width: 100%; min-height: 44px; padding: 10px 12px; border: 0; border-radius: 6px; background: transparent; color: inherit; font: inherit; text-align: left; white-space: normal; cursor: pointer; }
+.choice-panel .choice-list-option:is(:hover,:focus-visible) { background: var(--surface-2, #f0ede6); }
+.choice-panel .choice-list-option[aria-selected=true] { background: var(--surface-2, #f0ede6); font-weight: 700; box-shadow: inset 3px 0 var(--price-accent, #8a683b); }
+.choice-panel .choice-list-option:disabled { opacity: .45; cursor: not-allowed; }
+.choice-panel .choice-empty { margin: 0; padding: 12px; color: var(--muted, #606772); }
+.choice-panel[data-mode=sheet] { left: 0; right: 0; bottom: 0; width: 100%; max-width: 100%; max-height: min(264px, calc(100dvh - 24px)); padding: 8px 12px max(12px, env(safe-area-inset-bottom)); border-radius: 16px 16px 0 0; animation: choice-sheet-in .18s ease-out; }
+.choice-panel[data-mode=sheet]::backdrop { background: #0006; }
+html body .row-command-list { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+html body .row-command-list > button { min-height: 44px; padding: 7px 9px; font-size: 12px; }
+html body .photo-category-field .choice-option { flex-basis: 46%; padding: 7px 4px; font-size: 11px; }
+html body .wb-toolbar:has(#stockSort) { display: grid !important; grid-template-columns: minmax(180px,1fr) minmax(120px,180px) auto auto !important; align-items: end; gap: 12px !important; }
+html body .wb-toolbar .compact-field:has(#stockSort) { display: flex !important; flex-direction: column; gap: 6px; grid-column: 1 / -1; grid-row: 2; width: 100%; }
+html body #stockSort + .choice-host .choice-options { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); }
+@keyframes choice-sheet-in { from { transform: translateY(18px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@media(max-width:700px) { html body .controls-top-row > [data-sort-control] { grid-column: 1 / -1; } .choice-panel .choice-search { font-size: 16px; } }
+@media(max-width:700px) {
+ html body .wb-toolbar:has(#stockSort) { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+ html body .wb-toolbar :is(.search-field,.compact-field) { grid-column: 1 / -1; }
+ html body .wb-toolbar .compact-field:has(#stockSort) { grid-row: auto; }
+ html body #stockSort + .choice-host .choice-options { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:400px) { html body .choice-options--cards { grid-template-columns: minmax(0,1fr); } }
+@media(prefers-reduced-motion:reduce) { .choice-panel[data-mode=sheet] { animation: none; } }
