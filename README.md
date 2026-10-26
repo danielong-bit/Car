@@ -1,6 +1,6 @@
 # Danny Recon Select
 
-Live website: https://car-recond-japan.dannyreconstocklist.workers.dev/
+Live website: https://danny.stocklist.workers.dev/
 
 The active website source is in `gemini-site/`. GitHub Pages builds that project and publishes `gemini-site/dist-pages/`. See [the project README](gemini-site/README.md) for local preview and inventory workbench instructions.
 

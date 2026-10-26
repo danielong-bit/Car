@@ -2,7 +2,7 @@
 
 Public website: https://danielong-bit.github.io/Car-Recond-Japan/
 
-The production website and protected dashboard run on [Cloudflare](https://car-recond-japan.dannyreconstocklist.workers.dev/). GitHub Pages remains a public showroom and sends owner access to Cloudflare.
+The production website and protected dashboard run on [Cloudflare](https://danny.stocklist.workers.dev/). GitHub Pages remains a public showroom and sends owner access to Cloudflare.
 
 ## Gemini AI Studio and local preview
 

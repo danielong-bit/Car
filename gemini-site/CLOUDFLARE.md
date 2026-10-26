@@ -9,7 +9,7 @@ node gemini-site/scripts/build-cloudflare.mjs
 npx wrangler deploy --config wrangler.jsonc
 ```
 
-The root Wrangler configuration publishes static showroom assets plus the owner authentication Worker to the existing `car-recond-japan` Worker. Vehicle details and services remain public. `/studio/` and legacy admin routes require the owner session before an asset is served. The Cloudflare build uses `/` as its base path; GitHub Pages keeps `/Car-Recond-Japan/`.
+The root Wrangler configuration publishes static showroom assets plus the owner authentication Worker to the existing `danny` Worker at `danny.stocklist.workers.dev`. Vehicle details and services remain public. `/studio/` and legacy admin routes require the owner session before an asset is served. The Cloudflare build uses `/` as its base path; GitHub Pages keeps `/Car-Recond-Japan/`.
 
 For a Git-connected Cloudflare build, use `node gemini-site/scripts/build-cloudflare.mjs` as the build command and `npx wrangler deploy --config wrangler.jsonc` as the deploy command, with the repository root as the working directory.
 
