@@ -158,6 +158,9 @@ html body #vehicleDetailModal #vehicleSpecifications .spec-list-heading{color:va
 html body #vehicleDetailModal #vehicleSpecifications .full-spec-list>div{background:transparent!important;padding:14px 0!important}
 html body #vehicleDetailModal #vehicleSpecifications dd{font-weight:600;color:var(--ink)!important}
 html body #vehicleDetailModal #vehicleSpecifications .more-equipment{margin:16px 0 8px!important}
+html body .vehicle-specifications .equipment-count{font-weight:400;color:var(--muted);margin-left:4px}
+html body .vehicle-specifications .equipment-list{padding-left:20px;margin:8px 0 16px;line-height:1.6;font-size:14px}
+html body .vehicle-specifications .equipment-list li+li{margin-top:6px}
 html body #vehicleDetailModal #vehicleSpecifications>a{display:inline-flex;align-items:center;min-height:40px;font-size:12px;color:var(--muted)}
 /* The estimate leads; inputs and the bank rate support it. */
 html body #vehicleDetailModal #vehicleCalculator{display:flex!important;flex-direction:column!important;gap:0!important}

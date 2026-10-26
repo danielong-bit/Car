@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
 import {compareStock,stockSortChoices,validStockSort} from '../../public/inventory-order.mjs';
 import {buyerSpecificationGroups} from '../../public/buyer-specifications.mjs';
+import {extraSpecificationText,updateExtraSpecifications} from '../../public/specification-editor.mjs';
 import {startDeliveryCarousel} from '../../public/delivery-carousel.mjs';
 
 const stock=[
@@ -25,9 +26,26 @@ test('specifications omit duplicate overview facts and demo notes but retain use
  const v={engine:'3.0L TFSI',exteriorColor:'Grey',specs:{Powertrain:[['Engine','3.0L TFSI'],['Power','349 hp (demo)'],['Drive','AWD']],Observed:[['Brakes','Red caliper visible']],'Vehicle status':[['Year','To verify']],Interior:[['Speakers','Bang & Olufsen'],['Model','Audi S5']]}};
  const original=structuredClone(v);
  const result=buyerSpecificationGroups(v,{auctionGrade:'4.5',interiorGrade:'B',example:true});
- assert.deepEqual(result.core,[['Engine','3.0L TFSI'],['Colour','Grey'],['Auction grade','4.5/B · Example']]);
- assert.deepEqual(result.additional,[['Drive','AWD'],['Speakers','Bang & Olufsen']]);
+ assert.deepEqual(result.core,[['Engine','3.0L TFSI'],['Drive','AWD'],['Colour','Grey'],['Auction grade','4.5/B · Example']]);
+ assert.deepEqual(result.additional,[['Speakers','Bang & Olufsen']]);
  assert.deepEqual(v,original);
+});
+test('technical specifications are separate from equipment and repeated equipment is shown once',()=>{
+ const v={engine:'2.0L Turbo',transmission:'9G automatic',features:['4MATIC AWD','9G automatic','360° camera','Head-up display','Digital instrument cluster','Heated seats','Heated seats'],specs:{Powertrain:[['Drive','4MATIC AWD'],['Transmission','9G automatic']],Equipment:[['Camera','360° camera'],['Display','Head-up display and digital instrument cluster']]}};
+ const groups=buyerSpecificationGroups(v);
+ assert.deepEqual(groups.core,[['Engine','2.0L Turbo'],['Transmission','9G automatic'],['Drive','4MATIC AWD']]);
+ assert.deepEqual(groups.features,['Heated seats']);
+ assert.deepEqual(groups.additional,[['Camera','360° camera'],['Display','Head-up display and digital instrument cluster']]);
+ assert.deepEqual(buyerSpecificationGroups({transmission:'Auto',features:['Automatic headlights']}).features,['Automatic headlights']);
+});
+test('owners can edit extra specifications without losing the existing technical source record',()=>{
+ const v={engine:'2.0L Turbo',transmission:'Auto',specs:{Powertrain:[['Engine','2.0L Turbo'],['Drive','AWD']],Equipment:[['Camera','360° camera']],Observed:[['Seats','Leather visible']]}};
+ assert.equal(extraSpecificationText(v),'Drive: AWD\nCamera: 360° camera');
+ const edited={...v,specs:updateExtraSpecifications(v,'Drive: RWD\nAudio：Burmester: surround sound')};
+ assert.equal(extraSpecificationText(edited),'Drive: RWD\nAudio: Burmester: surround sound');
+ assert.deepEqual(edited.specs.Observed,v.specs.Observed);
+ assert.deepEqual(buyerSpecificationGroups(edited).core,[['Engine','2.0L Turbo'],['Transmission','Auto'],['Drive','RWD']]);
+ assert.throws(()=>updateExtraSpecifications(v,'Drive AWD'),/Name: Value/);
 });
 function carousel(t,reduced=false){
  const dom=new JSDOM('<div id="rail"><article></article><article></article><article></article></div><button id="previous"></button><button id="next"></button><button id="pause"></button>',{pretendToBeVisual:true});
