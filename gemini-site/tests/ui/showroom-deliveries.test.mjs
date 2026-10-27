@@ -22,6 +22,7 @@ test('all three showroom controls change the address, map, navigation and copied
  for(const showroom of SHOWROOMS){
   host.querySelector(`[data-showroom="${showroom.id}"]`).click();
   assert.equal(host.querySelector('[data-showroom-address]').textContent,showroom.address);
+  assert.equal(host.querySelector('[data-showroom-map-label]').textContent,showroom.name+' Showroom');
   assert.ok(decodeURIComponent(host.querySelector('iframe').src).includes(showroom.address));
   assert.ok(decodeURIComponent(host.querySelector('[data-showroom-maps]').href).includes(showroom.address));
   assert.equal(host.querySelectorAll('[aria-pressed=true]').length,1);

@@ -10,6 +10,19 @@ export function photoCategory(value='') {
  return 'details';
 }
 export function wrapIndex(index,length){return length?((index%length)+length)%length:0;}
+export function createGalleryPhotoCache(resolveSource,makeImage=()=>new Image()){
+ const entries=new Map();
+ return {load(path,priority='high'){
+  if(entries.has(path))return entries.get(path);
+  const promise=(async()=>{
+   const source=await resolveSource(path),image=makeImage();
+   image.decoding='async';image.fetchPriority=priority;image.src=source;
+   await image.decode();return source;
+  })();
+  entries.set(path,promise);
+  promise.catch(()=>entries.delete(path));return promise;
+ }};
+}
 function staticSrc(url,base=(typeof window!=='undefined'&&window.SITE_BASE)||'/',size='detail'){return displayPhoto(url,size,base);}
 export function galleryMarkup(photos,title,lang){
  const tr=translator(lang),labels={all:tr('All photos','全部照片','Semua foto'),exterior:tr('Exterior','外观','Luaran'),interior:tr('Interior','内饰','Dalaman'),engine:tr('Engine','引擎','Enjin'),details:tr('Details','细节','Butiran')};
@@ -22,7 +35,8 @@ export function galleryMarkup(photos,title,lang){
 export function bindGallery(photos,title,lang,base,openPhoto){
  const stage=document.getElementById('vehicleGallery');if(!stage||!photos.length)return;
  const tr=translator(lang),dialog=document.getElementById('photoModal');
- let filtered=photos.map((_,i)=>i),position=0,request=0,touch=null,swiped=false;
+ let filtered=photos.map((_,i)=>i),position=0,displayedPosition=0,request=0,touch=null,swiped=false;
+ const cache=createGalleryPhotoCache(path=>photoUrl(path,base));
  const current=()=>photos[filtered[position]];
  function thumbs(){
   const strip=document.getElementById('galleryThumbnails');
@@ -68,16 +82,11 @@ export function bindGallery(photos,title,lang,base,openPhoto){
  function modalState(source){
   if(!dialog.open||dialog.dataset.gallery!=='true')return;
   document.getElementById('lightboxPhoto').src=source;document.getElementById('photoTitle').textContent=title;
-  document.getElementById('lightboxCount').textContent=`${position+1} / ${filtered.length}`;
+  document.getElementById('lightboxCount').textContent=`${displayedPosition+1} / ${filtered.length}`;
   ['lightboxPrevious','lightboxNext'].forEach(id=>{const el=document.getElementById(id);el.disabled=filtered.length<2;el.hidden=filtered.length<2;});
  }
  async function select(index){
-  const token=++request;position=wrapIndex(index,filtered.length);const photo=current();
-  const countText=filtered.length?`${position+1} / ${filtered.length}`:tr('No photos yet','照片待上传','Belum ada foto');
-  document.getElementById('galleryCount').textContent=countText;
-  const stageCounter=document.getElementById('galleryStageCount');
-  if(stageCounter)stageCounter.textContent=filtered.length?`${position+1} / ${filtered.length}`:'';
-  document.getElementById('galleryCaption').textContent=photo?({exterior:tr('Exterior','外观','Luaran'),interior:tr('Interior','内饰','Dalaman'),engine:tr('Engine','引擎','Enjin'),details:tr('Details','细节','Butiran')}[photoCategory(photo.category)]):tr('Photo gallery','车辆图库','Galeri foto');
+  const token=++request;position=wrapIndex(index,filtered.length);const selectedPosition=position,photo=current();
   stage.querySelectorAll('[data-photo]').forEach(button=>{
    const active=Number(button.dataset.photo)===position;
    button.setAttribute('aria-pressed',String(active));
@@ -89,7 +98,38 @@ export function bindGallery(photos,title,lang,base,openPhoto){
   }
   ['galleryPrevious','galleryNext'].forEach(id=>{const el=document.getElementById(id);el.disabled=filtered.length<2;el.hidden=filtered.length<2;});
   if(!photo)return;
-  try{const source=await photoUrl(staticSrc(photo.url,base),base);if(token!==request||!stage.isConnected)return;const img=document.getElementById('activePhoto');img.src=source;img.alt=title+' · '+(photo.category||tr('Photo','照片','Foto'));modalState(source);}catch{document.getElementById('galleryCaption').textContent=tr('Photo unavailable. Try another photo.','照片暂不可用，请试试其他照片。','Foto tidak tersedia. Cuba foto lain.');}
+  const img=document.getElementById('activePhoto'),detail=staticSrc(photo.url,base),preview=staticSrc(photo.url,base,'card');
+  stage.dataset.photoLoading='true';stage.setAttribute('aria-busy','true');
+  document.getElementById('galleryCount').textContent=tr('Loading photo','正在加载照片','Memuatkan foto')+` ${selectedPosition+1} / ${filtered.length}`;
+  let detailShown=false,previewShown=false;
+  const commit=(source,full=false)=>{
+   if(token!==request||!stage.isConnected||(!full&&detailShown))return;
+   if(full)detailShown=true;previewShown=true;displayedPosition=selectedPosition;
+   img.src=source;img.alt=title+' · '+(photo.category||tr('Photo','照片','Foto'));
+   img.style.objectPosition=`${Number(photo.cropX??50)}% ${Number(photo.cropY??50)}%`;
+   stage.dataset.photoLoading='false';stage.setAttribute('aria-busy','false');
+   const count=`${selectedPosition+1} / ${filtered.length}`;
+   document.getElementById('galleryCount').textContent=count;
+   document.getElementById('galleryStageCount').textContent=count;
+   document.getElementById('galleryCaption').textContent={exterior:tr('Exterior','外观','Luaran'),interior:tr('Interior','内饰','Dalaman'),engine:tr('Engine','引擎','Enjin'),details:tr('Details','细节','Butiran')}[photoCategory(photo.category)];
+   modalState(source);
+  };
+  const thumbnail=stage.querySelector(`[data-photo="${selectedPosition}"] img`);
+  if(img.complete&&img.naturalWidth&&img.getAttribute('src')===detail)commit(detail,true);
+  else if(thumbnail?.complete&&thumbnail.naturalWidth)commit(thumbnail.currentSrc||thumbnail.src);
+  else if(preview!==detail)void cache.load(preview).then(source=>commit(source)).catch(()=>{});
+  try{
+   const source=await cache.load(detail);commit(source,true);
+   if(token!==request||!stage.isConnected)return;
+   for(const offset of [1,-1]){
+    const neighbour=photos[filtered[wrapIndex(selectedPosition+offset,filtered.length)]];
+    if(neighbour&&neighbour!==photo)void cache.load(staticSrc(neighbour.url,base),'low').catch(()=>{});
+   }
+  }catch{
+   if(token!==request||!stage.isConnected||previewShown)return;
+   stage.dataset.photoLoading='false';stage.setAttribute('aria-busy','false');
+   document.getElementById('galleryCaption').textContent=tr('Photo unavailable. Try another photo.','照片暂不可用，请试试其他照片。','Foto tidak tersedia. Cuba foto lain.');
+  }
  }
  const move=step=>select(position+step);
  document.getElementById('galleryPrevious').onclick=()=>move(-1);document.getElementById('galleryNext').onclick=()=>move(1);
@@ -97,7 +137,7 @@ export function bindGallery(photos,title,lang,base,openPhoto){
   const category=button.dataset.photoCategoryFilter;filtered=photos.map((_,i)=>i).filter(i=>category==='all'||photoCategory(photos[i].category)===category);position=0;thumbs();select(0);
   stage.querySelectorAll('[data-photo-category-filter]').forEach(node=>node.setAttribute('aria-pressed',String(node===button)));
  });
- document.getElementById('mainPhoto').onclick=()=>{if(swiped){swiped=false;return;}const photo=current();if(!photo)return;openPhoto(document.getElementById('activePhoto').src,title,{previous:()=>move(-1),next:()=>move(1),count:`${position+1} / ${filtered.length}`,disabled:filtered.length<2});};
+ document.getElementById('mainPhoto').onclick=()=>{if(swiped){swiped=false;return;}if(stage.dataset.photoLoading==='true')return;const photo=current();if(!photo)return;openPhoto(document.getElementById('activePhoto').src,title,{previous:()=>move(-1),next:()=>move(1),count:`${displayedPosition+1} / ${filtered.length}`,disabled:filtered.length<2});};
  const onKey=event=>{if(!['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();move(event.key==='ArrowLeft'?-1:1);};
  stage.onkeydown=onKey;dialog.onkeydown=event=>{if(dialog.dataset.gallery==='true')onKey(event);};
  dialog.onclose=()=>{touch=null;swiped=false;};
