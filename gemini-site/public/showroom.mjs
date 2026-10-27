@@ -597,6 +597,7 @@ async function renderDetail(targetNode=$('#vehicleContent'),vehicleOverride=null
    if(inModal){event.preventDefault();details.scrollIntoView({behavior:'smooth',block:'center'});}
   }
  });
+ if(localPreview){const notice=document.createElement('p');notice.className='vehicle-preview-notice';notice.textContent=tr('Preview · Not published','预览 · 尚未发布','Pratonton · Belum diterbitkan');targetNode.querySelector('.purchase-heading')?.prepend(notice);}
  targetNode.querySelectorAll('[data-modal-close]').forEach(btn=>{btn.onclick=()=>closeVehicleDetailModal();});
  if(inModal){
   targetNode.querySelectorAll('.breadcrumbs a, .mobile-detail-wordmark').forEach(link=>{
