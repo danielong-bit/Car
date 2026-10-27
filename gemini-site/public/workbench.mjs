@@ -1276,9 +1276,10 @@ function bindOwnerExtras(){
   tile.ondragleave=()=>tile.classList.remove('drag-over');
   tile.ondrop=e=>{if(dragged==null)return;e.preventDefault();tile.classList.remove('drag-over');if(dragged===i)return;captureForm();const [photo]=editing.gallery.splice(dragged,1);editing.gallery.splice(i,0,photo);dragged=null;editing.coverImageUrl=editing.gallery[0]?.url||'';editorDirty=true;render();};
   const m=editing.gallery[i],img=tile.querySelector('img');img.draggable=false;img.style.objectPosition=`${m.cropX??50}% ${m.cropY??50}%`;
-  const inspect=document.createElement('button');inspect.type='button';inspect.className='photo-inspect-trigger';inspect.setAttribute('aria-label',`Enlarge photo ${i+1}`);
-  img.before(inspect);inspect.append(img);inspect.insertAdjacentHTML('beforeend','<span>View photo ↗</span>');
+  const inspect=document.createElement('button');inspect.type='button';inspect.className='photo-inspect-trigger';inspect.setAttribute('aria-label',`Enlarge photo ${i+1}`);inspect.textContent='View photo ↗';
+  img.parentElement.append(inspect);
   inspect.onclick=()=>{photoInspector??=createPhotoInspector();photoInspector.open(()=>editing.gallery,i,`${editing.make} ${editing.model} · ${editing.stockId}`);};
+  img.onclick=inspect.onclick;
   tile.insertAdjacentHTML('beforeend',frameControlsMarkup(i,m));
  });
  if(editing)bindPhotoFraming(tiles,()=>editing.gallery,{source:photo=>photoUrl(displayPhoto(photo.url,'card',base),base),onChange:()=>{editorDirty=true;},onError:()=>toast('Could not suggest a crop. Use Adjust position instead.',true)});
