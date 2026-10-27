@@ -17,6 +17,7 @@ test('an empty public stock snapshot builds and native upload keys remain canoni
  assert.ok(storage.includes("canonical.startsWith('/assets/uploads/')"));
  assert.ok(!storage.includes("startsWith('/Car-Recond-Japan/assets/") );
  assert.ok(workbench.includes("files['public'+url]"));
- assert.ok(workbench.includes("p.startsWith('/assets/uploads/')"));
+ const {displayPhoto}=await import('../../.test-pages/site/photo-sources.mjs');
+ assert.equal(displayPhoto('/assets/uploads/new.webp','card','/Car-Recond-Japan/'),'/Car-Recond-Japan/assets/uploads/new.webp');
  assert.ok(!html.includes('DEMO SHOWROOM'));
 });

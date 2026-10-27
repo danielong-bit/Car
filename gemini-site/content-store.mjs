@@ -13,7 +13,7 @@ export class ShowroomContent{
   if(path.startsWith('/assets/uploads/')){
    const key='media:'+path,meta=await this.storage.get(key);const allowed=await this.storage.get('public-media')||[];
    if(!meta||(!request.headers.has('X-Owner-Media')&&!allowed.includes(path)))return new Response('Not found',{status:404});
-   const pieces=[];for(let i=0;i<meta.chunks;i++)pieces.push(await this.storage.get(key+':'+i));return new Response(new Blob(pieces,{type:meta.type}),{headers:{'Content-Type':meta.type,'X-Content-Type-Options':'nosniff','Content-Disposition':meta.type==='application/pdf'?'inline':'inline','Cache-Control':request.headers.has('X-Owner-Media')?'private, no-store':'public, max-age=86400'}});
+   const pieces=await Promise.all(Array.from({length:meta.chunks},(_,i)=>this.storage.get(key+':'+i)));return new Response(new Blob(pieces,{type:meta.type}),{headers:{'Content-Type':meta.type,'X-Content-Type-Options':'nosniff','Content-Disposition':meta.type==='application/pdf'?'inline':'inline','Cache-Control':request.headers.has('X-Owner-Media')?'private, no-store':'public, max-age=86400'}});
   }
   if(path==='/api/owner/media'&&request.method==='POST'){
    const type=request.headers.get('Content-Type')?.split(';')[0],allowed=['image/jpeg','image/png','image/webp','application/pdf'];if(!allowed.includes(type))return json({error:'Upload JPG, PNG, WebP or PDF.'},400);

@@ -1,3 +1,4 @@
+import {displayPhoto} from './photo-sources.mjs';
 import {photoUrl} from './browser-stock.mjs';
 import {escapeHtml as esc,translator} from './vehicle-tools.mjs';
 
@@ -9,12 +10,7 @@ export function photoCategory(value='') {
  return 'details';
 }
 export function wrapIndex(index,length){return length?((index%length)+length)%length:0;}
-function staticSrc(url,base=(typeof window!=='undefined'&&window.SITE_BASE)||'/'){
- const p=String(url||'');
- if(!p||p.startsWith('/assets/uploads/'))return '';
- if(base!=='/'&&p.startsWith(base))return p;
- return p.startsWith('/assets/')?base+p.slice(1):p;
-}
+function staticSrc(url,base=(typeof window!=='undefined'&&window.SITE_BASE)||'/',size='detail'){return displayPhoto(url,size,base);}
 export function galleryMarkup(photos,title,lang){
  const tr=translator(lang),labels={all:tr('All photos','全部照片','Semua foto'),exterior:tr('Exterior','外观','Luaran'),interior:tr('Interior','内饰','Dalaman'),engine:tr('Engine','引擎','Enjin'),details:tr('Details','细节','Butiran')};
  if(!photos.length)return `<section class="vehicle-gallery" id="vehicleGallery"><div class="gallery-empty">${tr('Photos will be added soon.','照片待上传。','Foto akan ditambah.')}</div></section>`;
@@ -31,9 +27,9 @@ export function bindGallery(photos,title,lang,base,openPhoto){
  function thumbs(){
   const strip=document.getElementById('galleryThumbnails');
   strip.hidden=filtered.length<2;
-  strip.innerHTML=filtered.map((index,i)=>{const s=staticSrc(photos[index].url,base);return `<button type="button" data-photo="${i}" aria-label="${tr('Photo','照片','Foto')} ${i+1}" aria-pressed="${i===position}"><img ${s?`src="${esc(s)}"`:''} data-source="${esc(photos[index].url)}" alt="${esc(photos[index].category||title)}" loading="eager" decoding="sync"></button>`;}).join('');
+  strip.innerHTML=filtered.map((index,i)=>{const s=staticSrc(photos[index].url,base,'card');return `<button type="button" data-photo="${i}" aria-label="${tr('Photo','照片','Foto')} ${i+1}" aria-pressed="${i===position}"><img ${s?`src="${esc(s)}"`:''} data-source="${esc(photos[index].url)}" alt="${esc(photos[index].category||title)}" loading="lazy" decoding="async"></button>`;}).join('');
   stage.querySelectorAll('[data-photo]').forEach(button=>button.onclick=()=>{if(strip.dataset.dragMoved==='true')return;select(Number(button.dataset.photo));});
-  stage.querySelectorAll('img[data-source]').forEach(async img=>{if(img.getAttribute('src'))return;try{img.src=await photoUrl(img.dataset.source,base);}catch{img.alt=tr('Photo unavailable','照片暂不可用','Foto tidak tersedia');}});
+  stage.querySelectorAll('img[data-source]').forEach(async img=>{if(img.getAttribute('src'))return;try{img.src=await photoUrl(staticSrc(img.dataset.source,base,'card'),base);}catch{img.alt=tr('Photo unavailable','照片暂不可用','Foto tidak tersedia');}});
  }
  const thumbStrip=document.getElementById('galleryThumbnails');
  if(thumbStrip&&!thumbStrip.dataset.dragBound){
@@ -93,7 +89,7 @@ export function bindGallery(photos,title,lang,base,openPhoto){
   }
   ['galleryPrevious','galleryNext'].forEach(id=>{const el=document.getElementById(id);el.disabled=filtered.length<2;el.hidden=filtered.length<2;});
   if(!photo)return;
-  try{const source=await photoUrl(photo.url,base);if(token!==request||!stage.isConnected)return;const img=document.getElementById('activePhoto');img.src=source;img.alt=title+' · '+(photo.category||tr('Photo','照片','Foto'));modalState(source);}catch{document.getElementById('galleryCaption').textContent=tr('Photo unavailable. Try another photo.','照片暂不可用，请试试其他照片。','Foto tidak tersedia. Cuba foto lain.');}
+  try{const source=await photoUrl(staticSrc(photo.url,base),base);if(token!==request||!stage.isConnected)return;const img=document.getElementById('activePhoto');img.src=source;img.alt=title+' · '+(photo.category||tr('Photo','照片','Foto'));modalState(source);}catch{document.getElementById('galleryCaption').textContent=tr('Photo unavailable. Try another photo.','照片暂不可用，请试试其他照片。','Foto tidak tersedia. Cuba foto lain.');}
  }
  const move=step=>select(position+step);
  document.getElementById('galleryPrevious').onclick=()=>move(-1);document.getElementById('galleryNext').onclick=()=>move(1);

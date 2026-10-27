@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
 
-for(const width of [1280,390])test(`homepage at ${width}px renders stock states, anonymous examples and the exact address`,async t=>{
+for(const width of [1280,390])test(`homepage at ${width}px renders stock states, saved deliveries and the exact address`,async t=>{
  const template=readFileSync(new URL('../../out/index.html',import.meta.url),'utf8');
  const css=readFileSync(new URL('../../public/customer-refinements.css',import.meta.url),'utf8');
  const fixture=JSON.parse(readFileSync(new URL('../../data/public-site.json',import.meta.url),'utf8')).document;
@@ -35,9 +35,9 @@ for(const width of [1280,390])test(`homepage at ${width}px renders stock states,
   assert.equal(Boolean(card.querySelector('.stock-price s')),status!=='available');
   if(status!=='available')assert.equal(win.getComputedStyle(card.querySelector('.stock-photo img')).filter,'grayscale(1)');
  }
- const location=win.document.querySelector('#contact .contact-location');
+ const location=win.document.querySelector('#contact [data-showroom-address]');
  assert.match(location.textContent,/4, Jalan Para U8\/103/);
- const map=win.document.querySelector('#contactMapFrame');assert.match(decodeURIComponent(map.src),/4, Jalan Para U8\/103/);
+ const map=win.document.querySelector('#contact [data-showroom-map]');assert.match(decodeURIComponent(map.src),/4, Jalan Para U8\/103/);
  assert.equal(win.document.querySelectorAll('.concierge-title-row .brand-logo').length,0);
  assert.equal(win.document.querySelector('.concierge-name').textContent,'Danny Ong');
  for(const review of win.document.querySelectorAll('.testimonial-body')){

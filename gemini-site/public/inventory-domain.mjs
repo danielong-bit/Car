@@ -49,7 +49,7 @@ export function normalizeStory(s={},index=0){
  return {
   id:String(s.id||'delivery-'+(index+1)),
   title:String(s.title||'Showroom delivery').trim(),
-  caption:String(s.caption||'A delivery moment with Danny.').trim(),
+  caption:String(s.caption??'').trim(),
   image:String(s.image||'/assets/customer-stories/1.jpeg').trim(),
   videoUrl,
   mediaType:videoUrl?'video':(s.mediaType==='video'?'video':'photo'),

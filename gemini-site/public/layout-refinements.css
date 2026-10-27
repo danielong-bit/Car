@@ -225,3 +225,15 @@ html body #customer-stories .delivery-controls #deliveryPause{color:var(--price-
  html body #customer-stories .section-heading .delivery-controls{grid-column:2;grid-row:2;justify-self:end;margin:0}
  html body #customer-stories .delivery-controls button{width:44px!important;height:44px!important;min-height:44px!important}
 }
+/* One address and map at a time; all three showrooms stay directly reachable. */
+html body #contact .showroom-locations-label{margin-bottom:10px}
+html body #contact .showroom-location-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+html body #contact .showroom-location-tabs button{min-width:0;min-height:44px;padding:9px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font-size:12px;font-weight:650;white-space:normal}
+html body #contact .showroom-location-tabs button[aria-pressed=true]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+html body #contact .showroom-location-tabs button:focus-visible{outline:2px solid var(--price-accent);outline-offset:3px}
+html body #contact .showroom-location-details h3{margin:0 0 6px;font-size:16px;line-height:1.4;color:var(--ink)}
+html body #contact .showroom-location-details p{margin:0 0 10px;font-size:13px;line-height:1.65;color:var(--muted)}
+html body #contact .showroom-location-details .location-actions{margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+html body #contact .showroom-location-details .location-actions :is(a,button){min-height:36px;display:inline-flex;align-items:center}
+html body .testimonial-meta{display:flex;flex-direction:column;gap:5px}
+html body .testimonial-meta small{color:var(--muted);font-size:11px;line-height:1.4}

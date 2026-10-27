@@ -1,3 +1,5 @@
+import {displayPhoto} from './photo-sources.mjs';
+import {showroomLocationsMarkup,bindShowroomLocations} from './showroom-locations.mjs';
 import {stockSortChoices,validStockSort,compareStock} from './inventory-order.mjs';
 import {startDeliveryCarousel} from './delivery-carousel.mjs';
 import {buyerSpecificationGroups} from './buyer-specifications.mjs';
@@ -38,30 +40,8 @@ document.addEventListener('click',event=>{
 const localPreview=new URLSearchParams(location.search).get('local-preview')==='1';
 const url=(route='')=>base+route.replace(/^\//,''),canonicalDetailsUrl=v=>localPreview?url('audi/?vehicle='+encodeURIComponent(v.id)+'&local-preview=1'):url('vehicle/'+encodeURIComponent(v.id)+'/'),details=v=>typeof document!=='undefined'&&document.body?.classList?.contains('exhibition-home')?url('?vehicle='+encodeURIComponent(v.id)+(localPreview?'&local-preview=1':'')):canonicalDetailsUrl(v),wa=message=>'https://wa.me/'+(d.profile.phone||'60125686528')+'?text='+encodeURIComponent(message);
 const enquiry=v=>wa(`Hi Danny, ${v.status==='reserved'||v.status==='sold'?'please share similar available stock to':'I am interested in'} ${v.year||''} ${v.make} ${v.model} ${v.variant}, Stock #${v.stockId}, ${money(v.priceRm)}. Please share the details.\n${location.origin}${canonicalDetailsUrl(v)}`);
-let lazyObserver,revealObserver,preloadedUrls=new Set();
-function staticImgSrc(u){
- const p=String(u||'');
- if(!p||p.startsWith('/assets/uploads/'))return '';
- if(base!=='/'&&p.startsWith(base))return p;
- return p.startsWith('/assets/')?base+p.slice(1):p;
-}
-function preloadShowroomPhotos(){
- try{
-  const urls=new Set();
-  (d?.vehicles||[]).forEach(v=>{
-   if(v?.coverImageUrl)urls.add(staticImgSrc(v.coverImageUrl));
-   (v?.gallery||[]).slice(0,6).forEach(g=>{if(g?.url&&!g.video)urls.add(staticImgSrc(g.url));});
-  });
-  ['/assets/audi-s5/audio_16x9.jpg','/assets/audi-s5/engine_16x9.jpg','/assets/audi-s5/wheel_16x9.jpg','/assets/audi-s5/seats_16x9.jpg','/assets/audi-s5/dashboard_16x9.jpg','/assets/audi-s5/boot_16x9.jpg','/assets/audi-s5/climate_16x9.jpg'].forEach(u=>urls.add(staticImgSrc(u)));
-  urls.forEach(src=>{
-   if(!src||preloadedUrls.has(src))return;
-   preloadedUrls.add(src);
-   const img=new Image();
-   img.decoding='sync';
-   img.src=src;
-  });
- }catch{}
-}
+let lazyObserver,revealObserver;
+function staticImgSrc(u){return displayPhoto(u,'card',base);}
 function markImgReady(img){
  if(!img)return;
  img.classList.add('is-loaded');
@@ -78,16 +58,14 @@ async function resolveImg(img){
   markImgReady(img);
   return;
  }
- const resolved=await photoUrl(img.dataset.source,base);
+ const resolved=await photoUrl(staticImgSrc(img.dataset.source),base);
  if(resolved&&img.getAttribute('src')!==resolved)img.src=resolved;
  markImgReady(img);
 }
 async function hydrateImages(){
- preloadShowroomPhotos();
  const imgs=[...document.querySelectorAll('img[data-source]')];
  imgs.forEach(img=>{
-  img.setAttribute('loading','eager');
-  img.setAttribute('decoding','sync');
+  img.setAttribute('decoding','async');
   const fastSrc=staticImgSrc(img.dataset.source);
   if(fastSrc&&!img.getAttribute('src'))img.setAttribute('src',fastSrc);
   if(img.complete)markImgReady(img);
@@ -334,20 +312,8 @@ window.addEventListener('danny:inventory-counts',event=>{
   syncHeroStockBadge(activeAvail);
  }
 });
-const EXAMPLE_FEEDBACK=[
- {en:'Clear pricing. No pressure to buy.',zh:'价格透明，不硬推销。',ms:'Harga jelas. Tiada paksaan membeli.'},
- {en:'Compare the car, its condition and price at your own pace.',zh:'慢慢比较车况、配置和价格。',ms:'Bandingkan kereta, keadaan dan harga mengikut keselesaan anda.'},
- {en:'Ask questions before deciding. Danny can explain the details.',zh:'决定前先问清楚，Danny 为你讲解细节。',ms:'Tanya dahulu sebelum membuat keputusan. Danny boleh terangkan butirannya.'},
- {en:'Take a closer look at the handover and ask Danny about this model.',zh:'看看交车照片，再向 Danny 了解这款车型。',ms:'Lihat foto serahan dan tanya Danny tentang model ini.'}
-];
-
-function renderHome(){
- const tr=translator(lang);
- if($('#findYourCar'))$('#findYourCar').onclick=()=>openCarFinder($('#carFinder'),{vehicles:d.vehicles,lang,details,wa,hydrate:()=>{hydrateImages();styleWhatsAppActions();}});
- syncHeroStockBadge();
- const heroWhatsApp=$('#heroWhatsApp');if(heroWhatsApp)heroWhatsApp.href=wa('Hi Danny, I would like to ask about your current Japanese reconditioned cars.');
- controls();renderCards();comparisonBar();
- $('#stockProvenance').textContent=d.vehicles.some(v=>v.sample)?({en:'Some listings and cover images are examples. Confirm current stock, specifications and price with Danny. Monthly figures use the calculator’s example settings.',zh:'部分车辆与封面图片为示例。实际库存、配置和价格请向 Danny 确认。月供使用计算器的示例设置。',ms:'Sesetengah senarai dan foto ialah contoh. Sahkan stok, spesifikasi dan harga dengan Danny. Anggaran bulanan menggunakan tetapan contoh kalkulator.'}[lang]):({en:'Monthly figures use example calculator settings. Confirm vehicle details and pricing with Danny.',zh:'月供使用示例设置，车辆资料和价格请向 Danny 确认。',ms:'Anggaran bulanan menggunakan tetapan contoh. Sahkan butiran dan harga dengan Danny.'}[lang]);
+function renderDeliveries(){
+ if(!$('#deliveryRail'))return;
  const stories=(d.stories||[]).filter(s=>s.published!==false&&(s.consent==='approved'||d.staticSite));
  deliveryCarousel?.destroy();deliveryCarousel=null;
  $('#deliveryRail').innerHTML=stories.filter(s=>s.image).map((s,idx)=>{
@@ -356,11 +322,10 @@ function renderHome(){
   const brand=(linkedCar?.make||String(s.vehicleModel||s.title||'').match(/Porsche|Toyota|Lexus|Honda|Audi|Nissan|BMW|Mercedes(?:-Benz)?/i)?.[0]||tr('Collection day','交车记录','Hari serahan'));
   const verified=s.reviewVerified===true&&typeof s.quote==='string'&&s.quote.trim().length>0;
   const starsCount=verified?Math.min(5,Math.max(1,Number(s.rating)||5)):5;
-  const sampleFeedback=EXAMPLE_FEEDBACK[idx]||{en:`${brand} handover example. Ask Danny about current details.`,zh:`${brand} 交车示例，可向 Danny 了解现况。`,ms:`Contoh serahan ${brand}. Tanya Danny untuk maklumat terkini.`};
-  const quoteText=verified?s.quote:sampleFeedback[lang]||sampleFeedback.en;
+  const quoteText=String(s.caption??'').trim();
   const label=verified?tr('Verified owner','已核实车主','Pemilik disahkan'):tr('Example review','示例评价','Contoh ulasan');
   const starsLabel=verified?`${starsCount} out of 5 stars`:tr('Five-star example, not a customer rating','五星展示示例，非真实顾客评分','Contoh lima bintang, bukan penilaian pelanggan');
-  return `<article class="delivery-card testimonial-card reveal-on-scroll is-visible"><button type="button" class="testimonial-photo-btn" data-story="${esc(s.id)}" aria-label="${esc(brand)}"><img ${sSrc?`src="${esc(sSrc)}" `:''}data-source="${esc(s.image)}" class="is-loaded" alt="${esc(brand)}" loading="lazy" decoding="async"><span class="testimonial-model-tag">${esc(brand)}</span></button><div class="testimonial-body"><div class="testimonial-rating-row"><span class="testimonial-stars" aria-label="${esc(starsLabel)}">${'★'.repeat(starsCount)}</span><span class="testimonial-verified">${esc(label)}</span></div><blockquote class="testimonial-quote">${esc(quoteText)}</blockquote><footer class="testimonial-meta"><strong>${esc(brand)}</strong></footer></div></article>`;
+  return `<article class="delivery-card testimonial-card reveal-on-scroll is-visible"><button type="button" class="testimonial-photo-btn" data-story="${esc(s.id)}" aria-label="${esc(brand)}"><img ${sSrc?`src="${esc(sSrc)}" `:''}data-source="${esc(s.image)}" class="is-loaded" alt="${esc(brand)}" loading="lazy" decoding="async"><span class="testimonial-model-tag">${esc(brand)}</span></button><div class="testimonial-body"><div class="testimonial-rating-row"><span class="testimonial-stars" aria-label="${esc(starsLabel)}">${'★'.repeat(starsCount)}</span><span class="testimonial-verified">${esc(label)}</span></div>${quoteText?`<blockquote class="testimonial-quote">${esc(quoteText)}</blockquote>`:''}<footer class="testimonial-meta"><strong>${esc(s.title||brand)}</strong>${s.date?`<small>${esc(s.date)}</small>`:''}</footer></div></article>`;
  }).join('');
  document.querySelectorAll('[data-story]').forEach(b=>b.onclick=async()=>{const s=stories.find(s=>s.id===b.dataset.story);if(s)openPhoto(await photoUrl(s.image,base),s.title);});
  const rail=$('#deliveryRail'),previous=$('#deliveryPrev'),next=$('#deliveryNext');
@@ -368,15 +333,20 @@ function renderHome(){
  if(!pause){pause=document.createElement('button');pause.id='deliveryPause';pause.type='button';pause.className='circle-button';pause.hidden=true;pause.setAttribute('aria-label',tr('Pause slideshow','暂停轮播','Jeda tayangan'));next?.before(pause);}
  for(const control of [previous,next,pause])if(control)control.hidden=rail.children.length<2;
  if(rail&&previous&&next)deliveryCarousel=startDeliveryCarousel(rail,{previous,next,pause,labels:{pause:tr('Pause slideshow','暂停轮播','Jeda tayangan'),play:tr('Play slideshow','播放轮播','Mainkan tayangan')}});
+}
+
+function renderHome(){
+ const tr=translator(lang);
+ if($('#findYourCar'))$('#findYourCar').onclick=()=>openCarFinder($('#carFinder'),{vehicles:d.vehicles,lang,details,wa,hydrate:()=>{hydrateImages();styleWhatsAppActions();}});
+ syncHeroStockBadge();
+ const heroWhatsApp=$('#heroWhatsApp');if(heroWhatsApp)heroWhatsApp.href=wa('Hi Danny, I would like to ask about your current Japanese reconditioned cars.');
+ controls();renderCards();comparisonBar();
+ $('#stockProvenance').textContent=d.vehicles.some(v=>v.sample)?({en:'Some listings and cover images are examples. Confirm current stock, specifications and price with Danny. Monthly figures use the calculator’s example settings.',zh:'部分车辆与封面图片为示例。实际库存、配置和价格请向 Danny 确认。月供使用计算器的示例设置。',ms:'Sesetengah senarai dan foto ialah contoh. Sahkan stok, spesifikasi dan harga dengan Danny. Anggaran bulanan menggunakan tetapan contoh kalkulator.'}[lang]):({en:'Monthly figures use example calculator settings. Confirm vehicle details and pricing with Danny.',zh:'月供使用示例设置，车辆资料和价格请向 Danny 确认。',ms:'Anggaran bulanan menggunakan tetapan contoh. Sahkan butiran dan harga dengan Danny.'}[lang]);
+ renderDeliveries();
  $('#heroTitle').removeAttribute('data-i18n');$('#heroTitle').textContent=d.homepage.heroTitles?.[lang]||tr('Japanese recond cars. Selected by Danny.','日本进口车，Danny 为你精选。','Kereta recond Jepun. Pilihan Danny.');const hero=document.querySelector('.mountain-scene img');if(hero&&d.homepage.heroImage)hero.src=d.homepage.heroImage;for(const [id,key] of [['customer-stories','showDeliveries'],['contact','showContact']]){const section=document.getElementById(id);if(section)section.hidden=d.homepage[key]===false;}if(d.homepage.sectionOrder==='deliveries-first'){const rail=$('#customer-stories');if(rail)$('#inventory').before(rail);}
  const p=d.profile;$('#profileIntro').textContent=p.intro||tr('Personally inspected for auction grade authenticity, cabin condition, and mechanical integrity before handover.','每一辆车均由 Danny 亲自核对原始拍卖报告、车厢成色与机械状态，透明安心交车。','Disemak sendiri oleh Danny untuk ketulenan gred lelong, keadaan kabin dan mekanikal sebelum serahan.');
  renderShowroomConciergeCard($('#contact .about-image'),p);
  renderContactFaq(document.getElementById('contactFaq'),lang,d.homepage.showContact!==false);
- const locationText=showroomLocation(p);
- const fullLocationQuery=encodeURIComponent(locationText);
- const locationUrl='https://www.google.com/maps/search/?api=1&query='+fullLocationQuery;
- const wazeUrl='https://waze.com/ul?q='+fullLocationQuery+'&navigate=yes';
- const mapEmbedUrl=`https://maps.google.com/maps?q=${encodeURIComponent(locationText)}&t=m&z=14&output=embed&iwloc=near`;
  const formattedPhone=String(p.phone||'60125686528').replace(/^60(\d{2})(\d{3})(\d{4})$/,'+60 $1-$2 $3');
  const socialMarkup=[['TikTok',p.tiktok,'tiktok'],['小红书',p.rednote,'xiaohongshu'],['Facebook',p.facebook||'https://www.facebook.com/reel/1834658307548568','facebook']].filter(([,linkUrl])=>linkUrl).map(([name,link,file])=>`<a href="${esc(link)}" target="_blank" rel="noopener"><img src="${url('assets/icons/'+file+'.svg?v=glass-20261019b')}" alt="" loading="lazy" decoding="async">${name} ↗</a>`).join('');
  $('#contactBlocks').innerHTML=`<div class="contact-block contact-primary reveal-on-scroll" style="--reveal-delay:40ms">
@@ -389,31 +359,8 @@ function renderHome(){
   </div>
   <div class="social-row" id="socialLinks">${socialMarkup}</div>
  </div>
- <div class="contact-block location-block contact-map-card reveal-on-scroll" style="--reveal-delay:70ms">
-  <div class="contact-map-header">
-   <div class="contact-map-title-group">
-    <span class="contact-section-label">${icon('pin')}<span>${tr('SHOWROOM LOCATION','展厅位置','LOKASI SHOWROOM')}</span></span>
-    <a class="contact-location" href="${locationUrl}" target="_blank" rel="noopener"><span>${esc(locationText)}</span></a>
-   </div>
-   <div class="location-actions">
-    <a class="location-directions" href="${locationUrl}" target="_blank" rel="noopener">${tr('Google Maps','Google 地图','Google Maps')} ↗</a>
-    <a class="location-waze" href="${wazeUrl}" target="_blank" rel="noopener">${tr('Waze','Waze 导航','Waze')} ↗</a>
-    <button type="button" id="copyLocation">${t('Copy location')}</button>
-   </div>
-  </div>
-  <div class="contact-map-viewport" id="contactMapContainer">
-   <iframe id="contactMapFrame" class="contact-map-iframe" src="${esc(mapEmbedUrl)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen title="${esc(tr('Danny Recond Select Dealership Location Map','Danny Recond Select 展厅位置地图','Peta Lokasi Showroom Danny Recond Select'))}"></iframe>
-   <div class="contact-map-pin-overlay" aria-hidden="true">
-    <span class="contact-map-pin-pulse"></span>
-    <span class="contact-map-pin-ring"></span>
-    <span class="contact-map-pin-marker">
-     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.2-6-10a6 6 0 1 1 12 0c0 4.8-6 10-6 10Z"/><circle cx="12" cy="11" r="2.2"/></svg>
-    </span>
-    <span class="contact-map-pin-badge">${esc(tr('Glenmarie Showroom','Glenmarie 展厅','Showroom Glenmarie'))}</span>
-   </div>
-  </div>
- </div>`;
- $('#copyLocation').onclick=async()=>{try{await navigator.clipboard.writeText(p.location||locationText);toast(t('Copied'));}catch{toast(locationText);}};
+ <div class="contact-block location-block contact-map-card reveal-on-scroll" id="showroomLocations" style="--reveal-delay:70ms">${showroomLocationsMarkup(lang)}</div>`;
+ bindShowroomLocations($('#showroomLocations'),{onCopied:(address,ok=true)=>toast(ok?t('Copied'):address)});
  hydrateImages();observeScrollReveal();translate();
  const urlVehicleId=new URLSearchParams(location.search).get('vehicle');
  if(urlVehicleId||activeModalVehicleId){
@@ -814,7 +761,10 @@ publishedContentPromise.then(snapshot=>{
  const contentKey=doc=>JSON.stringify([doc.vehicles,doc.stories,doc.homepage,doc.profile,doc.finance,doc.tintPackages,doc.articles]);
  // Export metadata must not reset the gallery, filters or a form in progress.
  const interacting=customerInteracted||document.activeElement?.matches('input,textarea,select')||document.activeElement?.closest('.vehicle-gallery')||document.querySelector('dialog[open]');
- if(contentKey(next)!==contentKey(d)&&!interacting){d=next;render();}
+ if(contentKey(next)!==contentKey(d)){
+  if(!interacting){d=next;render();}
+  else if(JSON.stringify(next.stories)!==JSON.stringify(d.stories)){d.stories=next.stories;renderDeliveries();void hydrateImages();}
+ }
 });
 
 void recordVisit();
