@@ -72,3 +72,15 @@ test('framing continues to edit the current photo record after another field nor
  const input=tile.querySelector('[data-crop][data-axis=cropY]');input.value='65';input.dispatchEvent(new dom.window.Event('input'));
  assert.equal(photos[0].cropY,65);dom.window.close();
 });
+
+test('photo zoom previews immediately and is retained when saving or resetting',()=>{
+ const photo={url:'/assets/car.jpg',cropX:50,cropY:50};
+ const dom=new JSDOM('<article><img>'+frameControlsMarkup(0,photo)+'</article>');
+ const tile=dom.window.document.querySelector('article'); bindPhotoFraming([tile],[photo]);
+ const zoom=tile.querySelector('[data-crop][data-axis=cropZoom]'); assert.ok(zoom);
+ zoom.value='150';zoom.dispatchEvent(new dom.window.Event('input'));
+ assert.equal(photo.cropZoom,150);assert.equal(tile.querySelector('img').style.transform,'scale(1.5)');
+ assert.equal(normalizeVehicle({gallery:[photo]}).gallery[0].cropZoom,150);
+ tile.querySelector('[data-reset-frame]').click();assert.equal(photo.cropZoom,100);
+ dom.window.close();
+});

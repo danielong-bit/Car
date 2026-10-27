@@ -106,7 +106,7 @@ export function bindGallery(photos,title,lang,base,openPhoto){
    if(token!==request||!stage.isConnected||(!full&&detailShown))return;
    if(full)detailShown=true;previewShown=true;displayedPosition=selectedPosition;
    img.src=source;img.alt=title+' · '+(photo.category||tr('Photo','照片','Foto'));
-   img.style.objectPosition=`${Number(photo.cropX??50)}% ${Number(photo.cropY??50)}%`;
+   img.style.objectPosition=`${Number(photo.cropX??50)}% ${Number(photo.cropY??50)}%`;img.style.transformOrigin=img.style.objectPosition;img.style.transform=`scale(${Math.max(100,Math.min(200,Number(photo.cropZoom)||100))/100})`;
    stage.dataset.photoLoading='false';stage.setAttribute('aria-busy','false');
    const count=`${selectedPosition+1} / ${filtered.length}`;
    document.getElementById('galleryCount').textContent=count;

@@ -134,7 +134,7 @@ function badgeClusterMarkup(v,{inline=false}={}){
 }
 function photoMarkup(v){
  const srcAttr=staticImgSrc(v.coverImageUrl);
- return `<div class="stock-photo${srcAttr?' is-photo-ready':''}"><a href="${details(v)}" data-detail-id="${esc(v.id)}">${v.coverImageUrl?`<img ${srcAttr?`src="${esc(srcAttr)}" `:''}data-source="${esc(v.coverImageUrl)}" class="is-loaded" style="object-position:${Number(v.gallery[0]?.cropX??50)}% ${Number(v.gallery[0]?.cropY??50)}%" alt="${esc(v.make+' '+v.model)}" loading="eager" fetchpriority="high" decoding="sync" width="640" height="400">`:`<div class="photo-placeholder">${icon('photo')}<span>${lang==='zh'?'车辆照片待上传':lang==='ms'?'Foto akan ditambah':'Photos to be added'}</span></div>`}</a>${badgeClusterMarkup(v)}</div>`;
+ return `<div class="stock-photo${srcAttr?' is-photo-ready':''}"><a href="${details(v)}" data-detail-id="${esc(v.id)}">${v.coverImageUrl?`<img ${srcAttr?`src="${esc(srcAttr)}" `:''}data-source="${esc(v.coverImageUrl)}" class="is-loaded" style="object-position:${Number(v.gallery[0]?.cropX??50)}% ${Number(v.gallery[0]?.cropY??50)}%;transform-origin:${Number(v.gallery[0]?.cropX??50)}% ${Number(v.gallery[0]?.cropY??50)}%;transform:scale(${Math.max(100,Math.min(200,Number(v.gallery[0]?.cropZoom)||100))/100})" alt="${esc(v.make+' '+v.model)}" loading="eager" fetchpriority="high" decoding="sync" width="640" height="400">`:`<div class="photo-placeholder">${icon('photo')}<span>${lang==='zh'?'车辆照片待上传':lang==='ms'?'Foto akan ditambah':'Photos to be added'}</span></div>`}</a>${badgeClusterMarkup(v)}</div>`;
 }
 function listingFacts(v){
  const c=conditionValues(v),grade=[c.auctionGrade,c.interiorGrade].filter(Boolean).join('/');

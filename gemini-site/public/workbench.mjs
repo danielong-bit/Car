@@ -1275,7 +1275,7 @@ function bindOwnerExtras(){
   tile.ondragover=e=>{if(dragged==null)return;e.preventDefault();tile.classList.add('drag-over');};
   tile.ondragleave=()=>tile.classList.remove('drag-over');
   tile.ondrop=e=>{if(dragged==null)return;e.preventDefault();tile.classList.remove('drag-over');if(dragged===i)return;captureForm();const [photo]=editing.gallery.splice(dragged,1);editing.gallery.splice(i,0,photo);dragged=null;editing.coverImageUrl=editing.gallery[0]?.url||'';editorDirty=true;render();};
-  const m=editing.gallery[i],img=tile.querySelector('img');img.draggable=false;img.style.objectPosition=`${m.cropX??50}% ${m.cropY??50}%`;
+  const m=editing.gallery[i],img=tile.querySelector('img');img.draggable=false;img.style.objectPosition=`${m.cropX??50}% ${m.cropY??50}%`;img.style.transformOrigin=img.style.objectPosition;img.style.transform=`scale(${Math.max(100,Math.min(200,Number(m.cropZoom)||100))/100})`;
   const inspect=document.createElement('button');inspect.type='button';inspect.className='photo-inspect-trigger';inspect.setAttribute('aria-label',`Enlarge photo ${i+1}`);inspect.textContent='View photo ↗';
   img.parentElement.append(inspect);
   inspect.onclick=()=>{photoInspector??=createPhotoInspector();photoInspector.open(()=>editing.gallery,i,`${editing.make} ${editing.model} · ${editing.stockId}`);};

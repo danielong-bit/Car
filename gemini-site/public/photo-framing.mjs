@@ -40,7 +40,7 @@ export async function suggestPhotoFrame(source){
 }
 
 export function frameControlsMarkup(index,photo){
- return `<div class="photo-frame-tools"><button type="button" data-auto-frame="${index}">Auto frame</button><details class="photo-position"><summary>Adjust position</summary>${[['cropX','Left / right'],['cropY','Up / down']].map(([axis,label])=>`<label class="photo-position-field"><span>${label}</span><input type="range" min="0" max="100" step="1" value="${clamp(photo[axis]??50)}" data-crop="${index}" data-axis="${axis}" aria-label="Photo ${index+1} ${label}"><input type="number" min="0" max="100" step="1" value="${clamp(photo[axis]??50)}" data-crop-number="${index}" data-axis="${axis}" aria-label="Photo ${index+1} ${label} value"></label>`).join('')}<button type="button" data-reset-frame="${index}">Reset to centre</button></details></div>`;
+ return `<div class="photo-frame-tools"><button type="button" data-auto-frame="${index}">Auto frame</button><details class="photo-position"><summary>Adjust position &amp; zoom</summary>${[['cropX','Left / right'],['cropY','Up / down'],['cropZoom','Zoom (%)']].map(([axis,label])=>{const zoom=axis==='cropZoom',min=zoom?100:0,max=zoom?200:100,value=zoom?Math.max(100,Math.min(200,Number(photo[axis])||100)):clamp(photo[axis]??50);return `<label class="photo-position-field"><span>${label}</span><input type="range" min="${min}" max="${max}" step="1" value="${value}" data-crop="${index}" data-axis="${axis}" aria-label="Photo ${index+1} ${label}"><input type="number" min="${min}" max="${max}" step="1" value="${value}" data-crop-number="${index}" data-axis="${axis}" aria-label="Photo ${index+1} ${label} value"></label>`;}).join('')}<button type="button" data-reset-frame="${index}">Reset to centre</button></details></div>`;
 }
 
 export function bindPhotoFraming(tiles,photos,{analyze=suggestPhotoFrame,onChange=()=>{},source=photo=>photo.url,onError=()=>{}}={}){
@@ -49,14 +49,14 @@ export function bindPhotoFraming(tiles,photos,{analyze=suggestPhotoFrame,onChang
   const image=tile.querySelector('img');
   const update=(axis,value)=>{
    const photo=currentPhotos()[index];
-   photo[axis]=clamp(value);image.style.objectPosition=`${photo.cropX??50}% ${photo.cropY??50}%`;
+   photo[axis]=axis==='cropZoom'?Math.max(100,Math.min(200,Number(value)||100)):clamp(value);image.style.objectPosition=`${photo.cropX??50}% ${photo.cropY??50}%`;image.style.transformOrigin=image.style.objectPosition;image.style.transform=`scale(${(photo.cropZoom??100)/100})`;
    tile.querySelectorAll(`[data-axis="${axis}"]`).forEach(input=>input.value=photo[axis]);onChange(photo);
   };
   tile.querySelectorAll('[data-crop],[data-crop-number]').forEach(input=>{
    input.draggable=false;input.addEventListener('pointerdown',e=>e.stopPropagation());
    input.oninput=()=>update(input.dataset.axis,input.value);
   });
-  tile.querySelector('[data-reset-frame]').onclick=()=>{update('cropX',50);update('cropY',50);};
+  tile.querySelector('[data-reset-frame]').onclick=()=>{update('cropX',50);update('cropY',50);update('cropZoom',100);};
   tile.querySelector('[data-auto-frame]').onclick=async event=>{
    const button=event.currentTarget;button.disabled=true;button.textContent='Framing…';
    try{const frame=await analyze(await source(currentPhotos()[index]));if(!tile.isConnected)return;update('cropX',frame.cropX);update('cropY',frame.cropY);}
