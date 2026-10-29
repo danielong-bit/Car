@@ -1,3 +1,4 @@
+import {openFacebookPost} from './facebook-post.mjs';
 import {createPhotoInspector} from './photo-inspector.mjs';
 import {vehiclePreviewDocument} from './vehicle-preview.mjs';
 import {suggestPhotoFrame,frameControlsMarkup,bindPhotoFraming} from './photo-framing.mjs';
@@ -310,7 +311,7 @@ function inventory(){
 function editor(){
  const activeTags=new Set((editing.specialBadges||[]).map(t=>String(t).toUpperCase()));
  const currentFeatures=new Set((editing.features||[]).map(f=>f.trim()));
- return `<form id="vehicleForm" class="vehicle-form"><div class="editor-heading"><div><p class="eyebrow">VEHICLE DETAILS</p><h2>${editing.stockId?esc((editing.manufactureYear||editing.year||'')+' '+editing.make+' '+editing.model):'Add your next vehicle'}</h2><p>Edit vehicle details and photos.</p></div><button type="button" class="button quiet" data-action="back">← Back to inventory</button></div>
+ return `<form id="vehicleForm" class="vehicle-form"><div class="editor-heading"><div><p class="eyebrow">VEHICLE DETAILS</p><h2>${editing.stockId?esc((editing.manufactureYear||editing.year||'')+' '+editing.make+' '+editing.model):'Add your next vehicle'}</h2><p>Edit vehicle details and photos.</p></div><div class="actions"><button type="button" class="button quiet" data-action="facebook-post">Generate Facebook post</button><button type="button" class="button quiet" data-action="back">← Back to inventory</button></div></div>
  <section class="wb-autofill-bar" aria-label="Smart Auto-Fill Assistant">
   <div class="wb-autofill-head">
    <div>
@@ -602,6 +603,7 @@ async function runAction(action){
  if(action==='export')return exportUpdate();
  if(action==='json')return download('public-site.json',new Blob([JSON.stringify({document:publicSnapshot(doc)},null,2)],{type:'application/json'}));
  if(action==='reset'){if(!await confirmAction('Reset browser inventory?','Remove local stock edits and return to the website’s saved inventory? Export your changes first.'))return;await deleteLocal('inventory');await deleteLocal('preview');location.reload();}
+ if(action==='facebook-post'){captureForm();return openFacebookPost(editing,doc.profile);}
  if(action==='preview-card')return openEditingVehiclePreview();
 }
 let photoInspector;

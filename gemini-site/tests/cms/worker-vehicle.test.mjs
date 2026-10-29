@@ -45,3 +45,21 @@ test('an unknown vehicle route does not expose the Audi fallback as that car',as
  assert.equal(response.status,404);
  assert.equal(await response.text(),'Vehicle not found');
 });
+
+test('homepage uses the current publication before the first render, without a static validator',async()=>{
+ const {env,reads}=environment([{id:'fresh-photo',stockId:'NEW',gallery:[{url:'/assets/uploads/new.webp'}]}]);
+ const previous=globalThis.HTMLRewriter;const injected=[];
+ globalThis.HTMLRewriter=class{on(selector,handler){if(selector==='head')handler.element({append(html){injected.push(html);}});return this;}transform(response){return response;}};
+ try{
+  const response=await worker.fetch(new Request('https://example.com/',{headers:{'If-None-Match':'static-build'}}),env);
+  assert.equal(response.status,200);assert.equal(reads[0].validator,null);
+  assert.equal(response.headers.get('Cache-Control'),'no-store');assert.equal(response.headers.get('ETag'),null);
+  assert.match(injected.join(''),/CMS_CONTENT_CURRENT=true/);assert.match(injected.join(''),/new.webp/);
+ }finally{globalThis.HTMLRewriter=previous;}
+});
+
+test('publication failure never falls back to outdated public photos',async()=>{
+ const {env}=environment([]);env.CONTENT_STORE.get=()=>({fetch:async()=>new Response('Unavailable',{status:503})});
+ const response=await worker.fetch(new Request('https://example.com/'),env);
+ assert.equal(response.status,503);assert.equal(response.headers.get('Cache-Control'),'no-store');assert.doesNotMatch(await response.text(),/CMS_DATA|static-build/);
+});
