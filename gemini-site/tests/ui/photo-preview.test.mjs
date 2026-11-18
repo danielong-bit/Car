@@ -16,7 +16,8 @@ test('photo preview opens at the clicked photograph, navigates, shows the draft 
  assert.equal(doc.body.style.overflow,'hidden');
  assert.equal(inspector.dialog.querySelector('img').getAttribute('src'),'/assets/b.jpg');
  assert.equal(inspector.dialog.querySelector('output').textContent,'2 / 2');
- assert.equal(inspector.dialog.querySelector('img').style.objectPosition,'60% 20%');
+ assert.equal(inspector.dialog.querySelector('img').style.objectFit,'contain');
+ assert.equal(inspector.dialog.querySelector('img').style.objectPosition,'50% 50%');
  inspector.dialog.querySelector('[data-inspector-prev]').click();await tick();
  assert.equal(inspector.dialog.querySelector('img').getAttribute('src'),'/assets/a.jpg');
  inspector.dialog.querySelector('[data-preview-mode=framed]').click();
@@ -27,9 +28,10 @@ test('photo preview opens at the clicked photograph, navigates, shows the draft 
 
 test('unsaved vehicle preview includes current edits and photos without changing the saved document or publishing a draft',()=>{
  const original={vehicles:[{id:'car',stockId:'STOCK',make:'BMW',model:'525LI',priceRm:100,status:'available',gallery:[{url:'/assets/old.jpg'}]}],homepage:{},profile:{},finance:{},stories:[]};
- const editing={...original.vehicles[0],priceRm:250,status:'draft',internalCost:123,gallery:[{url:'/assets/new.jpg',cropX:75,cropY:35}]};
+ const editing={...original.vehicles[0],priceRm:250,status:'draft',internalCost:123,gallery:[{url:'/assets/new.jpg',cropX:75,cropY:35,framing:'full'}]};
  const before=structuredClone(original);
  const preview=publicContent(vehiclePreviewDocument(original,editing));
  assert.equal(preview.vehicles[0].priceRm,250);assert.equal(preview.vehicles[0].gallery[0].cropY,35);
+ assert.equal(preview.vehicles[0].gallery[0].framing,'full');
  assert.equal(preview.vehicles[0].internalCost,undefined);assert.deepEqual(original,before);assert.equal(editing.status,'draft');
 });

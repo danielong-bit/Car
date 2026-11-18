@@ -1,7 +1,7 @@
 import {openFacebookPost} from './facebook-post.mjs';
 import {createPhotoInspector} from './photo-inspector.mjs';
 import {vehiclePreviewDocument} from './vehicle-preview.mjs';
-import {suggestPhotoFrame,frameControlsMarkup,bindPhotoFraming} from './photo-framing.mjs';
+import {applyPhotoFraming,frameControlsMarkup,bindPhotoFraming} from './photo-framing.mjs';
 import {displayPhoto} from './photo-sources.mjs';
 import {showroomLocationOptions} from './showroom-locations.mjs';
 import {stockSortChoices,compareStock} from './inventory-order.mjs';
@@ -311,38 +311,30 @@ function inventory(){
 function editor(){
  const activeTags=new Set((editing.specialBadges||[]).map(t=>String(t).toUpperCase()));
  const currentFeatures=new Set((editing.features||[]).map(f=>f.trim()));
- return `<form id="vehicleForm" class="vehicle-form"><div class="editor-heading"><div><p class="eyebrow">VEHICLE DETAILS</p><h2>${editing.stockId?esc((editing.manufactureYear||editing.year||'')+' '+editing.make+' '+editing.model):'Add your next vehicle'}</h2><p>Edit vehicle details and photos.</p></div><div class="actions"><button type="button" class="button quiet" data-action="facebook-post">Generate Facebook post</button><button type="button" class="button quiet" data-action="back">← Back to inventory</button></div></div>
- <section class="wb-autofill-bar" aria-label="Smart Auto-Fill Assistant">
-  <div class="wb-autofill-head">
-   <div>
-    <span class="wb-hook-eyebrow">⚡ SMART AUTO-FILL &amp; GUIDED ASSISTANT · 一键自动填表助手</span>
-    <strong>Pick a popular model preset or click “Smart Complete” after typing Make &amp; Model</strong>
-    <p>Automatically fills Stock ID, Body Type, Transmission, Engine CC, Chassis Code, Card Badges (RS / RF / TYPE R / LOW KM), Showroom Copy &amp; Features.</p>
-   </div>
-   <div class="wb-autofill-actions">
-    <button type="button" class="button small" data-action="smart-complete">⚡ Smart Complete from Make/Model</button>
-    <button type="button" class="button small quiet" data-action="auto-copy">✨ Auto-Write Copy</button>
-   </div>
-  </div>
-  <div class="wb-preset-row">
-   <span class="wb-preset-label">1-Click Model Presets:</span>
-   <div class="wb-preset-chips">
-    ${MODEL_PRESETS.map(p=>`<button type="button" class="wb-preset-chip" data-preset="${esc(p.id)}">+ ${esc(p.label)}</button>`).join('')}
-   </div>
-  </div>
-  <details class="wb-fill-guide">
-   <summary>💡 How to fill &amp; publish a car in 60 seconds (填写指南 — 放什么内容？)</summary>
-   <div class="wb-fill-guide-grid">
-    <div><strong>1. Click a Preset or Type Make + Model</strong><p>Click any model chip above (e.g. <em>Alphard 2.5 SC</em> or <em>Civic Type R FL5</em>) to auto-fill 80% of the form immediately.</p></div>
-    <div><strong>2. Fill Price (RM) &amp; Mileage (km)</strong><p>Enter only your selling price (e.g. <code>248000</code>) and mileage (e.g. <code>18500</code>). Under 25,000 km automatically activates the <code>LOW KM</code> badge.</p></div>
-    <div><strong>3. Drop Photos &amp; Save as Available</strong><p>Drag your car photos into Step 02 (Photo #1 becomes the cover), set Status to <strong>Available</strong>, and click <strong>Save vehicle</strong>.</p></div>
-   </div>
+ return `<form id="vehicleForm" class="vehicle-form owner-listing-form"><div class="editor-heading"><div><h2>${editing.stockId?esc((editing.manufactureYear||editing.year||'')+' '+editing.make+' '+editing.model):'Add your next vehicle'}</h2><p>Enter the basics first. Add more details when you have them.</p></div><div class="actions"><button type="button" class="button quiet" data-action="facebook-post">Generate Facebook post</button><button type="button" class="button quiet" data-action="back">← Back to inventory</button></div></div>
+ <nav class="listing-jump" aria-label="Listing sections">
+  <button type="button" data-editor-jump="listingBasics">Listing basics</button>
+  <button type="button" data-editor-jump="photosSection">Photos</button>
+  <button type="button" data-editor-jump="listingSpecs">Engine, equipment &amp; warranty</button>
+ </nav>
+ <section class="wb-panel form-section" id="listingBasics" tabindex="-1">
+  <div class="form-section-title"><span>01</span><div><h3>Listing basics</h3><p>Make and model are required. Leave the price blank to show “Enquire”.</p></div></div>
+  <div class="form-grid">${field("Make","make","text",null,true)}${field("Model","model","text",null,true)}${field("Variant / trim","variant")}${field("Year made","manufactureYear","number")}${field("Asking price (RM)","priceRm","number")}${field("Mileage (km)","mileageKm","number")}${field("Status","status","select",STATUSES,true)}${field("Showroom location","location")}</div>
+  <details class="listing-extra"><summary>Model shortcuts</summary><div class="wb-preset-chips">${MODEL_PRESETS.map(p=>`<button type="button" class="wb-preset-chip" data-preset="${esc(p.id)}">+ ${esc(p.label)}</button>`).join('')}</div></details>
+ </section>
+ <section class="wb-panel form-section" id="photosSection" tabindex="-1"><div class="form-section-title"><span>02</span><div><h3>Photos</h3><p>New photos show in full. Use Set cover to choose the photo buyers see first.</p></div><span class="count">${editing.gallery.length} photos</span></div><label class="upload-zone" id="photoDrop">${icon('photo')}<strong>Add photos</strong><span>Select several at once · JPG, PNG or WebP · up to 25 MB each</span><input id="photoFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple></label>${editing.gallery.some(photo=>photo.framing!=='full')?'<button type="button" class="button quiet photo-fit-all" data-action="fit-gallery">Show all photos in full</button>':''}<div id="uploadProgress" aria-live="polite"></div><p id="photoUploadFeedback" role="status" hidden></p><div class="photo-editor-grid">${editing.gallery.map((m,i)=>{const mSrc=staticWbSrc(m.url);return `<article class="photo-tile"><div><img ${mSrc?`src="${esc(mSrc)}" `:''}data-source="${esc(m.url)}" alt="Photo ${i+1}" loading="lazy" decoding="async">${i===0?'<span class="cover-label">Cover photo</span>':`<span class="cover-label" style="background:#080b10cc;color:#f8fafc">${i+1}/${editing.gallery.length}</span>`}</div><label class="photo-category-field">Photo category<select data-choice-presentation="select" data-media-category="${i}">${[['exterior','Exterior'],['interior','Interior'],['engine','Engine'],['details','Details']].map(([key,name])=>`<option value="${name}" ${photoCategory(m.category)===key?'selected':''}>${name}</option>`).join('')}</select></label><div class="photo-actions"><button type="button" data-cover="${i}" ${i===0?'disabled':''}>Set cover</button><button type="button" data-move="${i}" data-step="-1" ${i===0?'disabled':''} aria-label="Move photo ${i+1} left">←</button><button type="button" data-move="${i}" data-step="1" ${i===editing.gallery.length-1?'disabled':''} aria-label="Move photo ${i+1} right">→</button><label class="replace-photo">Replace<input type="file" accept="image/jpeg,image/png,image/webp" data-replace="${i}"></label><button type="button" data-remove="${i}" class="danger-text">Remove</button></div></article>`;}).join('')}</div></section>
+ <section class="wb-panel form-section" id="listingSpecs" tabindex="-1">
+  <div class="form-section-title"><span>03</span><div><h3>Engine, equipment &amp; warranty</h3><p>Add the details you can confirm. All fields here are optional.</p></div></div>
+  <div class="listing-spec-group"><h4>Engine &amp; transmission</h4><div class="form-grid">${field("Engine (e.g. 2.4L Turbo)","engine")}${field("Engine size (cc, e.g. 2393)","engineCc","number")}${field("Transmission","transmission")}${field("Fuel type","fuelType","select",["","Petrol","Diesel","Hybrid","Electric"])}</div></div>
+  <div class="listing-spec-group"><div class="field"><span class="field-label-row"><span>Equipment</span></span><div class="wb-feature-chips">${QUICK_FEATURES.map(f=>`<button type="button" class="wb-feature-chip ${currentFeatures.has(f)?'is-active':''}" data-toggle-feature="${esc(f)}">${currentFeatures.has(f)?'✓ ':'+ '}${esc(f)}</button>`).join('')}</div><textarea name="features" rows="5" placeholder="e.g.&#10;Sunroof / Panoramic Roof&#10;360° Surround Camera&#10;Apple CarPlay &amp; Android Auto">${esc(editing.features.join('\n'))}</textarea><small class="field-hint">Choose common equipment, or type your own, one item per line.</small></div></div>
+  <div class="listing-spec-group"><div class="form-grid">${field('Warranty','warrantyInfo','text',null,false,`<span class="field-quick-group"><button type="button" class="field-quick-btn" data-warranty-preset="Up to 5-Year Warranty (Engine, Gearbox, ECU &amp; Steering Rack)">5-Yr</button><button type="button" class="field-quick-btn" data-warranty-preset="Up to 7-Year / Unlimited Mileage Warranty Available">7-Yr</button></span>`)}</div></div>
+  <details class="listing-extra"><summary>More vehicle details</summary>
+   <div class="form-grid">${field("Stock ID","stockId")}${field("Auction grade","auctionGrade","select",GRADES)}${field("Interior grade","interiorGrade","select",INTERIORS)}${field("Exterior colour","exteriorColor")}${field("Interior colour","interiorColor")}${field("Auction house","auctionHouse")}${field("Registration year","registrationYear","number")}${field("Chassis model code","chassisCode")}${field("Chassis / frame number","chassisNumber")}${field("Body type","body","select",["","MPV","SUV","Sedan","Wagon","Coupe","Hatchback","Convertible","Pickup"])}${field("Condition","conditionType","select",["Recond","Pre-owned","Consignment"])}</div>
+   <div class="form-grid wide"><label class="field">Other specs<textarea name="extraSpecifications" rows="6" placeholder="Drive: AWD&#10;Camera: 360° camera">${esc(extraSpecificationText(editing))}</textarea><small class="field-hint">One per line, e.g. Drive: AWD. Use Equipment for items like a sunroof.</small></label>${field('Condition notes','conditionNotes','textarea',null,false,`<button type="button" class="field-quick-btn" data-action="auto-copy">✨ Auto-Write</button>`)}${field('Description','description','textarea',null,false,`<button type="button" class="field-quick-btn" data-action="auto-copy">✨ Auto-Write</button>`)}<div class="field-stack"><label class="field">Danny's TikTok explanation<input name="presenterUrl" type="url" value="${esc(editing.presenter?.url||'')}" placeholder="https://www.tiktok.com/@dannyongg/video/…"><small class="field-hint">Optional — embeds Danny's TikTok walkthrough video on the car detail page.</small></label><label class="field" style="margin-top:14px">Facebook video fallback<input name="presenterFacebook" type="url" value="${esc(editing.presenter?.facebook||'')}" placeholder="https://www.facebook.com/reel/…"><small class="field-hint">Optional Facebook Reel link shown alongside TikTok.</small></label></div></div>
+   <div class="badge-picker-block"><div class="badge-picker-head"><strong>Optional Trim &amp; Highlight Tags</strong><small>Stored with the vehicle for search &amp; detail view.</small></div><div class="badge-tag-grid">${SPECIAL_TAGS.map(tag=>`<label class="badge-tag-option"><input type="checkbox" name="specialBadgeTag" value="${esc(tag)}" ${activeTags.has(tag)||(tag==='LOW KM'&&editing.lowKm)?'checked':''}><span>${esc(tag)}</span></label>`).join('')}</div><div class="form-grid" style="margin-top:12px">${field('Custom badge label (optional, e.g. MUGEN / EDITION 1)','badgeLabel')}<label class="check-field" style="align-self:end"><input type="checkbox" name="lowKm" ${editing.lowKm||(editing.mileageKm!=null&&editing.mileageKm<=25000)?'checked':''}> Highlight as Low Mileage (LOW KM)</label></div></div><label class="check-field"><input type="checkbox" name="conditionExample" ${editing.conditionExample?'checked':''}> Show example grade &amp; demonstration report notice</label><label class="check-field"><input type="checkbox" name="gradeVerified" ${editing.gradeVerified?'checked':''}> Auction grade checked against the original report</label><label class="check-field"><input type="checkbox" name="isFeatured" ${editing.isFeatured?'checked':''}> Feature on the homepage</label>
   </details>
  </section>
- <section class="wb-panel form-section"><div class="form-section-title"><span>01</span><div><h3>Core Vehicle Identity &amp; Pricing</h3><p>Essential showroom details: Stock ID, Make, Model, Year, Price, Mileage, Status, and Grade.</p></div></div><div class="form-grid">${field('Stock ID','stockId','text',null,true,`<button type="button" class="field-quick-btn" data-action="auto-stock-id">⚡ Auto ID</button>`)}${field('Make','make','text',null,true)}${field('Model','model','text',null,true)}${field('Variant (e.g. RS, RF, Type R, Z Premier)','variant')}${field('Manufacture year','manufactureYear','number')}${field('Price (RM)','priceRm','number')}${field('Mileage (km)','mileageKm','number')}${field('Status','status','select',STATUSES,true)}${field('Auction grade','auctionGrade','select',GRADES)}${field('Interior grade','interiorGrade','select',INTERIORS)}${field('Exterior colour','exteriorColor')}${field('Showroom location','location')}</div>
- <p class="muted">Leave Price blank to display “Enquire”. Booked vehicles invite enquiries about similar stock.</p></section>
- <section class="wb-panel form-section" id="photosSection"><div class="form-section-title"><span>02</span><div><h3>Vehicle Photos (Cover &amp; 1/N Gallery)</h3><p>Photo #1 is the cover image. Buyers swipe 1/12 → 12/12 on mobile and tap to enlarge.</p></div><span class="count">${editing.gallery.length} photos</span></div><label class="upload-zone" id="photoDrop">${icon('photo')}<strong>Drop photos here, or choose files</strong><span>Photos shrink automatically before upload · JPG, PNG or WebP · up to 25 MB each</span><input id="photoFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple></label><div id="uploadProgress" aria-live="polite"></div><div class="photo-editor-grid">${editing.gallery.map((m,i)=>{const mSrc=staticWbSrc(m.url);return `<article class="photo-tile"><div><img ${mSrc?`src="${esc(mSrc)}" `:''}data-source="${esc(m.url)}" alt="Photo ${i+1}" loading="lazy" decoding="async">${i===0?'<span class="cover-label">Cover photo</span>':`<span class="cover-label" style="background:#080b10cc;color:#f8fafc">${i+1}/${editing.gallery.length}</span>`}</div><label class="photo-category-field">Photo category<select data-choice-presentation="select" data-media-category="${i}">${[['exterior','Exterior'],['interior','Interior'],['engine','Engine'],['details','Details']].map(([key,name])=>`<option value="${name}" ${photoCategory(m.category)===key?'selected':''}>${name}</option>`).join('')}</select></label><div class="photo-actions"><button type="button" data-cover="${i}" ${i===0?'disabled':''}>Set cover</button><button type="button" data-move="${i}" data-step="-1" ${i===0?'disabled':''} aria-label="Move photo ${i+1} left">←</button><button type="button" data-move="${i}" data-step="1" ${i===editing.gallery.length-1?'disabled':''} aria-label="Move photo ${i+1} right">→</button><label class="replace-photo">Replace<input type="file" accept="image/jpeg,image/png,image/webp" data-replace="${i}"></label><button type="button" data-remove="${i}" class="danger-text">Remove</button></div></article>`;}).join('')}</div></section>
- <details class="wb-panel form-section"><summary><span class="form-section-title"><span>03</span><span><strong>Specifications &amp; equipment</strong><small>Edit the specifications and equipment shown on the vehicle page.</small></span></span></summary><div class="form-grid">${field('Transmission','transmission')}${field('Body type','body','select',['','MPV','SUV','Sedan','Wagon','Coupe','Hatchback','Convertible','Pickup'])}${field('Condition','conditionType','select',['Recond','Pre-owned','Consignment'])}${field('Auction house','auctionHouse')}${field('Registration year','registrationYear','number')}${field('Engine capacity (cc)','engineCc','number')}${field('Engine description','engine')}${field('Fuel type','fuelType','select',['','Petrol','Diesel','Hybrid','Electric'])}${field('Interior colour','interiorColor')}${field('Chassis / Frame No. / VIN (real vehicle number)','chassisNumber')}${field('Chassis model code (e.g. FL5)','chassisCode')}${field('Warranty','warrantyInfo','text',null,false,`<span class="field-quick-group"><button type="button" class="field-quick-btn" data-warranty-preset="Up to 5-Year Warranty (Engine, Gearbox, ECU &amp; Steering Rack)">5-Yr</button><button type="button" class="field-quick-btn" data-warranty-preset="Up to 7-Year / Unlimited Mileage Warranty Available">7-Yr</button></span>`)}</div><div class="badge-picker-block"><div class="badge-picker-head"><strong>Optional Trim &amp; Highlight Tags</strong><small>Stored with the vehicle for search &amp; detail view.</small></div><div class="badge-tag-grid">${SPECIAL_TAGS.map(tag=>`<label class="badge-tag-option"><input type="checkbox" name="specialBadgeTag" value="${esc(tag)}" ${activeTags.has(tag)||(tag==='LOW KM'&&editing.lowKm)?'checked':''}><span>${esc(tag)}</span></label>`).join('')}</div><div class="form-grid" style="margin-top:12px">${field('Custom badge label (optional, e.g. MUGEN / EDITION 1)','badgeLabel')}<label class="check-field" style="align-self:end"><input type="checkbox" name="lowKm" ${editing.lowKm||(editing.mileageKm!=null&&editing.mileageKm<=25000)?'checked':''}> Highlight as Low Mileage (LOW KM)</label></div></div><label class="check-field"><input type="checkbox" name="conditionExample" ${editing.conditionExample?'checked':''}> Show example grade &amp; demonstration report notice</label><label class="check-field"><input type="checkbox" name="gradeVerified" ${editing.gradeVerified?'checked':''}> Auction grade checked against the original report</label><label class="check-field"><input type="checkbox" name="isFeatured" ${editing.isFeatured?'checked':''}> Feature on the homepage</label><div class="form-grid wide">${field('Condition notes','conditionNotes','textarea',null,false,`<button type="button" class="field-quick-btn" data-action="auto-copy">✨ Auto-Write</button>`)}${field('Description','description','textarea',null,false,`<button type="button" class="field-quick-btn" data-action="auto-copy">✨ Auto-Write</button>`)}<label class="field">Other specifications<textarea name="extraSpecifications" rows="6" placeholder="Drive: AWD&#10;Camera: 360° camera">${esc(extraSpecificationText(editing))}</textarea><small class="field-hint">One per line: Name: Value. Engine and transmission use the fields above.</small></label><div class="field"><span class="field-label-row"><span>Additional equipment (one item per line)</span></span><div class="wb-feature-chips">${QUICK_FEATURES.map(f=>`<button type="button" class="wb-feature-chip ${currentFeatures.has(f)?'is-active':''}" data-toggle-feature="${esc(f)}">${currentFeatures.has(f)?'✓ ':'+ '}${esc(f)}</button>`).join('')}</div><textarea name="features" rows="5" placeholder="e.g.&#10;Sunroof / Panoramic Roof&#10;360° Surround Camera&#10;Apple CarPlay &amp; Android Auto">${esc(editing.features.join('\n'))}</textarea><small class="field-hint">Type extra equipment here. Items already listed in the specifications are shown once.</small></div><div class="field-stack"><label class="field">Danny's TikTok explanation<input name="presenterUrl" type="url" value="${esc(editing.presenter?.url||'')}" placeholder="https://www.tiktok.com/@dannyongg/video/…"><small class="field-hint">Optional — embeds Danny's TikTok walkthrough video on the car detail page.</small></label><label class="field" style="margin-top:14px">Facebook video fallback<input name="presenterFacebook" type="url" value="${esc(editing.presenter?.facebook||'')}" placeholder="https://www.facebook.com/reel/…"><small class="field-hint">Optional Facebook Reel link shown alongside TikTok.</small></label></div></div></details><div class="editor-save"><span id="editorError" role="alert">Save and go live updates this vehicle only. Other drafts stay private.</span><div><button type="button" class="button quiet" data-action="preview-card">Preview vehicle</button><button type="button" class="button quiet" data-action="save-draft">Save as draft</button><button type="submit" class="button" id="saveVehicle">Save and go live ${icon('check')}</button></div></div></form>`;
+ <div class="editor-save"><span id="editorError" role="alert">Save a draft to finish later. Publishing a draft marks it Available.</span><div><button type="button" class="button quiet" data-action="preview-card">Preview vehicle</button><button type="button" class="button quiet" data-action="save-draft">Save as draft</button><button type="submit" class="button" id="saveVehicle">Publish vehicle ${icon('check')}</button></div></div></form>`;
 }
 function deliveriesMarkup(){
  const stories=doc.stories||[];
@@ -497,8 +489,104 @@ function settings(){
  </details>`;
 }
 function captureForm(){const form=$('#vehicleForm');if(!form)return;const data=new FormData(form);for(const [key,value] of data){if(['features','extraSpecifications','presenterUrl','presenterFacebook','gradeVerified','isFeatured','conditionExample','specialBadgeTag','lowKm'].includes(key))continue;editing[key]=['manufactureYear','priceRm','mileageKm','engineCc','registrationYear'].includes(key)?value===''?null:Number(value):String(value).trim();}editing.conditionExample=data.has('conditionExample');editing.gradeVerified=data.has('gradeVerified');editing.isFeatured=data.has('isFeatured');editing.lowKm=data.has('lowKm');editing.specialBadges=data.getAll('specialBadgeTag').map(v=>String(v).trim()).filter(Boolean);editing.specs=updateExtraSpecifications(editing,String(data.get('extraSpecifications')||''));editing.features=String(data.get('features')||'').split('\n').map(v=>v.trim()).filter(Boolean);editing.presenter={...editing.presenter,url:String(data.get('presenterUrl')||''),facebook:String(data.get('presenterFacebook')||'')};editing.coverImageUrl=editing.gallery[0]?.url||'';editing=normalizeVehicle(editing);}
-async function saveVehicle(asDraft){if(busy)return;captureForm();if(asDraft)editing.status='draft';const errors=vehicleIssues(editing);if(doc.vehicles.some(v=>v.id!==editing.id&&v.stockId.toLowerCase()===editing.stockId.toLowerCase()))errors.push('Stock ID already exists. Choose a unique ID.');if(editing.presenter?.url&&!/^https:\/\/(www\.)?tiktok.com\/@[\w.-]+\/video\/\d+(\?.*)?$/.test(editing.presenter.url))errors.push('Use a TikTok video URL for Danny’s explanation.');if(editing.presenter?.facebook&&!/^https:\/\/(www\.)?facebook.com\/reel\/\d+\/?$/.test(editing.presenter.facebook))errors.push('Use a Facebook Reel URL for the fallback.');if(errors.length){$('#editorError').textContent=errors.join(' ');toast(errors[0],true);return;}const targetId=editing.id,controls=[...document.querySelectorAll('#vehicleForm input,#vehicleForm select,#vehicleForm textarea,#vehicleForm button,[data-nav]')].map(el=>[el,el.disabled]);busy=true;controls.forEach(([el])=>el.disabled=true);const before=structuredClone(doc);const i=doc.vehicles.findIndex(v=>v.id===editing.id);if(i<0)doc.vehicles.push(structuredClone(editing));else doc.vehicles[i]=structuredClone(editing);try{await persist();if(!asDraft)await publishItem({collection:'vehicles',id:targetId});else toast('Vehicle draft saved.');editorDirty=false;busy=false;activate('inventory');}catch(e){doc=before;toast(e.message,true);}finally{busy=false;controls.forEach(([el,disabled])=>el.disabled=disabled);}}
-async function upload(files,replaceIndex){if(busy)return;captureForm();if(files.length>30)return toast('Choose up to 30 photos at once.',true);if(replaceIndex==null&&editing.gallery.length+files.length>60)return toast('A car can have up to 60 photos.',true);busy=true;const target=editing,progress=$('#uploadProgress');document.querySelectorAll('[data-nav],#openPreview,#exportUpdate,#saveVehicle,[data-action],#vehicleForm input,#vehicleForm select,#vehicleForm textarea').forEach(el=>el.disabled=true);progress.innerHTML=[...files].map((f,i)=>`<label>${esc(f.name)} <progress id="progress${i}" max="100" value="0"></progress><span id="progressText${i}">Waiting</span></label>`).join('');let uploaded=0;try{for(const [i,file] of [...files].entries()){const text=$('#progressText'+i);text.textContent='Resizing…';$('#progress'+i).value=20;const blob=await compressPhoto(file);$('#progress'+i).value=70;const url=cloudReady?await uploadCloudMedia(blob):'/assets/uploads/'+crypto.randomUUID()+'.webp';await writeLocal(url,blob);const frame=await suggestPhotoFrame(blob).catch(()=>({cropX:50,cropY:50}));const media={id:crypto.randomUUID(),url,visible:true,category:'Photo',ratio:'16/10',...frame};if(replaceIndex!=null)target.gallery[replaceIndex]=media;else target.gallery.push(media);$('#progress'+i).value=100;text.textContent='Ready';uploaded++;editorDirty=true;}toast(uploaded+' photos added. Save the vehicle to keep this gallery.');}catch(e){toast(e.message,true);}finally{busy=false;editing.coverImageUrl=editing.gallery[0]?.url||'';document.querySelectorAll('[data-nav],#openPreview,#exportUpdate').forEach(el=>el.disabled=false);render();}}
+async function saveVehicle(asDraft){
+  if(busy)return;
+  captureForm();
+  const isNew=!doc.vehicles.some(vehicle=>vehicle.id===editing.id);
+  const vehicle={...editing,stockId:editing.stockId||generateUniqueStockId(editing.make)};
+  if(asDraft&&isNew)vehicle.status='draft';
+  if(!asDraft&&vehicle.status==='draft')vehicle.status='available';
+  const errors=vehicleIssues(vehicle);
+  if(doc.vehicles.some(existing=>existing.id!==vehicle.id&&existing.stockId.toLowerCase()===vehicle.stockId.toLowerCase())){
+   errors.push('Stock ID already exists. Choose a unique ID under More vehicle details.');
+  }
+  const needsCover=!asDraft&&['available','reserved','sold'].includes(vehicle.status)
+   &&!vehicle.gallery.some(photo=>photo.url&&photo.visible!==false&&!photo.video);
+  if(needsCover)errors.push('Add a cover photo before publishing.');
+  if(vehicle.presenter?.url&&!/^https:\/\/(www\.)?tiktok\.com\/@[\w.-]+\/video\/\d+(\?.*)?$/.test(vehicle.presenter.url)){
+   errors.push('Use a TikTok video URL for the vehicle walkthrough.');
+  }
+  if(vehicle.presenter?.facebook&&!/^https:\/\/(www\.)?facebook\.com\/reel\/\d+\/?$/.test(vehicle.presenter.facebook)){
+   errors.push('Use a Facebook Reel URL for the fallback.');
+  }
+  if(errors.length){
+   $('#editorError').textContent=errors.join(' ');
+   if(needsCover&&!asDraft&&errors.length===1)$('#photosSection')?.scrollIntoView({block:'start'});
+   return toast(errors[0],true);
+  }
+  const controls=[...document.querySelectorAll('#vehicleForm input,#vehicleForm select,#vehicleForm textarea,#vehicleForm button,[data-nav]')];
+  const previousDisabled=controls.map(control=>control.disabled);
+  const before=structuredClone(doc);
+  busy=true;
+  controls.forEach(control=>control.disabled=true);
+  const index=doc.vehicles.findIndex(item=>item.id===vehicle.id);
+  if(index<0)doc.vehicles.push(vehicle);
+  else doc.vehicles[index]=vehicle;
+  try{
+   await persist();
+  }catch(error){
+   doc=before;
+   toast(error.message,true);
+   busy=false;
+   controls.forEach((control,index)=>control.disabled=previousDisabled[index]);
+   return;
+  }
+  editing=structuredClone(vehicle);
+  try{
+   if(asDraft)toast('Vehicle draft saved.');
+   else await publishItem({collection:'vehicles',id:vehicle.id});
+   busy=false;
+   activate('inventory');
+  }catch(error){
+   editorDirty=true;
+   render();
+   $('#editorError').textContent='Draft saved. '+error.message;
+   toast(error.message,true);
+  }finally{
+   busy=false;
+   controls.forEach((control,index)=>control.disabled=previousDisabled[index]);
+  }
+ }
+async function upload(files,replaceIndex){
+  if(busy||!files.length)return;
+  captureForm();
+  if(files.length>30)return toast('Choose up to 30 photos at once.',true);
+  if(replaceIndex==null&&editing.gallery.length+files.length>60)return toast('A car can have up to 60 photos.',true);
+  busy=true;
+  const target=editing,progress=$('#uploadProgress');
+  const controls=[...document.querySelectorAll('[data-nav],#openPreview,#exportUpdate,#vehicleForm input,#vehicleForm select,#vehicleForm textarea,#vehicleForm button')];
+  const previousDisabled=controls.map(control=>control.disabled);
+  controls.forEach(control=>control.disabled=true);
+  const feedback=$('#photoUploadFeedback');
+  if(feedback)feedback.hidden=true;
+  let uploaded=0;
+  const failed=[];
+  try{
+   for(const [index,file] of [...files].entries()){
+    progress.textContent=`Uploading photo ${index+1} of ${files.length}…`;
+    try{
+     const blob=await compressPhoto(file);
+     const url=cloudReady?await uploadCloudMedia(blob):'/assets/uploads/'+crypto.randomUUID()+'.webp';
+     if(!cloudReady)await writeLocal(url,blob);
+     const media={id:crypto.randomUUID(),url,visible:true,category:'Photo',framing:'full'};
+     if(replaceIndex!=null)target.gallery[replaceIndex]=media;
+     else target.gallery.push(media);
+     uploaded++;
+     editorDirty=true;
+    }catch(error){failed.push(error.message.startsWith(file.name)?error.message:`${file.name}: ${error.message}`);}
+   }
+  }finally{
+   busy=false;
+   target.coverImageUrl=target.gallery[0]?.url||'';
+   controls.forEach((control,index)=>control.disabled=previousDisabled[index]);
+   render();
+  }
+  const notice=$('#photoUploadFeedback');
+  if(notice){
+   notice.hidden=false;
+   notice.textContent=failed.length?`${uploaded} added. ${failed.length} could not upload. Retry only the failed photos. ${failed.join(' ')}`:`${uploaded} ${uploaded===1?'photo':'photos'} added.`;
+  }
+ }
 async function uploadStoryPhoto(storyId,file){
  if(!file||busy)return;
  const story=(doc.stories||[]).find(s=>s.id===storyId);
@@ -518,6 +606,11 @@ function render(){syncStatusBanner();content.innerHTML=view==='overview'?overvie
 function bind(){
  if($('#workbenchThemeSelect'))$('#workbenchThemeSelect').onchange=e=>saveWorkbenchTheme(e.target.value);
  if($('#brandFilterMode'))$('#brandFilterMode').onchange=event=>{$('#brandFilterChoices').hidden=event.target.value!=='manual';};
+ document.querySelectorAll('[data-editor-jump]').forEach(button=>button.onclick=()=>{
+  const section=document.getElementById(button.dataset.editorJump);
+  section?.focus({preventScroll:true});
+  section?.scrollIntoView({block:'start'});
+ });
  if($('#vehicleForm'))$('#vehicleForm').oninput=event=>{editorDirty=true;if(['auctionGrade','interiorGrade','auctionHouse','gradeVerified'].includes(event.target.name)){editing.conditionExample=false;$('#vehicleForm input[name=conditionExample]').checked=false;}};
  const search=$('#stockSearch');if(search)search.oninput=()=>{query=search.value;const start=search.selectionStart;render();const next=$('#stockSearch');next.focus();next.setSelectionRange(start,start);};
  for(const [id,setter] of [['makeFilter',v=>make=v],['yearFilter',v=>year=v],['stockSort',v=>sort=v],['statusSelectFilter',v=>{filter=v;issueFilter='';}],['issueSelectFilter',v=>issueFilter=v]]){const node=$('#'+id);if(node)node.onchange=()=>{setter(node.value);render();};}
@@ -604,6 +697,14 @@ async function runAction(action){
  if(action==='json')return download('public-site.json',new Blob([JSON.stringify({document:publicSnapshot(doc)},null,2)],{type:'application/json'}));
  if(action==='reset'){if(!await confirmAction('Reset browser inventory?','Remove local stock edits and return to the website’s saved inventory? Export your changes first.'))return;await deleteLocal('inventory');await deleteLocal('preview');location.reload();}
  if(action==='facebook-post'){captureForm();return openFacebookPost(editing,doc.profile);}
+ if(action==='fit-gallery'){
+  captureForm();
+  editing.gallery.forEach(photo=>{photo.framing='full';});
+  editorDirty=true;
+  render();
+  document.querySelector('#photosSection')?.focus({preventScroll:true});
+  return toast('Full photos selected. Save to keep this change.');
+ }
  if(action==='preview-card')return openEditingVehiclePreview();
 }
 let photoInspector;
@@ -1043,12 +1144,12 @@ function overviewMarkup(){
   <div class="owner-overview-heading">
    <div>
 
-    <h2>Stock at a glance</h2>
+    <h2>Manage your stock</h2>
     <p class="owner-last-published">${publishedAt}</p>
    </div>
    <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button class="button quiet" data-owner-nav="edit">${icon('plus')} Add vehicle</button>
-    <button class="button" data-owner-nav="inventory">View vehicles →</button>
+    <button class="button" data-owner-nav="edit">${icon('plus')} Add vehicle</button>
+    <button class="button quiet" data-owner-nav="inventory">View vehicles →</button>
    </div>
   </div>
   <div id="ownerCountMount" class="owner-count-mount">
@@ -1059,10 +1160,10 @@ function overviewMarkup(){
     <div class="owner-count-card"><span>Drafts</span><strong>${counts.drafts}</strong></div>
    </div>
   </div>
-  ${spotlightDeckMarkup}
   <div class="wb-overview-widgets" id="overviewWidgetsGrid">
    ${savedOrder.map(k=>widgets[k]).join('')}
   </div>
+  ${spotlightDeckMarkup}
  </section>`;
 }
 function mediaLibraryMarkup(){return `<section><p class="eyebrow">YOUR VEHICLE PHOTOGRAPHY</p><h2>Media Library</h2><p class="owner-intro">Choose a vehicle to upload, reorder or frame its photographs. Original images stay intact.</p><div class="owner-media-grid">${doc.vehicles.map(v=>`<article>${v.coverImageUrl?`<img data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}">`:'<div class="photo-placeholder">No cover photo</div>'}<p><strong>${esc(v.make+' '+v.model)}</strong><br>${v.gallery.length} photos · ${esc(v.stockId)}</p><button class="button quiet small" data-owner-media="${esc(v.id)}">Manage photos</button></article>`).join('')}</div></section>`;}
@@ -1277,7 +1378,7 @@ function bindOwnerExtras(){
   tile.ondragover=e=>{if(dragged==null)return;e.preventDefault();tile.classList.add('drag-over');};
   tile.ondragleave=()=>tile.classList.remove('drag-over');
   tile.ondrop=e=>{if(dragged==null)return;e.preventDefault();tile.classList.remove('drag-over');if(dragged===i)return;captureForm();const [photo]=editing.gallery.splice(dragged,1);editing.gallery.splice(i,0,photo);dragged=null;editing.coverImageUrl=editing.gallery[0]?.url||'';editorDirty=true;render();};
-  const m=editing.gallery[i],img=tile.querySelector('img');img.draggable=false;img.style.objectPosition=`${m.cropX??50}% ${m.cropY??50}%`;img.style.transformOrigin=img.style.objectPosition;img.style.transform=`scale(${Math.max(100,Math.min(200,Number(m.cropZoom)||100))/100})`;
+  const m=editing.gallery[i],img=tile.querySelector('img');img.draggable=false;applyPhotoFraming(img,m);
   const inspect=document.createElement('button');inspect.type='button';inspect.className='photo-inspect-trigger';inspect.setAttribute('aria-label',`Enlarge photo ${i+1}`);inspect.textContent='View photo ↗';
   img.parentElement.append(inspect);
   inspect.onclick=()=>{photoInspector??=createPhotoInspector();photoInspector.open(()=>editing.gallery,i,`${editing.make} ${editing.model} · ${editing.stockId}`);};
