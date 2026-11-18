@@ -39,7 +39,7 @@ function visiblePhotos(vehicle) {
         .filter(item => item && item.visible !== false && !item.video && clean(item.url))
         .map(item => clean(item.url))
     : [];
-  if (fromGallery.length) return fromGallery;
+  if (Array.isArray(vehicle?.gallery)) return fromGallery;
   if (Array.isArray(vehicle?.galleryUrls) && vehicle.galleryUrls.length) {
     return vehicle.galleryUrls.map(clean).filter(Boolean);
   }
@@ -106,26 +106,27 @@ function normalizeBodyStyle(body = '') {
   if (u === 'CONVERTIBLE' || u === 'CABRIOLET' || u === 'ROADSTER') return 'CONVERTIBLE';
   if (u === 'HATCHBACK') return 'HATCHBACK';
   if (u === 'WAGON' || u === 'ESTATE' || u === 'AVANT') return 'WAGON';
-  return 'SEDAN';
+  return u === 'SEDAN' ? 'SEDAN' : '';
 }
 
 function normalizeTransmission(trans = '') {
-  return /manual|6mt|mt\b/i.test(clean(trans)) ? 'MANUAL' : 'AUTOMATIC';
+  if (/manual|\b\d?mt\b/i.test(clean(trans))) return 'MANUAL';
+  return /auto|cvt|dct|dsg/i.test(clean(trans)) ? 'AUTOMATIC' : '';
 }
 
 function normalizeFuelType(fuel = '', engine = '') {
   const combined = `${clean(fuel)} ${clean(engine)}`.toLowerCase();
-  if (combined.includes('electric') || combined.includes('ev')) return 'ELECTRIC';
-  if (combined.includes('plug-in') || combined.includes('phev')) return 'PLUGIN_HYBRID';
+  if (combined.includes('plug-in') || /\bphev\b/.test(combined)) return 'PLUGIN_HYBRID';
+  if (/\b(electric|ev|bev)\b/.test(combined)) return 'ELECTRIC';
   if (combined.includes('hybrid')) return 'HYBRID';
   if (combined.includes('diesel')) return 'DIESEL';
-  return 'GASOLINE';
+  return /petrol|gasoline/i.test(combined) ? 'GASOLINE' : '';
 }
 
 export function buildFacebookCatalogItem(vehicle, origin = DEFAULT_ORIGIN, finance = {}) {
   const v = vehicle || {};
   const photos = visiblePhotos(v).map(u => resolveAbsoluteUrl(u, origin)).filter(Boolean);
-  const year = v.manufactureYear || v.year || new Date().getFullYear();
+  const year = v.manufactureYear || v.year || null;
   const make = clean(v.make || v.brand || 'Recon');
   const model = clean(v.model || 'Vehicle');
   const trim = clean(v.variant || '');
@@ -135,7 +136,7 @@ export function buildFacebookCatalogItem(vehicle, origin = DEFAULT_ORIGIN, finan
     ? Math.round(Number(rawPrice))
     : 0;
   const monthly = numericPrice > 0 ? estimate({ priceRm: numericPrice }, finance) : null;
-  const km = parseMileageNumber(v) ?? 0;
+  const km = parseMileageNumber(v);
   const availability = v.status === 'sold'
     ? 'out of stock'
     : v.status === 'reserved'
@@ -146,7 +147,7 @@ export function buildFacebookCatalogItem(vehicle, origin = DEFAULT_ORIGIN, finan
 
   const gradeText = [clean(v.auctionGrade), clean(v.interiorGrade)].filter(Boolean).join('/');
   const summaryParts = [
-    `${title} (${v.conditionType === 'Recond' ? 'Unregistered Japan/UK Recond' : clean(v.conditionType || 'Inspected')})`,
+    `${title} (${clean(v.conditionType || 'Used')})`,
     km > 0 ? `${km.toLocaleString('en-MY')} km` : '',
     gradeText && !v.conditionExample ? `Auction Grade ${gradeText}` : '',
     clean(v.exteriorColor || v.color),
@@ -180,7 +181,7 @@ export function buildFacebookCatalogItem(vehicle, origin = DEFAULT_ORIGIN, finan
     body_style: normalizeBodyStyle(v.body),
     transmission: normalizeTransmission(v.transmission),
     fuel_type: normalizeFuelType(v.fuelType, v.engine),
-    exterior_color: clean(v.exteriorColor || v.color || 'Metallic'),
+    exterior_color: clean(v.exteriorColor || v.color),
     interior_color: clean(v.interiorColor || ''),
     drivetrain: /awd|4wd|quattro|4matic/i.test(`${v.variant || ''} ${JSON.stringify(v.specs || {})}`) ? 'AWD' : 'Other',
     address: JSON.stringify({
@@ -190,7 +191,7 @@ export function buildFacebookCatalogItem(vehicle, origin = DEFAULT_ORIGIN, finan
       postal_code: '40150',
       country: 'MY',
     }),
-    custom_label_0: gradeText ? `Grade ${gradeText}` : 'Inspected Recond',
+    custom_label_0: gradeText && !v.conditionExample ? `Grade ${gradeText}` : '',
     custom_label_1: monthly ? `RM ${monthly.toLocaleString('en-MY')}/mo` : '',
     custom_label_2: clean(v.status || 'available').toUpperCase(),
   };
@@ -324,7 +325,7 @@ export function buildVehicleOpenGraphMeta(vehicle, doc = {}, origin = DEFAULT_OR
   const description = `${carTitle} (${statusTag})${specs ? ` — ${specs}` : ''}. Stock #${clean(vehicle.stockId || vehicle.id)} at Danny Recond Select, Shah Alam.`;
   const photos = visiblePhotos(vehicle);
   const imageUrl = resolveAbsoluteUrl(photos[0] || '/assets/audi-s5/main-car-16x9.jpg', origin);
-  const canonicalUrl = requestUrl || `${clean(origin).replace(/\/+$/, '')}/?vehicle=${encodeURIComponent(vehicle.id || vehicle.stockId)}`;
+  const canonicalUrl = `${clean(origin).replace(/\/+$/, '')}/?vehicle=${encodeURIComponent(vehicle.id || vehicle.stockId)}`;
   const availability = vehicle.status === 'sold' ? 'oos' : vehicle.status === 'reserved' ? 'pending' : 'instock';
 
   return {

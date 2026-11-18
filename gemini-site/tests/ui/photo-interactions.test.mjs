@@ -84,3 +84,19 @@ test('photo zoom previews immediately and is retained when saving or resetting',
  tile.querySelector('[data-reset-frame]').click();assert.equal(photo.cropZoom,100);
  dom.window.close();
 });
+
+test('full photos fit the frame by default and can switch to the previously saved crop',()=>{
+ const photo={url:'/assets/car.jpg',framing:'full',cropX:20,cropY:70,cropZoom:150};
+ const dom=new JSDOM('<article><img>'+frameControlsMarkup(0,photo)+'</article>');
+ const tile=dom.window.document.querySelector('article'),image=tile.querySelector('img');
+ const choice=tile.querySelector('[data-photo-framing]');
+ bindPhotoFraming([tile],[photo]);
+ assert.equal(image.style.objectFit,'contain');assert.equal(image.style.transform,'scale(1)');
+ assert.equal(tile.querySelector('[data-manual-framing]').hidden,true);
+ choice.value='crop';choice.dispatchEvent(new dom.window.Event('change'));
+ assert.equal(image.style.objectFit,'cover');assert.equal(image.style.objectPosition,'20% 70%');
+ assert.equal(image.style.transform,'scale(1.5)');
+ choice.value='full';choice.dispatchEvent(new dom.window.Event('change'));
+ assert.equal(image.style.objectFit,'contain');assert.equal(photo.cropZoom,150);
+ dom.window.close();
+});

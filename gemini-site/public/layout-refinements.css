@@ -307,3 +307,57 @@ html body.workbench .facebook-post-dialog label{display:block;margin:16px 0 8px;
 html body.workbench .facebook-post-dialog textarea{box-sizing:border-box;width:100%;height:min(52dvh,480px);min-height:180px;resize:vertical;padding:14px;font-family:inherit;font-size:14px;line-height:1.65;background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:8px}
 html body.workbench .facebook-post-dialog .facebook-post-note,html body.workbench .facebook-post-dialog [role=status]{font-size:12px;line-height:1.5;color:var(--muted)}
 html body.workbench .facebook-post-dialog footer .button{flex-shrink:0;min-height:44px}
+
+/* Vehicle listing workflow */
+html body.workbench .owner-listing-form { max-width: 1040px; margin-inline: auto; }
+.owner-listing-form .editor-heading { align-items: flex-start; }
+.owner-listing-form .editor-heading h2 { text-wrap: balance; }
+.owner-listing-form .listing-jump { display: flex; flex-wrap: wrap; gap: 8px; }
+.owner-listing-form .listing-jump button {
+ min-height: 44px; padding: 8px 13px; border: 1px solid var(--line);
+ border-radius: 8px; background: var(--surface); color: var(--ink); font-weight: 650;
+}
+.owner-listing-form .listing-jump button:hover { border-color: var(--champagne); }
+.owner-listing-form .form-section { scroll-margin-top: 84px; }
+.owner-listing-form .form-section-title { margin-bottom: 16px; }
+.owner-listing-form .form-section-title h3 { margin-block: 0 4px; font-size: 1.15rem; }
+.owner-listing-form .form-section-title p { margin: 0; }
+.owner-listing-form .listing-spec-group + .listing-spec-group,
+.owner-listing-form .listing-extra {
+ border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px;
+}
+.owner-listing-form .listing-spec-group h4 { margin: 0 0 12px; font-size: 1rem; }
+.owner-listing-form .listing-extra summary { cursor: pointer; padding-block: 8px; font-weight: 650; }
+.owner-listing-form .listing-extra > :is(.form-grid,.wb-preset-chips) { margin-block: 8px 14px; }
+.owner-listing-form .photo-fit-all { margin-block: 10px; min-height: 44px; }
+.owner-listing-form :is(#uploadProgress,#photoUploadFeedback):not(:empty) {
+ margin-block: 10px; padding: 10px 12px; border: 1px solid var(--line);
+ border-radius: 8px; color: var(--ink); background: var(--surface);
+}
+.owner-listing-form .photo-fit-choice { display: grid; gap: 5px; margin-block: 5px 10px; }
+.owner-listing-form .photo-fit-choice span { font-size: .78rem; color: var(--muted); }
+.owner-listing-form .photo-fit-choice select { min-width: 0; min-height: 44px; width: 100%; }
+.owner-listing-form .photo-tile > div:first-child { background: #20262a; }
+.owner-listing-form [data-manual-framing][hidden], .owner-listing-form [data-auto-frame][hidden] { display: none; }
+.owner-listing-form .editor-save { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+
+/* Let the existing vehicle photography lead the showroom. */
+html body.exhibition-home .mountain-copy h1 { letter-spacing: -.045em; }
+html body.exhibition-home .showroom-browse { border-radius: 8px; }
+html body.exhibition-home .showroom-browse::after { content: '↓'; margin-inline-start: 8px; }
+html body.exhibition-home #inventory .section-heading h2 { letter-spacing: -.035em; text-wrap: balance; }
+html body.exhibition-home #inventory .stock-price { font-variant-numeric: tabular-nums; }
+html body.exhibition-home #inventory .stock-photo { background: #20262a; }
+@media (max-width: 640px) {
+ html body.workbench .owner-listing-form .editor-heading { flex-wrap: wrap; }
+ .owner-listing-form .editor-heading .actions { flex-wrap: wrap; }
+ .owner-listing-form .form-section { scroll-margin-top: 68px; }
+ .owner-listing-form .listing-jump { gap: 6px; }
+ .owner-listing-form .listing-jump button { font-size: .8rem; }
+ html body.exhibition-home main > .showroom-hero.mountain-hero { height: clamp(430px, 116vw, 500px) !important; }
+ html body.exhibition-home .mountain-hero .mountain-copy { width: calc(100% - 36px); padding-top: 84px !important; }
+ html body.exhibition-home .mountain-hero .mountain-scene { inset: 228px 0 0 !important; }
+ html body.exhibition-home .mountain-hero .mountain-scene::after {
+  background: linear-gradient(180deg, var(--page), transparent 32%, transparent 80%, var(--page));
+ }
+}

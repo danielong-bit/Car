@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
 
 for(const width of [1280,390])test(`homepage at ${width}px renders stock states, saved deliveries and the exact address`,async t=>{
- const template=readFileSync(new URL('../../out/index.html',import.meta.url),'utf8');
+ const template=readFileSync(new URL('../../templates/index.html',import.meta.url),'utf8');
  const css=readFileSync(new URL('../../public/customer-refinements.css',import.meta.url),'utf8');
  const fixture=JSON.parse(readFileSync(new URL('../../data/public-site.json',import.meta.url),'utf8')).document;
  const car=fixture.vehicles[0];

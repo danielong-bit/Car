@@ -260,19 +260,17 @@ test('createGalleryPhotoCache caches resolved photo requests and evicts failures
   let calls = 0;
   const cache = createGalleryPhotoCache(async (path) => {
     calls += 1;
-    if (path === 'bad') throw new Error('missing');
+    if (path === 'bad' && calls === 2) throw new Error('missing');
     return `blob:${path}`;
-  });
+  }, () => ({decode: async () => {}}));
   const first = await cache.load('/a.webp');
   const second = await cache.load('/a.webp');
   assert.equal(first, 'blob:/a.webp');
   assert.equal(second, 'blob:/a.webp');
   assert.equal(calls, 1);
-  assert.equal(cache.has('/a.webp'), true);
   await assert.rejects(() => cache.load('bad'), /missing/);
-  assert.equal(cache.has('bad'), false);
-  cache.clear();
-  assert.equal(cache.has('/a.webp'), false);
+  assert.equal(await cache.load('bad'), 'blob:bad');
+  assert.equal(calls, 3);
 });
 
 test('specification-editor roundtrips extra technical specs while preserving managed fields', () => {

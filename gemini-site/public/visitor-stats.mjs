@@ -5,7 +5,7 @@ function currentAttributionContext(){
   const utmCampaign=params.get('utm_campaign')||'';
   const vehicleId=params.get('vehicle')||params.get('car')||(location.pathname.match(/\/(?:vehicle|stock)\/([^/?#]+)/i)?.[1]||'');
   if(utmSource||utmCampaign){
-   sessionStorage.setItem('danny-ad-attribution',JSON.stringify({s:utmSource||'facebook',c:utmCampaign||'fb_feed_ad'}));
+   sessionStorage.setItem('danny-ad-attribution',JSON.stringify({s:utmSource,c:utmCampaign}));
   }
   const saved=JSON.parse(sessionStorage.getItem('danny-ad-attribution')||'null')||{};
   return {
@@ -116,11 +116,11 @@ function paint(host,data){
    return `<div class="visitor-bar-row"><div class="visitor-bar-head"><span>${label}</span><strong>${c.toLocaleString()} <em>(${pct}%)</em></strong></div><div class="visitor-bar-track" aria-hidden="true"><span style="width:${Math.max(c>0?6:0,pct)}%;background:${accent}"></span></div></div>`;
   }).join('')}</div>`;
  };
- const daily=Array.isArray(data.daily)&&data.daily.length?data.daily:[Math.max(1,Math.round(data.total*0.09)),Math.max(1,Math.round(data.total*0.14)),Math.max(1,Math.round(data.total*0.12)),Math.max(1,Math.round(data.total*0.17)),Math.max(1,Math.round(data.total*0.19)),Math.max(1,Math.round(data.total*0.15)),Math.max(1,data.today||Math.round(data.total*0.14))];
+ const daily=Array.isArray(data.daily)?data.daily:[];
  const maxDay=Math.max(1,...daily);
  const dayNames=['6d','5d','4d','3d','2d','1d','Today'];
  const sparkBars=daily.map((v,i)=>{
-  const h=Math.max(12,Math.round((v/maxDay)*100));
+  const h=v===0?0:Math.max(8,Math.round((v/maxDay)*100));
   return `<div class="visitor-spark-col" title="${dayNames[i]}: ${v} visits"><div class="visitor-spark-bar-wrap"><span class="visitor-spark-bar${i===daily.length-1?' is-today':''}" style="height:${h}%"></span></div><small>${dayNames[i]}</small></div>`;
  }).join('');
  const leadsTotal=Number(data.leadsTotal||0);

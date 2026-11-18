@@ -14,19 +14,19 @@ const requestedBase = process.env.PAGES_BASE_PATH || defaultBase;
 const segments=requestedBase.split('/').filter(Boolean);
 const basePath = segments.length ? `/${segments.join('/')}/` : '/';
 const baseWithoutTrailingSlash = basePath.slice(0, -1);
+const previewEditor=process.env.PREVIEW_EDITOR==='1';
+if(previewEditor&&(process.env.OWNER_WORKER_BUILD==='1'||outputDirectory!==path.join(projectRoot,'dist-preview')))throw new Error('The preview editor may only be built into dist-preview.');
 import {publicDocument} from '../lib/cms/contracts.mjs';
 import {normalizeDocument} from '../public/inventory-domain.mjs';
 import {prepareExhibition} from './prepare-exhibition.mjs';
 import {buildUiIslands} from './build-ui-islands.mjs';
 import {ownerSidebarMarkup} from '../public/workbench-navigation.mjs';
 import {initialVehicleMarkup} from '../public/vehicle-initial.mjs';
-import {existsSync} from 'node:fs';
+import {welcomeHeadMarkup,welcomeInitialMarkup} from '../public/dashboard-welcome-boot.mjs';
 import {buildFacebookCatalogFeed} from '../public/facebook-catalog.mjs';
 const publicDataPath = path.resolve(projectRoot, process.env.PAGES_SNAPSHOT_PATH || 'data/public-site.json');
 const publicAssetsPath = path.join(projectRoot, 'public');
-const templatesPath = existsSync(path.join(projectRoot, 'templates'))
-  ? path.join(projectRoot, 'templates')
-  : path.join(projectRoot, 'out');
+const templatesPath = path.join(projectRoot, 'templates');
 const excludedPublicFiles = new Set([
   'admin.css',
   'admin.js',
@@ -204,12 +204,6 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
       postalCode: '40150',
       addressCountry: 'MY',
     },
-    openingHoursSpecification: [{
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-      opens: '10:00',
-      closes: '19:00',
-    }],
   } : null);
 
   if (existingDescMatch && vehicle) {
@@ -218,11 +212,11 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
   const descMeta = !existingDescMatch ? `<meta name="description" content="${escapeAttr(resolvedDescription)}">` : '';
   const schemaScript = schemaObj ? `<script type="application/ld+json">${safeInlineJson(schemaObj)}</script>` : '';
   const metadata = `${descMeta}<link rel="canonical" href="${canonicalUrl}"><meta property="og:site_name" content="Danny Recon Select"><meta property="og:type" content="${vehicle ? 'product' : 'website'}"><meta property="og:title" content="${escapeAttr(resolvedTitle)}"><meta property="og:description" content="${escapeAttr(resolvedDescription)}"><meta property="og:image" content="${escapeAttr(imageUrl)}"><meta property="og:url" content="${canonicalUrl}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${escapeAttr(resolvedTitle)}"><meta name="twitter:description" content="${escapeAttr(resolvedDescription)}"><meta name="twitter:image" content="${escapeAttr(imageUrl)}">${schemaScript}`;
-  const runtime = `<base href="${basePath}"><script>window.SITE_BASE=${safeInlineJson(basePath)};window.GITHUB_PAGES_STATIC=true;window.CMS_DATA=${safeInlineJson(publicData)};</script>`;
+  const runtime = `<base href="${basePath}"><script>window.SITE_BASE=${safeInlineJson(basePath)};window.GITHUB_PAGES_STATIC=true;window.DANNY_PREVIEW_EDITOR=${previewEditor};window.CMS_DATA=${safeInlineJson(publicData)};</script>`;
   if (!/<head(?:\s[^>]*)?>/i.test(html) || !/<\/body>/i.test(html)) {
     throw new Error(`Template ${templateName} is missing its document head or body.`);
   }
-  html = html.replace(/<head(?:\s[^>]*)?>/i, match => `${match}${runtime}${metadata}`);
+  html = html.replace(/<head(?:\s[^>]*)?>/i, match => `${match}${runtime}${metadata}<link rel="stylesheet" href="/choice-controls.css?v=choices-20261026a"><link rel="stylesheet" href="/layout-refinements.css?v=layout-20261119a">`);
   if (vehicle) {
     html = html.replace(/(<main[^>]*id="vehicleContent"[^>]*>)[\s\S]*?(<\/main>)/, (_match, open, close) => open + initialVehicleMarkup(vehicle, publicData, {base: basePath, pathname: canonicalPath}) + close);
   }
@@ -232,9 +226,12 @@ async function renderTemplate(templateName, {route = '', title} = {}) {
 async function dashboardPage() {
   const page = await renderTemplate('workbench.html', {route:'studio',title:'Inventory workbench · Danny Recond Select'});
   return page
+    .replace(/<head(?:\s[^>]*)?>/i,match=>match+welcomeHeadMarkup)
+    .replace(/<body\b[^>]*>/i,match=>match+welcomeInitialMarkup)
     .replace(/<aside class="wb-sidebar">[\s\S]*?<\/aside>/,()=>ownerSidebarMarkup('/'))
-    .replace('</head>', '<link rel="stylesheet" href="/assets/workbench-ui.css?v=owner-ui-20261024d"><link rel="stylesheet" href="/workbench-hierarchy.css?v=owner-nav-20261023b"></head>')
-    .replace('</body>', '<div id="workbenchUiMount"></div><script type="module" src="/assets/workbench-ui.js?v=owner-ui-20261024d"></script></body>');
+    .replace('<div id="workspaceContent">', (previewEditor?'<p class="preview-editor-notice" role="status">Preview workspace · Changes are saved in this browser. The live website stays unchanged.</p>':'')+'<div id="workspaceContent">')
+    .replace('</head>', '<link rel="stylesheet" href="/assets/workbench-ui.css?v=owner-ui-20261026a"><link rel="stylesheet" href="/workbench-hierarchy.css?v=owner-nav-20261023b"></head>')
+    .replace('</body>', '<div id="workbenchUiMount"></div><script type="module" src="/assets/workbench-ui.js?v=owner-ui-20261026a"></script></body>');
 }
 
 const snapshot = JSON.parse(await readFile(publicDataPath, 'utf8'));
@@ -257,12 +254,14 @@ if (process.env.KEEP_OUTPUT !== '1' && (outputDirectory !== path.resolve(project
 await mkdir(outputDirectory, {recursive: true});
 await prepareExhibition();
 await copyPublicAssets();
-await buildUiIslands(outputDirectory, {includeOwner: true});
+await buildUiIslands(outputDirectory, {includeOwner: process.env.OWNER_WORKER_BUILD==='1'||previewEditor});
 await writeFile(path.join(outputDirectory,'published-baseline.json'),JSON.stringify({document:publicData}));
-const catalogOrigin = (process.env.CMS_API_BASE || 'https://danielong-bit.github.io').replace(/\/+$/, '') + baseWithoutTrailingSlash;
-const catalogFeed = buildFacebookCatalogFeed(publicData, catalogOrigin);
-await writeFile(path.join(outputDirectory, 'facebook-catalog.csv'), catalogFeed.csv);
-await writeFile(path.join(outputDirectory, 'facebook-catalog.json'), JSON.stringify({items: catalogFeed.items, stats: catalogFeed.stats}, null, 2));
+const catalogOrigin = process.env.OWNER_WORKER_BUILD==='1'
+  ? 'https://danny.stocklist.workers.dev'
+  : 'https://danielong-bit.github.io'+baseWithoutTrailingSlash;
+const catalogFeed = buildFacebookCatalogFeed(publicData,catalogOrigin);
+await writeFile(path.join(outputDirectory,'facebook-catalog.csv'),catalogFeed.csv);
+await writeFile(path.join(outputDirectory,'facebook-catalog.json'),JSON.stringify({items:catalogFeed.items,stats:catalogFeed.stats},null,2));
 const pages = [
   {template:'tools.html',file:'tools/index.html',route:'tools',title:'Calculator & JPJ · Danny Recon Select'},
   {template: 'index.html', file: 'index.html', route: '', title: 'Danny Recond Select · Japan Recond by Danny'},
@@ -303,12 +302,13 @@ await mkdir(path.join(outputDirectory, 'workbench'), {recursive: true});
 await mkdir(path.join(outputDirectory, 'dashboard'), {recursive: true});
 await mkdir(path.join(outputDirectory, 'admin'), {recursive: true});
 if(process.env.OWNER_WORKER_BUILD!=='1')await writeFile(path.join(outputDirectory,'inventory-workbench.json'),JSON.stringify({document:publicData}));
-const dashboard = await dashboardPage();
+const dashboard = process.env.OWNER_WORKER_BUILD==='1'||previewEditor ? await dashboardPage() : `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=https://danny.stocklist.workers.dev/studio/"><title>Owner Log In</title></head><body><a href="https://danny.stocklist.workers.dev/studio/">Continue to Owner Log In</a></body></html>`;
 await writeFile(path.join(outputDirectory, 'studio', 'index.html'), dashboard);
-await writeFile(path.join(outputDirectory, 'workbench', 'index.html'), dashboard);
-await writeFile(path.join(outputDirectory, 'dashboard', 'index.html'), dashboard);
+await writeFile(path.join(outputDirectory, 'workbench', 'index.html'), previewEditor?dashboard:'<html><head><meta http-equiv="refresh" content="0;url=/studio/"></head><body><a href="/studio/">Owner dashboard</a></body></html>');
+await writeFile(path.join(outputDirectory, 'dashboard', 'index.html'), previewEditor?dashboard:'<html><head><meta http-equiv="refresh" content="0;url=/studio/"></head><body><a href="/studio/">Owner dashboard</a></body></html>');
 await writeFile(path.join(outputDirectory, 'admin', 'index.html'), dashboard);
 await writeFile(path.join(outputDirectory,'admin.html'),dashboard);
+if(previewEditor){await mkdir(path.join(outputDirectory,'owner-login'),{recursive:true});await writeFile(path.join(outputDirectory,'owner-login','index.html'),'<html><head><meta http-equiv="refresh" content="0;url=/studio/"></head><body><a href="/studio/">Open preview editor</a></body></html>');}
 await writeFile(
   path.join(outputDirectory, '404.html'),
   `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="${basePath}"><title>Page not found · Danny Recond Select</title><link rel="stylesheet" href="design-system.css"></head><body><main class="public-cms-wrap"><section class="public-panel"><p class="stories-eyebrow">DANNY RECOND SELECT</p><h1 class="public-title">We couldn’t find this page.</h1><p class="public-muted">Browse the current vehicles or return to the home page.</p><div class="public-actions"><a href="${basePath}#inventory">Browse inventory</a><a class="secondary" href="${basePath}">Home</a></div></section></main></body></html>`,

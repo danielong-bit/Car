@@ -8,8 +8,8 @@ function campaignChannelName(source = '', campaign = '') {
   if (c === 'fb_whatsapp_ctwa') return 'Click-to-WhatsApp Ad';
   if (c === 'fb_carousel_catalog' || c === 'fb_automotive_catalog') return 'Meta Catalog Ad';
   if (c === 'fb_page_post') return 'Facebook Page Post';
-  if (s === 'facebook' || s === 'fb' || c.includes('fb')) return 'Facebook Ad / Referral';
-  if (c) return c.slice(0, 32);
+  if (s === 'facebook' || s === 'fb') return 'Facebook Ad / Referral';
+  if (s || c) return 'Other referral';
   return 'Direct / Showroom';
 }
 
@@ -89,12 +89,13 @@ export function visitorAnalytics(storage, request, now = Date.now()) {
   }
 
   const rows = (query, ...params) => Array.from(sql.exec(query, ...params));
+  const facebookChannels="(channel LIKE 'Facebook %' OR channel IN ('Click-to-WhatsApp Ad','Meta Catalog Ad'))";
   const campaigns = rows(
     "SELECT channel AS name, COUNT(*) AS count FROM visitor_attribution WHERE created >= ? AND kind = 'visit' GROUP BY channel ORDER BY count DESC LIMIT 6",
     since
   );
   const topAdVehicles = rows(
-    "SELECT vehicle AS name, COUNT(*) AS count FROM visitor_attribution WHERE created >= ? AND kind = 'visit' AND vehicle != '' GROUP BY vehicle ORDER BY count DESC LIMIT 6",
+    "SELECT vehicle AS name, COUNT(*) AS count FROM visitor_attribution WHERE created >= ? AND kind = 'visit' AND vehicle != '' AND "+facebookChannels+" GROUP BY vehicle ORDER BY count DESC LIMIT 6",
     since
   );
   const leadsTotal = rows(
@@ -106,11 +107,11 @@ export function visitorAnalytics(storage, request, now = Date.now()) {
     today
   )[0]?.count || 0;
   const fbClicks = rows(
-    "SELECT COUNT(*) AS count FROM visitor_attribution WHERE created >= ? AND kind = 'visit' AND channel != 'Direct / Showroom'",
+    "SELECT COUNT(*) AS count FROM visitor_attribution WHERE created >= ? AND kind = 'visit' AND "+facebookChannels,
     since
   )[0]?.count || 0;
   const fbLeads = rows(
-    "SELECT COUNT(*) AS count FROM visitor_attribution WHERE created >= ? AND kind = 'whatsapp_lead' AND channel != 'Direct / Showroom'",
+    "SELECT COUNT(*) AS count FROM visitor_attribution WHERE created >= ? AND kind = 'whatsapp_lead' AND "+facebookChannels,
     since
   )[0]?.count || 0;
   const topLeadVehicles = rows(
@@ -118,7 +119,12 @@ export function visitorAnalytics(storage, request, now = Date.now()) {
     since
   );
 
+  const daily=Array.from({length:7},(_,index)=>{
+    const start=today-(6-index)*86400000;
+    return rows('SELECT COUNT(*) AS count FROM visitor_sessions WHERE created >= ? AND created < ?',start,start+86400000)[0]?.count||0;
+  });
   return respond({
+    daily,
     total: rows('SELECT COUNT(*) AS count FROM visitor_sessions WHERE created >= ?', since)[0].count,
     today: rows('SELECT COUNT(*) AS count FROM visitor_sessions WHERE created >= ?', today)[0].count,
     countries: rows(

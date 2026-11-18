@@ -39,17 +39,47 @@ export async function suggestPhotoFrame(source){
  }finally{close();}
 }
 
+export function photoFrameStyle(photo={}){
+ const full=photo.framing==='full';
+ const position=full?'50% 50%':`${clamp(photo.cropX??50)}% ${clamp(photo.cropY??50)}%`;
+ const zoom=full?1:Math.max(100,Math.min(200,Number(photo.cropZoom)||100))/100;
+ return `object-fit:${full?'contain':'cover'};object-position:${position};transform-origin:${position};transform:scale(${zoom})`;
+}
+export function applyPhotoFraming(image,photo){
+ for(const rule of photoFrameStyle(photo).split(';')){
+  const [property,value]=rule.split(':');
+  image.style.setProperty(property,value);
+ }
+}
+
 export function frameControlsMarkup(index,photo){
- return `<div class="photo-frame-tools"><button type="button" data-auto-frame="${index}">Auto frame</button><details class="photo-position"><summary>Adjust position &amp; zoom</summary>${[['cropX','Left / right'],['cropY','Up / down'],['cropZoom','Zoom (%)']].map(([axis,label])=>{const zoom=axis==='cropZoom',min=zoom?100:0,max=zoom?200:100,value=zoom?Math.max(100,Math.min(200,Number(photo[axis])||100)):clamp(photo[axis]??50);return `<label class="photo-position-field"><span>${label}</span><input type="range" min="${min}" max="${max}" step="1" value="${value}" data-crop="${index}" data-axis="${axis}" aria-label="Photo ${index+1} ${label}"><input type="number" min="${min}" max="${max}" step="1" value="${value}" data-crop-number="${index}" data-axis="${axis}" aria-label="Photo ${index+1} ${label} value"></label>`;}).join('')}<button type="button" data-reset-frame="${index}">Reset to centre</button></details></div>`;
+ return `<div class="photo-frame-tools"><button type="button" data-auto-frame="${index}" ${photo.framing==='full'?'hidden':''}>Auto crop</button><details class="photo-position"><summary>Framing</summary><label class="photo-fit-choice"><span>How the photo appears</span><select data-photo-framing aria-label="Photo ${index+1} framing"><option value="full" ${photo.framing==='full'?'selected':''}>Show whole photo</option><option value="crop" ${photo.framing!=='full'?'selected':''}>Crop to fill</option></select></label><div data-manual-framing ${photo.framing==='full'?'hidden':''}>${[['cropX','Left / right'],['cropY','Up / down'],['cropZoom','Zoom (%)']].map(([axis,label])=>{const zoom=axis==='cropZoom',min=zoom?100:0,max=zoom?200:100,value=zoom?Math.max(100,Math.min(200,Number(photo[axis])||100)):clamp(photo[axis]??50);return `<label class="photo-position-field"><span>${label}</span><input type="range" min="${min}" max="${max}" step="1" value="${value}" data-crop="${index}" data-axis="${axis}" aria-label="Photo ${index+1} ${label}"><input type="number" min="${min}" max="${max}" step="1" value="${value}" data-crop-number="${index}" data-axis="${axis}" aria-label="Photo ${index+1} ${label} value"></label>`;}).join('')}<button type="button" data-reset-frame="${index}">Reset crop</button></div></details></div>`;
 }
 
 export function bindPhotoFraming(tiles,photos,{analyze=suggestPhotoFrame,onChange=()=>{},source=photo=>photo.url,onError=()=>{}}={}){
  const currentPhotos=typeof photos==='function'?photos:()=>photos;
  tiles.forEach((tile,index)=>{
   const image=tile.querySelector('img');
+  const fit=tile.querySelector('[data-photo-framing]');
+  const auto=tile.querySelector('[data-auto-frame]');
+  const syncPhoto=()=>{
+   const photo=currentPhotos()[index];
+   const full=photo.framing==='full';
+   fit.value=full?'full':'crop';
+   tile.querySelector('[data-manual-framing]').hidden=full;
+   auto.hidden=full;
+   applyPhotoFraming(image,photo);
+  };
+  fit.onchange=()=>{
+   const photo=currentPhotos()[index];
+   photo.framing=fit.value;
+   syncPhoto();
+   onChange(photo);
+  };
+  syncPhoto();
   const update=(axis,value)=>{
    const photo=currentPhotos()[index];
-   photo[axis]=axis==='cropZoom'?Math.max(100,Math.min(200,Number(value)||100)):clamp(value);image.style.objectPosition=`${photo.cropX??50}% ${photo.cropY??50}%`;image.style.transformOrigin=image.style.objectPosition;image.style.transform=`scale(${(photo.cropZoom??100)/100})`;
+   photo[axis]=axis==='cropZoom'?Math.max(100,Math.min(200,Number(value)||100)):clamp(value);applyPhotoFraming(image,photo);
    tile.querySelectorAll(`[data-axis="${axis}"]`).forEach(input=>input.value=photo[axis]);onChange(photo);
   };
   tile.querySelectorAll('[data-crop],[data-crop-number]').forEach(input=>{
@@ -61,7 +91,7 @@ export function bindPhotoFraming(tiles,photos,{analyze=suggestPhotoFrame,onChang
    const button=event.currentTarget;button.disabled=true;button.textContent='Framing…';
    try{const frame=await analyze(await source(currentPhotos()[index]));if(!tile.isConnected)return;update('cropX',frame.cropX);update('cropY',frame.cropY);}
    catch(error){onError(error);}
-   finally{button.disabled=false;button.textContent='Auto frame';}
+   finally{button.disabled=false;button.textContent='Auto crop';}
   };
  });
 }
