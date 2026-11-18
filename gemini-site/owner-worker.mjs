@@ -1,5 +1,6 @@
 export {ShowroomContent} from './content-store.mjs';
 import {initialVehicleMarkup} from './public/vehicle-initial.mjs';
+import {buildVehicleOpenGraphMeta,findVehicleByQueryOrPath} from './public/facebook-catalog.mjs';
 const encoder=new TextEncoder();
 const COOKIE='__Host-danny-owner';
 const MAX_AGE=8*60*60;
@@ -8,6 +9,7 @@ const bytesToBase64=bytes=>btoa(String.fromCharCode(...new Uint8Array(bytes))).r
 const fromBase64=value=>Uint8Array.from(atob(value.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
 const json=(value,status=200,extra={})=>new Response(JSON.stringify(value),{status,headers:{...privateHeaders,'Content-Type':'application/json',...extra}});
 const redirect=(url,extra={})=>new Response(null,{status:303,headers:{...privateHeaders,Location:url,...extra}});
+const escAttr=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 async function sessionKey(env){return crypto.subtle.importKey('raw',encoder.encode(env.OWNER_SESSION_SECRET),{name:'HMAC',hash:'SHA-256'},false,['sign','verify']);}
 async function authenticated(request,env){
  if(!env.OWNER_SESSION_SECRET)return false;
@@ -33,7 +35,7 @@ export default{
  async fetch(request,env){
   const url=new URL(request.url);let path;
   try{path=decodeURIComponent(url.pathname).replace(/\/+/g,'/').toLowerCase();}catch{return new Response('Invalid path',{status:400});}
-  if(path==='/api/analytics/visit'){
+  if(path==='/api/analytics/visit'||path==='/api/analytics/event'){
    if(request.method!=='POST')return json({error:'Method not allowed.'},405);
    if(request.headers.get('Origin')!==url.origin)return json({error:'Request not allowed.'},403);
    if(!env.CONTENT_STORE)return json({error:'Statistics are unavailable.'},503);
@@ -42,11 +44,30 @@ export default{
    if(/bot|crawler|spider|headless|preview/i.test(agent))return json({ok:true,excluded:true});
    const ip=request.headers.get('CF-Connecting-IP');
    if(ip&&env.LOGIN_LIMITER&&!(await env.LOGIN_LIMITER.limit({key:'visits:'+ip})).success)return json({error:'Please try later.'},429);
-   const text=await request.text();if(text.length>200)return json({error:'Invalid visit.'},400);
+   const text=await request.text();if(text.length>400)return json({error:'Invalid visit.'},400);
    let data;try{data=JSON.parse(text);}catch{return json({error:'Invalid visit.'},400);}
+   if(path==='/api/analytics/event'){
+    const eventName=typeof data?.event==='string'?data.event.slice(0,32):'';
+    if(!eventName)return json({error:'Invalid event.'},400);
+    const evtPayload={event:eventName};
+    if(typeof data.id==='string'&&data.id.trim())evtPayload.id=data.id.trim().slice(0,48);
+    if(typeof data.s==='string'&&data.s.trim())evtPayload.s=data.s.trim().slice(0,24);
+    if(typeof data.c==='string'&&data.c.trim())evtPayload.c=data.c.trim().slice(0,32);
+    if(typeof data.v==='string'&&data.v.trim())evtPayload.v=data.v.trim().slice(0,64);
+    return env.CONTENT_STORE.get(env.CONTENT_STORE.idFromName('showroom')).fetch(new Request(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(evtPayload)}));
+   }
    if(!/^[a-f0-9-]{36}$/i.test(data?.id||''))return json({error:'Invalid visit.'},400);
    const country=request.cf?.country||'Unknown',device=/iPad|Tablet|Android(?!.*Mobile)/i.test(agent)?'Tablet':/Mobi|Android|iPhone/i.test(agent)?'Mobile':'Desktop';
-   return env.CONTENT_STORE.get(env.CONTENT_STORE.idFromName('showroom')).fetch(new Request(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:data.id,country,device})}));
+   const visitPayload={id:data.id,country,device};
+   if(typeof data.s==='string'&&data.s.trim())visitPayload.s=data.s.trim().slice(0,24);
+   if(typeof data.c==='string'&&data.c.trim())visitPayload.c=data.c.trim().slice(0,32);
+   if(typeof data.v==='string'&&data.v.trim())visitPayload.v=data.v.trim().slice(0,64);
+   return env.CONTENT_STORE.get(env.CONTENT_STORE.idFromName('showroom')).fetch(new Request(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(visitPayload)}));
+  }
+  if(path==='/api/facebook/catalog.csv'||path==='/api/facebook/catalog.json'){
+   if(!['GET','HEAD'].includes(request.method))return json({error:'Method not allowed.'},405);
+   if(!env.CONTENT_STORE)return env.ASSETS.fetch(new Request(new URL(path.endsWith('.csv')?'/facebook-catalog.csv':'/facebook-catalog.json',url),request));
+   return env.CONTENT_STORE.get(env.CONTENT_STORE.idFromName('showroom')).fetch(request);
   }
   if(path==='/api/content/published'||path.startsWith('/assets/uploads/')){
    if(!['GET','HEAD'].includes(request.method))return json({error:'Method not allowed.'},405);
@@ -93,7 +114,6 @@ export default{
   const vehiclePage=/^\/(vehicle|stock)\/[^/]+\/?$/.test(path);
   const publicPage=vehiclePage||(!path.startsWith('/assets/')&&(!/\.[a-z0-9]+$/.test(path)||path.endsWith('.html')));
   const assetHeaders=new Headers(request.headers);
-  // A static-file ETag cannot validate HTML containing a newer publication.
   if(publicPage){assetHeaders.delete('If-None-Match');assetHeaders.delete('If-Modified-Since');}
   const assetRequest=new Request(request,{headers:assetHeaders});
   let response=await env.ASSETS.fetch(assetRequest);
@@ -109,14 +129,24 @@ export default{
     const published=await env.CONTENT_STORE.get(env.CONTENT_STORE.idFromName('showroom')).fetch(new Request(new URL('/api/content/published',url)));
     if(!published.ok)throw Error('Published content unavailable');
     const {document}=await published.json();
-    const key=path.split('/').filter(Boolean).at(-1);
-    const vehicle=document?.vehicles?.find(v=>v.id?.toLowerCase()===key||v.stockId?.toLowerCase()===key);
+    const vehicle=findVehicleByQueryOrPath(document,path,url.searchParams);
     if(vehiclePage&&document&&!vehicle)return vehicleNotFound();
     if(document){
      const data=JSON.stringify(document).replaceAll('<','\\u003c').replaceAll('>','\\u003e');
+     const ogMeta=vehicle?buildVehicleOpenGraphMeta(vehicle,document,url.origin,url.href):null;
      const rewriter=new HTMLRewriter();
      if(vehiclePage&&vehicle)rewriter.on('#vehicleContent',{element(element){element.setInnerContent(initialVehicleMarkup(vehicle,document,{pathname:url.pathname}),{html:true});}});
-     response=rewriter.on('head',{element(element){element.append(`<script>window.CMS_DATA=${data};window.CMS_CONTENT_CURRENT=true;</script>`,{html:true});}}).transform(response);
+     if(ogMeta){
+      rewriter.on('title',{element(el){el.setInnerContent(ogMeta.title);}});
+      rewriter.on('meta[name="description"]',{element(el){el.setAttribute('content',ogMeta.description);}});
+      rewriter.on('meta[property="og:type"]',{element(el){el.setAttribute('content','product');}});
+      rewriter.on('meta[property="og:title"],meta[name="twitter:title"]',{element(el){el.setAttribute('content',ogMeta.title);}});
+      rewriter.on('meta[property="og:description"],meta[name="twitter:description"]',{element(el){el.setAttribute('content',ogMeta.description);}});
+      rewriter.on('meta[property="og:image"],meta[name="twitter:image"]',{element(el){el.setAttribute('content',ogMeta.imageUrl);}});
+      rewriter.on('meta[property="og:url"]',{element(el){el.setAttribute('content',ogMeta.canonicalUrl);}});
+     }
+     const extraHead=ogMeta?`<meta property="product:brand" content="${escAttr(ogMeta.brand)}"><meta property="product:availability" content="${escAttr(ogMeta.availability)}"><meta property="product:retailer_item_id" content="${escAttr(ogMeta.retailerItemId)}">${ogMeta.priceAmount!=null?`<meta property="product:price:amount" content="${escAttr(ogMeta.priceAmount)}"><meta property="product:price:currency" content="MYR">`:''}`:'';
+     response=rewriter.on('head',{element(element){element.append(`${extraHead}<script>window.CMS_DATA=${data};window.CMS_CONTENT_CURRENT=true;</script>`,{html:true});}}).transform(response);
      const headers=new Headers(response.headers);headers.set('Cache-Control','no-store');headers.delete('ETag');headers.delete('Last-Modified');
      return new Response(response.body,{status:response.status,headers});
     }

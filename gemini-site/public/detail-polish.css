@@ -397,3 +397,53 @@ html body .vehicle-gallery .detail-thumbs button[aria-pressed=true]{
   border-color:var(--mint,#36b37e)!important;
   box-shadow:0 0 0 1.5px var(--mint,#36b37e),0 4px 12px rgba(0,0,0,.25)!important;
 }
+
+.share-car-btn.share-fb-btn{
+  text-decoration:none;
+  border-color:rgba(24,119,242,.42);
+  background:rgba(24,119,242,.12);
+  color:#93c5fd;
+}
+html[data-theme=light] .share-car-btn.share-fb-btn{
+  color:#1877f2;
+  background:rgba(24,119,242,.08);
+}
+.share-car-btn.share-fb-btn>span:first-child{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:#1877f2;
+  color:#ffffff;
+  font-weight:800;
+  font-size:11px;
+  line-height:1;
+}
+.share-car-btn.share-fb-btn:hover{
+  background:rgba(24,119,242,.22);
+  border-color:#1877f2;
+  color:#ffffff;
+}
+html[data-theme=light] .share-car-btn.share-fb-btn:hover{
+  color:#1d4ed8;
+}
+.ad-live-sync-note{
+  display:grid;
+  gap:4px;
+  margin-bottom:14px;
+  padding:11px 14px;
+  border-radius:10px;
+  border:1px solid color-mix(in srgb,var(--mint,#36b37e) 42%,var(--line));
+  background:color-mix(in srgb,var(--mint,#36b37e) 10%,var(--surface));
+  font-size:12.5px;
+  line-height:1.45;
+}
+.ad-live-sync-note strong{
+  font-size:12.5px;
+  color:var(--mint,#36b37e);
+}
+.ad-live-sync-note span{
+  color:var(--muted);
+}

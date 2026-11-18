@@ -35,6 +35,8 @@ export function validateDocument(d, publishing=false) {
   if(d.profile?.phone&&!/^\d{8,15}$/.test(d.profile.phone))e.push('WhatsApp number must contain country code and digits only.');
   if(d.profile?.portrait&&!safeMediaUrl(d.profile.portrait))e.push('Profile photo URL is invalid.');
   for(const k of ['tiktok','rednote','facebook'])if(d.profile?.[k]&&!/^https:\/\/[a-zA-Z0-9.-]+\/[a-zA-Z0-9_./@%?=&+-]+$/.test(d.profile[k]))e.push('Social links must use HTTPS.');
+  if(d.profile?.facebookPixelId&&!/^\d{8,24}$/.test(String(d.profile.facebookPixelId).trim()))e.push('Meta Pixel ID must contain 8–24 digits only.');
+  if(d.profile?.facebookPageId&&!/^[a-zA-Z0-9._-]{3,64}$/.test(String(d.profile.facebookPageId).trim()))e.push('Facebook Page ID or handle is invalid.');
   for(const m of d.vehicles.flatMap(v=>v.gallery||[]))if(m.ratio&&!['16/9','4/3','4/5','1/1'].includes(m.ratio))e.push('Invalid photo aspect ratio.');
   const scan=(x)=>{if(typeof x==='string'&&(x.length>18000||/[<>\u0000-\u0008]/.test(x)))e.push('Use plain text without HTML, double quotes or script markup.');else if(Array.isArray(x))x.forEach(scan);else if(x&&typeof x==='object')Object.values(x).forEach(scan);};scan(d);
   return [...new Set(e)];

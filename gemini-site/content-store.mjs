@@ -1,6 +1,7 @@
 import {validateContent,publicContent,referencedMedia} from './content-contracts.mjs';
 import {visitorAnalytics} from './visitor-analytics.mjs';
-const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
+import {buildFacebookCatalogFeed} from './public/facebook-catalog.mjs';
+const json=(data,status=200,extra={})=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store',...extra}});
 const CHUNK=60000;
 export class ShowroomContent{
  constructor(ctx,env){this.storage=ctx.storage;this.env=env;}
@@ -8,8 +9,22 @@ export class ShowroomContent{
  async write(key,value){const text=JSON.stringify(value),old=await this.storage.get(key),count=Math.ceil(text.length/CHUNK);for(let i=0;i<count;i++)await this.storage.put(key+':'+i,text.slice(i*CHUNK,(i+1)*CHUNK));await this.storage.put(key,{chunks:count});for(let i=count;i<(old?.chunks||0);i++)await this.storage.delete(key+':'+i);}
  async fetch(request){
   const url=new URL(request.url),path=url.pathname;
-  if((path==='/api/analytics/visit'&&request.method==='POST')||(path==='/api/owner/analytics'&&request.method==='GET'))return visitorAnalytics(this.storage,request);
+  if(((path==='/api/analytics/visit'||path==='/api/analytics/event')&&request.method==='POST')||(path==='/api/owner/analytics'&&request.method==='GET'))return visitorAnalytics(this.storage,request);
   if(path==='/api/content/published'){const p=await this.read('published');return json(p?{...p,document:publicContent(p.document,url.origin)}:{document:null,revision:0});}
+  if((path==='/api/facebook/catalog.csv'||path==='/api/facebook/catalog.json')&&['GET','HEAD'].includes(request.method)){
+   const p=await this.read('published');
+   let doc=p?.document?publicContent(p.document,url.origin):null;
+   if(!doc&&this.env?.ASSETS){try{const baseRes=await this.env.ASSETS.fetch(new URL('/published-baseline.json',request.url));if(baseRes.ok)doc=(await baseRes.json()).document;}catch{}}
+   const feed=buildFacebookCatalogFeed(doc||{vehicles:[]},url.origin);
+   if(path.endsWith('.csv'))return new Response(request.method==='HEAD'?null:feed.csv,{status:200,headers:{'Content-Type':'text/csv; charset=utf-8','Cache-Control':'public, max-age=300','Access-Control-Allow-Origin':'*'}});
+   return json({items:feed.items,stats:feed.stats},200,{'Access-Control-Allow-Origin':'*'});
+  }
+  if(path==='/api/owner/facebook/diagnostics'&&request.method==='GET'){
+   const draft=await this.read('draft'),published=await this.read('published');
+   const activeDoc=(draft||published)?.document||{vehicles:[]};
+   const feed=buildFacebookCatalogFeed(activeDoc,url.origin);
+   return json({diagnostics:feed.diagnostics,stats:feed.stats,pixelConfigured:Boolean(activeDoc.profile?.facebookPixelId)});
+  }
   if(path.startsWith('/assets/uploads/')){
    const key='media:'+path,meta=await this.storage.get(key);const allowed=await this.storage.get('public-media')||[];
    if(!meta||(!request.headers.has('X-Owner-Media')&&!allowed.includes(path)))return new Response('Not found',{status:404});
