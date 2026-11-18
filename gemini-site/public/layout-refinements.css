@@ -79,7 +79,7 @@ html body #deliveryPause { font-size: 14px; }
 html body #customer-stories #deliveryRail.delivery-rail { display: grid !important; grid-template-columns: none !important; grid-auto-flow: column !important; grid-auto-columns: calc((100% - 42px) / 4); gap: 14px !important; overflow-x: auto !important; overflow-y: hidden !important; padding-bottom: 6px !important; scroll-snap-type: x mandatory; }
 html body #deliveryRail .delivery-card { scroll-snap-align: start; }
 @media(max-width:1000px) { html body #customer-stories #deliveryRail.delivery-rail { grid-auto-columns: calc((100% - 28px) / 3); } }
-@media(max-width:700px) { html body #customer-stories #deliveryRail.delivery-rail { grid-auto-columns: 82%; } }
+@media(max-width:700px) { html body.exhibition-home #customer-stories #deliveryRail.delivery-rail { grid-auto-columns: 82%; overflow-x: auto !important; overflow-y: hidden !important; overscroll-behavior-x: contain; } }
 
 /* Buyer details: clear title, price, four facts, then expandable equipment. */
 html body .purchase-heading h1 { font-size: clamp(26px,2.7vw,34px) !important; line-height: 1.2 !important; margin: 8px 0 !important; font-weight: 750 !important; }
@@ -354,10 +354,90 @@ html body.exhibition-home #inventory .stock-photo { background: #20262a; }
  .owner-listing-form .form-section { scroll-margin-top: 68px; }
  .owner-listing-form .listing-jump { gap: 6px; }
  .owner-listing-form .listing-jump button { font-size: .8rem; }
- html body.exhibition-home main > .showroom-hero.mountain-hero { height: clamp(430px, 116vw, 500px) !important; }
- html body.exhibition-home .mountain-hero .mountain-copy { width: calc(100% - 36px); padding-top: 84px !important; }
- html body.exhibition-home .mountain-hero .mountain-scene { inset: 228px 0 0 !important; }
  html body.exhibition-home .mountain-hero .mountain-scene::after {
   background: linear-gradient(180deg, var(--page), transparent 32%, transparent 80%, var(--page));
  }
+}
+
+/* Routine owner actions stay visible. Advanced photo controls open on demand. */
+.owner-listing-form .listing-import {
+ margin-block: 0 20px;
+ border: 1px solid var(--line);
+ border-radius: 12px;
+ background: var(--surface-2);
+}
+.owner-listing-form .listing-import > summary,
+.owner-listing-form .photo-options > summary,
+.workbench .owner-reports > summary {
+ padding: 12px 14px;
+ color: var(--ink);
+ font-weight: 650;
+ cursor: pointer;
+}
+.owner-listing-form .listing-import-body {
+ display: grid;
+ gap: 12px;
+ padding: 0 14px 14px;
+}
+.owner-listing-form .listing-import textarea { width: 100%; resize: vertical; }
+.owner-listing-form #listingImportResult:not([hidden]) { display: grid; gap: 8px; justify-items: start; min-width: 0; }
+.owner-listing-form #listingImportResult :is(p,ul) { margin: 0; }
+.owner-listing-form #listingImportResult ul { padding-inline-start: 20px; overflow-wrap: anywhere; }
+.owner-listing-form #listingImportResult details { width: 100%; }
+.owner-listing-form #listingImportResult details summary { cursor: pointer; }
+.owner-listing-form .photo-options { border-top: 1px solid var(--line); min-width: 0; }
+.owner-listing-form .photo-options > summary { font-size: .82rem; }
+.owner-listing-form .photo-options .photo-category-field { display: grid; gap: 4px; }
+.owner-listing-form .editor-save > .editor-save-status { display: grid; gap: 4px; color: var(--muted); }
+.owner-listing-form .editor-save-status #editorError:empty { display: none; }
+.workbench :is(.owner-resume,.owner-reports) {
+ border: 1px solid var(--line);
+ border-radius: 12px;
+ background: var(--surface);
+}
+.workbench .owner-resume { padding: 14px; }
+.workbench .owner-resume h3 { margin: 0 0 12px; font-size: 1rem; }
+.workbench .owner-resume ul {
+ display: grid;
+ gap: 8px;
+ grid-template-columns: repeat(auto-fit,minmax(min(230px,100%),1fr));
+ list-style: none;
+ margin: 0;
+ padding: 0;
+}
+.workbench .owner-resume button { display: grid; grid-template-columns: 1fr auto auto; width: 100%; min-width: 0; text-align: start; }
+.workbench .owner-resume button small { color: var(--muted); }
+.workbench .owner-reports > :not(summary) { margin: 0 12px 12px; }
+
+/* Put stock search in the hero, with the mobile photo in its own row. */
+body .mountain-hero .hero-stock-search:not([hidden]) {
+ display: grid;
+ grid-template-columns: minmax(0,1fr) auto;
+ align-items: stretch;
+ gap: 6px;
+ max-width: 430px;
+ margin: 18px 0 12px;
+ padding: 5px;
+ background: var(--surface);
+ border: 1px solid var(--line);
+ border-radius: 12px;
+}
+body .mountain-hero .hero-stock-search input {
+ min-width: 0;
+ width: 100%;
+ padding: 8px 10px;
+ border: 0;
+ background: transparent;
+ font-size: 16px;
+}
+body .mountain-hero .hero-stock-search .button { padding-inline: 14px; border-radius: 8px; white-space: nowrap; }
+@media(max-width:700px){
+ html body.exhibition-home main>.showroom-hero.mountain-hero { display: flex; flex-direction: column; align-items: stretch; height: auto!important; }
+ html body.exhibition-home .mountain-hero .mountain-copy { order: 0; margin: 0; width: 100%; padding: 88px 18px 8px !important; }
+ html body.exhibition-home .mountain-hero .mountain-copy h1 { font-size: clamp(32px, 8.5vw, 40px); text-wrap: pretty; }
+ html body.exhibition-home .mountain-hero .mountain-copy .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+ html body.exhibition-home .mountain-hero .mountain-copy .actions .button { padding-inline: 12px; min-width: 0; width: auto; }
+ html body .mountain-hero .mountain-scene { order: 1; position: relative; inset: auto!important; height: auto!important; min-height: 0; aspect-ratio: 2 / 1; z-index: 0; }
+ html body .mountain-hero .mountain-scene img { width: 100%; height: 100%; object-fit: cover; object-position: 67% center; }
+ html body .mountain-hero .hero-stock-search:not([hidden]) { margin-top: 12px; }
 }

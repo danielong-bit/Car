@@ -175,10 +175,12 @@ function renderViewToggle(){
 function controls(){
  const tr=translator(lang),makes=visibleBrandFilters(d);
  const statuses=[['','All stock'],['available','Available'],['reserved','Booked'],...(d.homepage.showSoldVehicles?[['sold','Sold']]:[])];
+ const heroSearch=$('#heroSearchQuery');
+ if(heroSearch&&document.activeElement!==heroSearch)heroSearch.value=filters.search;
  const currentStatus=statuses.find(([status])=>status===filters.status)?.[1]||'All stock';
  $('#inventoryControls').innerHTML=`<div class="inventory-controls"><div class="controls-top-row"><label class="search-field">${icon('search')}<input id="publicSearch" type="search" value="${esc(filters.search)}" placeholder="${tr('Search model, stock #…','搜索车型、库存编号…','Cari model, nombor stok…')}" aria-label="${t('Search model, stock #, colour...')}"></label>${selectControl('Sort','sort',stockSortChoices(lang))}</div><div class="filter-pills" role="group" aria-label="${t('Filter')}"><div class="pill-group" role="group" aria-label="${t('Status')}">${statuses.map(([status,title])=>`<button type="button" data-public-status="${status}" aria-pressed="${filters.status===status}">${t(title)} <span>${d.vehicles.filter(v=>(!status||v.status===status)&&matchesInventorySelection(v,{make:filters.make})).length}</span></button>`).join('')}</div>${makes.length?`<span class="pill-divider" aria-hidden="true"></span><div class="pill-group" role="group" aria-label="${t('Make')}">${makes.map(make=>`<button type="button" data-public-make="${esc(make)}" aria-pressed="${filters.make===make}">${esc(make)} <span>${d.vehicles.filter(v=>matchesInventorySelection(v,{make,status:filters.status})).length}</span></button>`).join('')}</div>`:''}<button type="button" id="resetPublic" class="pill-reset">${t('Reset')} ↺</button></div><div class="inventory-filter-note" ${filters.make?'':'hidden'}><span>${tr('Showing','当前筛选','Paparan')}: ${esc(t(currentStatus))} · <strong>${esc(filters.make)}</strong></span><button type="button" id="clearBrandFilter">${tr('Clear brand','清除品牌','Kosongkan jenama')} ×</button></div></div>`;
  window.dispatchEvent(new CustomEvent('danny:inventory-filter-config',{detail:filterSheetConfig()}));
- $('#publicSearch').oninput=e=>{filters.search=e.target.value;renderCards();};
+ $('#publicSearch').oninput=e=>{filters.search=e.target.value;if(heroSearch)heroSearch.value=filters.search;renderCards();};
  document.querySelectorAll('[data-filter]').forEach(select=>select.onchange=()=>{filters[select.dataset.filter]=select.value;renderCards();});
  document.querySelectorAll('[data-public-status]').forEach(button=>button.onclick=()=>{filters.status=button.dataset.publicStatus;controls();renderCards();document.querySelector(`[data-public-status="${filters.status}"]`)?.focus({preventScroll:true});});
  document.querySelectorAll('[data-public-make]').forEach(button=>button.onclick=()=>{const make=button.dataset.publicMake;filters.make=filters.make===make?'':make;controls();renderCards();[...document.querySelectorAll('[data-public-make]')].find(b=>b.dataset.publicMake===make)?.focus({preventScroll:true});});
@@ -341,6 +343,23 @@ function renderHome(){
  const tr=translator(lang);
  if($('#findYourCar'))$('#findYourCar').onclick=()=>openCarFinder($('#carFinder'),{vehicles:d.vehicles,lang,details,wa,hydrate:()=>{hydrateImages();styleWhatsAppActions();}});
  syncHeroStockBadge();
+ const stockSearch=$('#heroStockSearch');
+ if(stockSearch){
+  const input=$('#heroSearchQuery');
+  input.placeholder=tr('Search model or stock #','搜索车型或库存编号','Cari model atau nombor stok');
+  input.setAttribute('aria-label',input.placeholder);
+  stockSearch.querySelector('button').textContent=tr('Search stock','搜索现车','Cari stok');
+  stockSearch.onsubmit=event=>{
+   event.preventDefault();
+   filters={...filters,search:input.value.trim(),make:'',status:'',featured:false};
+   if($('#featuredFilter'))$('#featuredFilter').checked=false;
+   controls();
+   renderCards();
+   $('#inventoryTitle').focus({preventScroll:true});
+   $('#inventory').scrollIntoView({block:'start'});
+  };
+  stockSearch.hidden=false;
+ }
  const heroWhatsApp=$('#heroWhatsApp');if(heroWhatsApp)heroWhatsApp.href=wa('Hi Danny, I would like to ask about your current Japanese reconditioned cars.');
  controls();renderCards();comparisonBar();
  $('#stockProvenance').textContent=d.vehicles.some(v=>v.sample)?({en:'Some listings and cover images are examples. Confirm current stock, specifications and price with Danny. Monthly figures use the calculator’s example settings.',zh:'部分车辆与封面图片为示例。实际库存、配置和价格请向 Danny 确认。月供使用计算器的示例设置。',ms:'Sesetengah senarai dan foto ialah contoh. Sahkan stok, spesifikasi dan harga dengan Danny. Anggaran bulanan menggunakan tetapan contoh kalkulator.'}[lang]):({en:'Monthly figures use example calculator settings. Confirm vehicle details and pricing with Danny.',zh:'月供使用示例设置，车辆资料和价格请向 Danny 确认。',ms:'Anggaran bulanan menggunakan tetapan contoh. Sahkan butiran dan harga dengan Danny.'}[lang]);

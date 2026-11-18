@@ -22,7 +22,6 @@ export function validateDocument(d, publishing=false) {
     if(p?.facebook&&!/^https:\/\/(www\.)?facebook\.com\/reel\/\d+\/?$/.test(p.facebook))e.push('Presenter Facebook fallback needs a Facebook Reel link.');
     if(!/^[a-zA-Z0-9_-]{1,80}$/.test(v.id||'')||ids.has(v.id)) e.push('Vehicle ID is invalid or duplicated.'); ids.add(v.id);
     if(!v.stockId||stocks.has(v.stockId.toLowerCase()))e.push('Stock ID is missing or duplicated.');stocks.add(v.stockId.toLowerCase());
-    if(!v.brand?.trim()||!v.model?.trim())e.push('Brand and model are required.');
     if(!['draft','available','reserved','sold','unavailable','archived'].includes(v.status))e.push('Invalid vehicle status.');
     if(v.year && (!Number.isInteger(Number(v.year))||v.year<1900||v.year>2100))e.push('Invalid year.');
     if(!Number.isFinite(Number(v.price))||Number(v.price)<0)e.push('Price must be a positive number in RM.');
