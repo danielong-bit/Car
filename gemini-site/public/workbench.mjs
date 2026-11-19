@@ -20,8 +20,7 @@ import {frameControlsMarkup,bindPhotoFraming} from './photo-framing.mjs';
 import {createPhotoInspector} from './photo-inspector.mjs';
 import {extraSpecificationText,updateExtraSpecifications} from './specification-editor.mjs';
 import {bindListingImport,listingImportMarkup} from './listing-import.mjs';
-import {openFacebookPost,buildFacebookAdUrl,buildFacebookAdCampaignData,FB_AD_PRESETS,FB_COPY_LANGUAGES,FB_COPY_TONES,buildMarketplaceListingFields,renderFacebookAdPreviewMarkup,resolveLiveOrigin} from './facebook-post.mjs';
-import {diagnoseVehicleForFacebook,buildFacebookCatalogFeed} from './facebook-catalog.mjs';
+import {openFacebookPost} from './facebook-post.mjs?v=showroom-restore-1';
 
 const $=s=>document.querySelector(s),base=window.SITE_BASE||'/',esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>n==null?'Enquire':'RM '+Number(n).toLocaleString('en-MY');
@@ -33,12 +32,9 @@ let doc,editing,view='overview',filter='all',issueFilter='',query='',make='',yea
 let overviewChartTab='brands';
 let overviewActivityFilter='all';
 let overviewSpotlightId='';
-let adsSelectedId='',adsCampaign='fb_feed_ad',adsPromo='',adsLang='en',adsTone='standard',adsIncludeMonthly=true,adsRightTab='preview',adsPreviewFormat='feed',adsMatrixFilter='all';
-let analyticsSnapshot=null;
 let draftMeta={updatedAt:null,exportFingerprint:null,exportGeneratedAt:null};
 const content=$('#workspaceContent');
 const ACTIVITY_STORAGE_KEY='danny-wb-activity-log';
-const CAMPAIGN_STORAGE_KEY='danny-fb-campaigns';
 
 function setBusyState(next,labelText=''){
  busy=Boolean(next);
@@ -65,23 +61,8 @@ function recordActivityLog(entry){
   return item;
  }catch{return null;}
 }
-function recordCampaignLaunch(entry){
- try{
-  const raw=JSON.parse(localStorage.getItem(CAMPAIGN_STORAGE_KEY)||'[]');
-  const list=Array.isArray(raw)?raw:[];
-  const filtered=list.filter(item=>!(item.vehicleId===entry.vehicleId&&item.campaign===entry.campaign));
-  const next=[{...entry,at:new Date().toISOString()},...filtered].slice(0,20);
-  localStorage.setItem(CAMPAIGN_STORAGE_KEY,JSON.stringify(next));
- }catch{}
-}
-function readCampaignLaunches(){
- try{
-  const raw=JSON.parse(localStorage.getItem(CAMPAIGN_STORAGE_KEY)||'[]');
-  return Array.isArray(raw)?raw:[];
- }catch{return [];}
-}
 function buildRecentActivities(){
- return readActivityLog().slice(0,10).map(item=>{
+ return readActivityLog().filter(item=>item.kind!=='ad').slice(0,10).map(item=>{
   const minutes=Math.max(0,Math.round((Date.now()-Date.parse(item.at))/60000));
   const timeLabel=minutes<1?'Just now':minutes<60?`${minutes}m ago`:`${Math.round(minutes/60)}h ago`;
   return {...item,timeLabel};
@@ -151,7 +132,7 @@ async function persist(){
 function activate(next){
  if(busy){toast('Please wait until the current file operation finishes.');return;}
  view=next;editorDirty=false;selection.clear();
- $('#pageHeading').textContent={overview:'Overview',ads:'Facebook Ads & Stock Sync',media:'Media Library',homepage:'Homepage Editor',tools:'Calculator & JPJ',advanced:'Advanced Studio',inventory:'Vehicles',edit:doc.vehicles.some(v=>v.id===editing?.id)?'Edit vehicle':'Add a vehicle',services:'Services & Tinted (XPEL / 3M)',deliveries:'Deliveries & Handovers',settings:'Website Settings'}[view]||'Inventory';
+ $('#pageHeading').textContent={overview:'Overview',media:'Media Library',homepage:'Homepage Editor',tools:'Calculator & JPJ',advanced:'Advanced Studio',inventory:'Vehicles',edit:doc.vehicles.some(v=>v.id===editing?.id)?'Edit vehicle':'Add a vehicle',services:'Services & Tinted (XPEL / 3M)',deliveries:'Deliveries & Handovers',settings:'Website Settings'}[view]||'Inventory';
  const activeNav=view==='edit'?'inventory':view;
  document.querySelectorAll('.wb-sidebar [data-nav]').forEach(b=>{if(b.dataset.nav===activeNav)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
  render();
@@ -280,7 +261,7 @@ function getFilteredInventory(){
  return filtered;
 }
 function inventoryRowsMarkup(filtered){
- const rows=filtered.map(v=>{const sp=vehicleSpecialBadges(v,doc.homepage),cSrc=staticWbSrc(v.coverImageUrl);return `<div class="wb-swipe-host" data-swipe-host><article class="wb-row" data-id="${esc(v.id)}"><label class="row-check"><input data-select="${esc(v.id)}" type="checkbox" ${selection.has(v.id)?'checked':''} aria-label="Select ${esc(v.stockId)}"></label><button type="button" class="wb-vehicle" data-edit="${esc(v.id)}">${v.coverImageUrl?`<img ${cSrc?`src="${esc(cSrc)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="lazy" decoding="async">`:`<span class="wb-photo-placeholder">${icon('photo')}</span>`}<span><strong>${v.year||''} ${esc(v.make)} ${esc(v.model)}</strong><small>${esc(v.variant||v.body)} · ${esc(v.transmission)}${v.auctionGrade?` · Grade ${esc(v.auctionGrade)}${esc(v.interiorGrade||'')}`:''}</small><code>${esc(v.stockId)}</code></span></button><div class="row-status-group"><div class="quick-status-pills" role="group" aria-label="Quick status for ${esc(v.stockId)}">${[['available','Available'],['reserved','Booked'],['sold','Sold']].map(([st,lbl])=>`<button type="button" class="quick-status-btn ${v.status===st?'is-active '+st:''}" data-quick-status="${esc(v.id)}" data-status-val="${st}">${lbl}</button>`).join('')}</div><label class="row-status"><span class="sr-only">Status for ${esc(v.stockId)}</span><select class="status-pill ${v.status}" data-status="${esc(v.id)}">${STATUSES.map(s=>`<option value="${s}" ${v.status===s?'selected':''}>${statusName(s)}</option>`).join('')}</select></label>${sp.length?`<div class="wb-badge-chips">${sp.map(b=>`<span class="wb-mini-badge">${esc(b)}</span>`).join('')}</div>`:''}</div><div class="row-price"><label class="quick-price-field" aria-label="Price RM for ${esc(v.stockId)}"><span class="quick-price-prefix">RM</span><input type="number" min="0" step="1000" class="quick-price-input" data-quick-price="${esc(v.id)}" value="${v.priceRm??''}" placeholder="Enquire"></label><small>${esc(v.location||'Glenmarie')}</small></div><button type="button" class="photo-count" data-photos="${esc(v.id)}">${icon('photo')} ${v.gallery.length}</button><div class="row-actions"><button type="button" data-edit="${esc(v.id)}">Edit</button><details><summary aria-label="More actions for ${esc(v.stockId)}">•••</summary><div class="row-menu"><button type="button" data-fb-post="${esc(v.id)}">Facebook Ad &amp; Live Link</button><button type="button" data-duplicate="${esc(v.id)}">Duplicate as draft</button><div class="archive-fuse-mount" data-archive-mount="${esc(v.id)}"></div><button type="button" data-delete="${esc(v.id)}" class="danger-text">Delete</button></div></details></div></article></div>`;}).join('')||`<div class="empty-state"><h3>${doc.vehicles.length?'No matching vehicles':'No vehicles in inventory yet'}</h3><p>${doc.vehicles.length?'Try another search or clear the active filter to see your collection.':'Add your first vehicle or restore a JSON backup from Website Settings.'}</p><button type="button" class="button quiet" data-action="${doc.vehicles.length?'reset-filters':'new'}">${doc.vehicles.length?'Reset filters':'+ Add first vehicle'}</button></div>`;
+ const rows=filtered.map(v=>{const sp=vehicleSpecialBadges(v,doc.homepage),cSrc=staticWbSrc(v.coverImageUrl);return `<div class="wb-swipe-host" data-swipe-host><article class="wb-row" data-id="${esc(v.id)}"><label class="row-check"><input data-select="${esc(v.id)}" type="checkbox" ${selection.has(v.id)?'checked':''} aria-label="Select ${esc(v.stockId)}"></label><button type="button" class="wb-vehicle" data-edit="${esc(v.id)}">${v.coverImageUrl?`<img ${cSrc?`src="${esc(cSrc)}" `:''}data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="lazy" decoding="async">`:`<span class="wb-photo-placeholder">${icon('photo')}</span>`}<span><strong>${v.year||''} ${esc(v.make)} ${esc(v.model)}</strong><small>${esc(v.variant||v.body)} · ${esc(v.transmission)}${v.auctionGrade?` · Grade ${esc(v.auctionGrade)}${esc(v.interiorGrade||'')}`:''}</small><code>${esc(v.stockId)}</code></span></button><div class="row-status-group"><div class="quick-status-pills" role="group" aria-label="Quick status for ${esc(v.stockId)}">${[['available','Available'],['reserved','Booked'],['sold','Sold']].map(([st,lbl])=>`<button type="button" class="quick-status-btn ${v.status===st?'is-active '+st:''}" data-quick-status="${esc(v.id)}" data-status-val="${st}">${lbl}</button>`).join('')}</div><label class="row-status"><span class="sr-only">Status for ${esc(v.stockId)}</span><select class="status-pill ${v.status}" data-status="${esc(v.id)}">${STATUSES.map(s=>`<option value="${s}" ${v.status===s?'selected':''}>${statusName(s)}</option>`).join('')}</select></label>${sp.length?`<div class="wb-badge-chips">${sp.map(b=>`<span class="wb-mini-badge">${esc(b)}</span>`).join('')}</div>`:''}</div><div class="row-price"><label class="quick-price-field" aria-label="Price RM for ${esc(v.stockId)}"><span class="quick-price-prefix">RM</span><input type="number" min="0" step="1000" class="quick-price-input" data-quick-price="${esc(v.id)}" value="${v.priceRm??''}" placeholder="Enquire"></label><small>${esc(v.location||'Glenmarie')}</small></div><button type="button" class="photo-count" data-photos="${esc(v.id)}">${icon('photo')} ${v.gallery.length}</button><div class="row-actions"><button type="button" data-edit="${esc(v.id)}">Edit</button><details><summary aria-label="More actions for ${esc(v.stockId)}">•••</summary><div class="row-menu"><button type="button" data-duplicate="${esc(v.id)}">Duplicate as draft</button><div class="archive-fuse-mount" data-archive-mount="${esc(v.id)}"></div><button type="button" data-delete="${esc(v.id)}" class="danger-text">Delete</button></div></details></div></article></div>`;}).join('')||`<div class="empty-state"><h3>${doc.vehicles.length?'No matching vehicles':'No vehicles in inventory yet'}</h3><p>${doc.vehicles.length?'Try another search or clear the active filter to see your collection.':'Add your first vehicle or restore a JSON backup from Website Settings.'}</p><button type="button" class="button quiet" data-action="${doc.vehicles.length?'reset-filters':'new'}">${doc.vehicles.length?'Reset filters':'+ Add first vehicle'}</button></div>`;
  return `<div class="wb-table-head"><label><input type="checkbox" id="selectAll" ${filtered.length&&filtered.every(v=>selection.has(v.id))?'checked':''} aria-label="Select all shown vehicles"></label><span>VEHICLE / STOCK ID</span><span>STATUS &amp; QUICK SWITCH</span><span>PRICE (RM) / LOCATION</span><span>PHOTOS</span><span>ACTIONS</span></div>${rows}`;
 }
 function inventory(){
@@ -293,7 +274,7 @@ function inventory(){
  const hasAttention=missingPhotoCars.length>0||draftCars.length>0||exampleCars.length>0;
  return `${buildHookMarkup()}
  <section class="wb-kpis wb-kpis-4" aria-label="Filter by primary stock status">${PRIMARY_KPIS.map(s=>`<button type="button" data-status-filter="${s}" aria-pressed="${filter===s}"><span>${statusName(s)}</span><strong>${totals[s]||0}</strong></button>`).join('')}</section>
- <section class="wb-panel"><div class="wb-section-head"><div><h2>Your vehicles <span class="count" id="inventoryResultCount">${filtered.length}</span></h2><p>Update a status inline, generate tracked Facebook Ad links, or open a car to edit its photos and specs.</p></div><div class="wb-head-actions">${filter!=='all'||issueFilter||query||make||year?`<button type="button" class="button quiet" data-action="reset-filters">Show all (${doc.vehicles.filter(v=>v.status!=='archived').length})</button>`:''}<button type="button" class="button quiet" data-owner-nav="ads">${icon('share')} FB Ads Sync</button><button type="button" class="button" data-action="new">${icon('plus')} Add vehicle</button></div></div>
+ <section class="wb-panel"><div class="wb-section-head"><div><h2>Your vehicles <span class="count" id="inventoryResultCount">${filtered.length}</span></h2><p>Manage prices, status and photos.</p></div><div class="wb-head-actions">${filter!=='all'||issueFilter||query||make||year?`<button type="button" class="button quiet" data-action="reset-filters">Show all (${doc.vehicles.filter(v=>v.status!=='archived').length})</button>`:''}<button type="button" class="button" data-action="new">${icon('plus')} Add vehicle</button></div></div>
  ${hasAttention?`<div class="stock-attention-bar" role="region" aria-label="Stock attention">
   <span class="attention-label">Stock Attention:</span>
   <div class="attention-chips">
@@ -468,8 +449,8 @@ function themeSettingsMarkup(){return '<section class="wb-theme-settings"><h3>Ap
 function settings(){
  return `<form id="settingsForm">
  <details class="wb-panel form-section settings-group" open>
-  <summary><span class="form-section-title"><span>01</span><span><strong>Brand, Contact &amp; Facebook / Meta Integration</strong><small>Appears in the showroom header, About Danny section, WhatsApp enquiry links, and Meta Pixel browser events.</small></span></span></summary>
-  <div class="form-grid">${[['Name','name'],['WhatsApp (country code, digits only)','phone'],['Email','email'],['Full business / showroom address','location'],['TikTok URL','tiktok'],['Facebook URL','facebook'],['小红书 URL','rednote'],['Meta Pixel ID (8–24 digits, optional)','facebookPixelId'],['Facebook Page ID / Handle (optional)','facebookPageId']].map(([name,key])=>`<label class="field">${name}<input name="${key}" value="${esc(doc.profile[key]||'')}" ${key==='phone'?'pattern="[0-9]{8,15}" required':''} ${key==='facebookPixelId'?'pattern="[0-9]{8,24}" placeholder="e.g. 123456789012345"':''} ${key==='facebookPageId'?'pattern="[A-Za-z0-9._-]{3,64}" placeholder="e.g. DannyReconSelect"':''} ${key==='email'?'type="email"':''}></label>`).join('')}<label class="field">Showroom locations (one per line)<textarea name="locations">${esc((doc.profile.locations||['Glenmarie','Bukit Jelutong']).join('\n'))}</textarea></label><label class="field">Intro<textarea name="intro">${esc(doc.profile.intro)}</textarea></label></div>
+  <summary><span class="form-section-title"><span>01</span><span><strong>Brand &amp; Contact (Danny’s Profile &amp; Locations)</strong><small>Appears in the showroom header, About Danny section, and WhatsApp enquiry links.</small></span></span></summary>
+  <div class="form-grid">${[['Name','name'],['WhatsApp (country code, digits only)','phone'],['Email','email'],['Full business / showroom address','location'],['TikTok URL','tiktok'],['Facebook URL','facebook'],['小红书 URL','rednote']].map(([name,key])=>`<label class="field">${name}<input name="${key}" value="${esc(doc.profile[key])}" ${key==='phone'?'pattern="[0-9]{8,15}" required':''} ${key==='email'?'type="email"':''}></label>`).join('')}<label class="field">Showroom locations (one per line)<textarea name="locations">${esc((doc.profile.locations||['Glenmarie','Bukit Jelutong']).join('\n'))}</textarea></label><label class="field">Intro<textarea name="intro">${esc(doc.profile.intro)}</textarea></label></div>
   <div style="margin-top:16px"><button class="button" type="submit">Save Brand &amp; Showroom Settings</button></div>
  </details>
  <details class="wb-panel form-section settings-group" open>
@@ -485,8 +466,12 @@ function settings(){
   <button class="button" type="submit">Save settings and go live</button>
  </details>
  </form>
+ <details class="wb-panel form-section settings-group" id="deliveriesGroup">
+  <summary><span class="form-section-title"><span>03</span><span><strong>Deliveries (Photos &amp; Videos)</strong><small>Manage customer handover photos and TikTok/Reel videos shown on the homepage (${(doc.stories||[]).filter(s=>s.published).length} active).</small></span></span></summary>
+  ${deliveriesMarkup()}
+ </details>
  <details class="wb-panel form-section backup-panel settings-group" id="backupGroup">
-  <summary><span class="form-section-title"><span>03</span><span><strong>Export, Backup &amp; Reset</strong><small>Download a site update ZIP, save/restore a JSON backup, or reset local edits.</small></span></span></summary>
+  <summary><span class="form-section-title"><span>04</span><span><strong>Export, Backup &amp; Reset</strong><small>Download a site update ZIP, save/restore a JSON backup, or reset local edits.</small></span></span></summary>
   <div class="actions" style="margin-top:12px">
    <button type="button" class="button" data-action="export">Export site update ZIP</button>
    <button type="button" class="button quiet" data-action="json">Download public-site.json</button>
@@ -632,7 +617,6 @@ function bindInventoryRows(){
   inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();inp.blur();}};
   inp.onchange=async()=>{const v=doc?.vehicles.find(item=>item.id===inp.dataset.quickPrice);if(!v)return;const raw=inp.value.trim(),next=raw===''?null:Number(raw);if(next!=null&&(Number.isNaN(next)||next<0))return toast('Enter a valid price in RM.',true);if(v.priceRm===next)return;const prev=v.priceRm;v.priceRm=next;if(prev!=null&&next!=null){recordActivityLog({vehicleId:v.id,stockId:v.stockId||'DRS',title:`${v.year||v.manufactureYear||''} ${v.make||''} ${v.model||''}`.trim(),cover:v.coverImageUrl||v.gallery?.[0]?.url||'',kind:'price',prevPrice:Number(prev),nextPrice:Number(next),delta:Number(next)-Number(prev),status:v.status});}try{await persist();inp.classList.add('is-saved');setTimeout(()=>inp.classList.remove('is-saved'),1200);if(cloudReady)await publishItem({collection:'vehicles',id:v.id});else toast(`${v.stockId} price updated to ${money(next)}.`);}catch(err){v.priceRm=prev;inp.value=prev??'';toast(err.message,true);}};
  });
- document.querySelectorAll('#inventoryRowsMount [data-fb-post]').forEach(b=>b.onclick=()=>openVehicleAdDialog(b.dataset.fbPost));
  for(const action of ['duplicate','delete'])document.querySelectorAll('#inventoryRowsMount [data-'+action+']').forEach(b=>b.onclick=async()=>{const v=doc.vehicles.find(v=>v.id===b.dataset[action]);if(!v)return;if(action==='duplicate'){editing=normalizeVehicle({...v,id:crypto.randomUUID(),stockId:v.stockId+'-COPY',status:'draft'});while(doc.vehicles.some(x=>x.stockId===editing.stockId))editing.stockId+='-COPY';activate('edit');return;}if(!await confirmAction(label(action)+' '+v.stockId+'?','Remove this car from your browser inventory? Export a backup first.'))return;const before=structuredClone(doc);doc.vehicles=doc.vehicles.filter(x=>x.id!==v.id);try{await persist();render();toast('Vehicle removed locally.');}catch(error){doc=before;try{await persist();}catch{}render();toast(error.message,true);}});
 }
 function updateInventorySelection(){
@@ -653,46 +637,14 @@ function updateInventoryRows(){
  bindInventoryRows();
  mount.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>runAction(b.dataset.action));
 }
-function openVehicleAdDialog(vehicleId){
- const v=doc?.vehicles.find(item=>item.id===vehicleId);
- if(!v)return;
- const origin=resolveLiveOrigin(document);
- openFacebookPost(v,doc.profile,document,{
-  origin,
-  campaign:adsCampaign,
-  promoHeadline:adsPromo,
-  lang:adsLang,
-  tone:adsTone,
-  includeMonthly:adsIncludeMonthly,
-  finance:doc.finance,
-  onAdGenerated:({vehicle,campaign,adUrl})=>{
-   recordCampaignLaunch({vehicleId:vehicle.id,stockId:vehicle.stockId,title:`${vehicle.year||''} ${vehicle.make} ${vehicle.model}`.trim(),campaign,adUrl,status:vehicle.status});
-   recordActivityLog({vehicleId:vehicle.id,stockId:vehicle.stockId||'DRS',title:`${vehicle.year||vehicle.manufactureYear||''} ${vehicle.make||''} ${vehicle.model||''}`.trim(),cover:vehicle.coverImageUrl||vehicle.gallery?.[0]?.url||'',kind:'ad',campaign,priceRm:Number(vehicle.priceRm)||0,status:vehicle.status});
-   if(view==='ads'||view==='overview')render();
-  }
- });
-}
-let analyticsFetching=false;
-async function ensureAnalyticsSnapshot(force=false){
- if(analyticsFetching||(analyticsSnapshot&&!force))return;
- analyticsFetching=true;
- try{
-  const r=await fetch('/api/owner/analytics',{credentials:'same-origin',cache:'no-store'});
-  if(r.ok){
-   analyticsSnapshot=await r.json();
-   if(view==='ads')render();
-  }
- }catch{}finally{analyticsFetching=false;}
-}
 function render(){
  syncStatusBanner();
  content.setAttribute('aria-busy','false');
- content.innerHTML=view==='overview'?overviewMarkup():view==='ads'?adsSyncMarkup():view==='media'?mediaLibraryMarkup():view==='homepage'?homepageEditorMarkup():view==='tools'?toolsSettingsMarkup():view==='advanced'?advancedMarkup():view==='inventory'?inventory():view==='edit'?editor():view==='services'?servicesMarkup():view==='deliveries'?deliveriesView():settings();
+ content.innerHTML=view==='overview'?overviewMarkup():view==='media'?mediaLibraryMarkup():view==='homepage'?homepageEditorMarkup():view==='tools'?toolsSettingsMarkup():view==='advanced'?advancedMarkup():view==='inventory'?inventory():view==='edit'?editor():view==='services'?servicesMarkup():view==='deliveries'?deliveriesView():settings();
  hydrateImages();
  bind();
  bindOwnerExtras();
- if(view==='overview'||view==='ads')loadVisitorStats();
- if(view==='ads')void ensureAnalyticsSnapshot();
+ if(view==='overview')loadVisitorStats();
 }
 function bind(){
  if($('#workbenchThemeSelect'))$('#workbenchThemeSelect').onchange=e=>saveWorkbenchTheme(e.target.value);
@@ -773,7 +725,7 @@ function bind(){
   toast('✨ Handover caption auto-filled.');
  });
  document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>runAction(b.dataset.action));
- if($('#settingsForm'))$('#settingsForm').onsubmit=async e=>{e.preventDefault();const values=Object.fromEntries(new FormData(e.target));for(const key of ['tiktok','facebook','rednote'])if(values[key]&&!/^https:\/\//i.test(values[key]))return toast('Social links must start with https://',true);const pixelVal=String(values.facebookPixelId||'').trim();if(pixelVal&&!/^\d{8,24}$/.test(pixelVal))return toast('Meta Pixel ID must be 8–24 digits.',true);const pageVal=String(values.facebookPageId||'').trim();if(pageVal&&!/^[A-Za-z0-9._-]{3,64}$/.test(pageVal))return toast('Facebook Page ID / handle must be 3–64 characters.',true);const before=structuredClone(doc);for(const key of ['name','phone','email','location','intro','tiktok','facebook','rednote']){if(['tiktok','facebook','rednote'].includes(key)&&values[key]&&!/^https:\/\//i.test(values[key]))return toast('Social links must start with https://',true);doc.profile[key]=values[key];}doc.profile.facebookPixelId=pixelVal;doc.profile.facebookPageId=pageVal;doc.profile.locations=String(values.locations).split('\n').map(s=>s.trim()).filter(Boolean);for(const k of ['rate','tenure','downPayment'])doc.finance[k]=Number(values[k]);doc.homepage.brandFilterMode=values.brandFilterMode==='manual'?'manual':'auto';doc.homepage.brandFilters=new FormData(e.target).getAll('brandFilters').map(String);doc.homepage.showSoldVehicles=values.showSoldVehicles==='on';doc.homepage.hideAvailableBadge=values.hideAvailableBadge==='on';doc.homepage.autoLowKmBadge=values.autoLowKmBadge==='on';try{await persist();await publishItem({section:'settings'});}catch(error){doc=before;toast(error.message,true);}};
+ if($('#settingsForm'))$('#settingsForm').onsubmit=async e=>{e.preventDefault();const values=Object.fromEntries(new FormData(e.target));for(const key of ['tiktok','facebook','rednote'])if(values[key]&&!/^https:\/\//i.test(values[key]))return toast('Social links must start with https://',true);const before=structuredClone(doc);for(const key of ['name','phone','email','location','intro','tiktok','facebook','rednote']){if(['tiktok','facebook','rednote'].includes(key)&&values[key]&&!/^https:\/\//i.test(values[key]))return toast('Social links must start with https://',true);doc.profile[key]=values[key];}doc.profile.locations=String(values.locations).split('\n').map(s=>s.trim()).filter(Boolean);for(const k of ['rate','tenure','downPayment'])doc.finance[k]=Number(values[k]);doc.homepage.brandFilterMode=values.brandFilterMode==='manual'?'manual':'auto';doc.homepage.brandFilters=new FormData(e.target).getAll('brandFilters').map(String);doc.homepage.showSoldVehicles=values.showSoldVehicles==='on';doc.homepage.hideAvailableBadge=values.hideAvailableBadge==='on';doc.homepage.autoLowKmBadge=values.autoLowKmBadge==='on';try{await persist();await publishItem({section:'settings'});}catch(error){doc=before;toast(error.message,true);}};
  if($('#restoreBackup'))$('#restoreBackup').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>8*1024*1024)throw Error('Use a JSON backup under 8 MB.');const value=JSON.parse(await file.text()),restored=normalizeDocument(value.document||value);if(!Array.isArray(value.vehicles||value.document?.vehicles)||restored.vehicles.length>500)throw Error('Choose a valid inventory-workbench.json backup.');for(const v of restored.vehicles)if(vehicleIssues(v).length)throw Error('The backup contains invalid vehicle details.');if(!await confirmAction('Restore inventory?','Replace the inventory saved in this browser with this JSON backup?'))return;doc=restored;await persist();render();toast('Inventory restored. Keep uploaded photos in their matching website folder.');}catch(error){toast(error.message,true);}};
 }
 async function runAction(action){
@@ -782,7 +734,6 @@ async function runAction(action){
  if(action==='auto-stock-id'){captureForm();editing.stockId=generateUniqueStockId(editing.make);editorDirty=true;render();toast(`Generated unique Stock ID: ${editing.stockId}`);return;}
  if(action==='auto-copy'){captureForm();const copy=generateAutoCopy(editing);editing.conditionNotes=copy.conditionNotes;editing.description=copy.description;editorDirty=true;render();toast('✨ Condition notes & showroom description auto-generated!');return;}
  if(action==='smart-complete'){captureForm();if(!editing.stockId)editing.stockId=generateUniqueStockId(editing.make);editing=normalizeVehicle(editing);editorDirty=true;render();toast('Stock ID and formatting updated. Confirm the vehicle specifications and grade from its documents.');return;}
- if(action==='fb-post-editing'){captureForm();return openVehicleAdDialog(editing.id);}
  if(action==='go-deliveries')return activate('deliveries');
  if(action==='go-backup'){activate('settings');const g=$('#backupGroup');if(g){g.open=true;g.scrollIntoView({block:'start'});}return;}
  if(action==='filter-missing-photo'){filter='available';issueFilter=issueFilter==='missing-photo'?'':'missing-photo';return render();}
@@ -1031,7 +982,6 @@ function overviewMarkup(){
     <div class="wb-spotlight-foot">
      <button type="button" class="button small" data-edit="${esc(spotCar.id)}">Open full 3-step editor →</button>
      <button type="button" class="button quiet small" data-photos="${esc(spotCar.id)}">${icon('photo')} Manage ${spotCar.gallery?.length||0} photos</button>
-     <button type="button" class="button quiet small" data-fb-post="${esc(spotCar.id)}">${icon('share')} FB Ad</button>
     </div>
    </div>
   </div>
@@ -1049,7 +999,6 @@ function overviewMarkup(){
       <button type="button" role="tab" class="wb-chart-tab ${overviewActivityFilter==='all'?'is-active':''}" data-activity-filter="all">All</button>
       <button type="button" role="tab" class="wb-chart-tab ${overviewActivityFilter==='price'?'is-active':''}" data-activity-filter="price">Price</button>
       <button type="button" role="tab" class="wb-chart-tab ${overviewActivityFilter==='status'?'is-active':''}" data-activity-filter="status">Status</button>
-      <button type="button" role="tab" class="wb-chart-tab ${overviewActivityFilter==='ad'?'is-active':''}" data-activity-filter="ad">FB Ads</button>
      </div>
      <span class="wb-drag-pill" title="Drag to reorder panel">⋮⋮ Drag</span>
     </div>
@@ -1065,10 +1014,6 @@ function overviewMarkup(){
       const sign=isUp?'+':'−';
       trendBadge=`<span class="wb-trend-badge ${isUp?'is-up':'is-down'}" title="${isUp?'Price increased':'Price reduced / value offer'}">${isUp?'▲':'▼'} ${sign}RM ${Math.abs(delta).toLocaleString('en-MY')} (${pct}%)</span>`;
       summaryLine=`Price adjusted from <s>${money(act.prevPrice)}</s> to <strong>${money(act.nextPrice)}</strong>`;
-     }else if(act.kind==='ad'){
-      const adLabel=FB_AD_PRESETS.find(p=>p.id===act.campaign)?.label||'Facebook Ad';
-      trendBadge=`<span class="wb-trend-badge is-ad">📣 ${esc(adLabel)}</span>`;
-      summaryLine=`Synced Facebook Ad link &amp; copy prepared${act.priceRm?` · ${money(act.priceRm)}`:''}`;
      }else if(act.kind==='stock'){
       const st=act.status||'available';
       const stClass=st==='available'?'is-avail':st==='reserved'?'is-booked':'is-sold';
@@ -1284,269 +1229,6 @@ function overviewMarkup(){
   </details>
  </section>`;
 }
-function adsSyncMarkup(){
- const pool=doc.vehicles.filter(v=>v.status!=='archived');
- if(!adsSelectedId||!pool.some(v=>v.id===adsSelectedId)){
-  adsSelectedId=(pool.find(v=>v.status==='available')||pool[0])?.id||'';
- }
- const selectedCar=pool.find(v=>v.id===adsSelectedId)||pool[0]||null;
- const liveOrigin=resolveLiveOrigin(document);
- const campaignData=selectedCar?buildFacebookAdCampaignData(selectedCar,doc.profile,liveOrigin,{campaign:adsCampaign,promoHeadline:adsPromo,lang:adsLang,tone:adsTone,includeMonthly:adsIncludeMonthly,finance:doc.finance,includeDraftLink:true}):null;
- const mpFields=selectedCar?buildMarketplaceListingFields(selectedCar,doc.profile,liveOrigin,doc.finance):null;
- const launches=readCampaignLaunches();
- const topAdMap=new Map((analyticsSnapshot?.topAdVehicles||[]).map(item=>[String(item.name||'').toLowerCase(),Number(item.count)||0]));
- const findAdClicks=v=>{
-  const code=(v.stockId||'').toLowerCase(),id=(v.id||'').toLowerCase();
-  let clicks=0;
-  for(const [name,cnt] of topAdMap){
-   if((code&&name.includes('#'+code))||(id&&name.includes(id)))clicks+=cnt;
-  }
-  return clicks;
- };
- const diagnosticsList=pool.map(v=>({vehicle:v,diag:diagnoseVehicleForFacebook(v)}));
- const readyCount=diagnosticsList.filter(d=>d.diag.ready).length;
- const attentionCount=diagnosticsList.length-readyCount;
- const avgScore=diagnosticsList.length?Math.round(diagnosticsList.reduce((acc,d)=>acc+d.diag.score,0)/diagnosticsList.length):100;
- const fbClicks=Number(analyticsSnapshot?.fbClicks)||0;
- const fbLeads=Number(analyticsSnapshot?.fbLeads)||0;
- const leadsTotal=Number(analyticsSnapshot?.leadsTotal)||0;
- const convPct=fbClicks>0?Math.round((fbLeads/fbClicks)*100):0;
- const catalogCsvUrl=`${liveOrigin.replace(/\/+$/,'')}/api/facebook/catalog.csv`;
- const catalogJsonUrl=`${liveOrigin.replace(/\/+$/,'')}/api/facebook/catalog.json`;
- const pixelId=doc.profile?.facebookPixelId||'';
- const filteredMatrix=diagnosticsList.filter(({diag})=>adsMatrixFilter==='ready'?diag.ready:adsMatrixFilter==='attention'?!diag.ready:true);
- const isPending=cloudReady&&pendingDraftChanges;
- const isSelectedLive=selectedCar&&['available','reserved','sold'].includes(selectedCar.status);
- return `<section class="wb-ads-studio">
-  <div class="wb-hook-bar ${isPending?'is-cold':''}">
-   <div class="wb-hook-copy">
-    <span class="wb-hook-eyebrow">FACEBOOK ADS · META CATALOG · WHATSAPP CONVERSION SUITE</span>
-    <strong>${isPending?'Draft edits waiting to publish — publish below so your Facebook Ads, OpenGraph cards, and Meta Catalog feed reflect the latest stock.':`Connected live domain: ${esc(liveOrigin)} · Dynamic OpenGraph cards & Meta Automotive Catalog sync automatically.`}</strong>
-   </div>
-   <div class="wb-hook-actions">
-    ${cloudReady?`<button type="button" class="button small" id="adsPublishNow">${icon('check')} ${isPending?'Publish Latest Stock Now':'Re-sync Live Stock'}</button>`:''}
-    <button type="button" class="button small quiet" data-action="export">Export ZIP Update</button>
-    <button type="button" class="button small quiet" id="adsRefreshStats">Refresh Funnel</button>
-   </div>
-  </div>
-  <div class="wb-fb-kpi-strip" aria-label="Facebook Ads & Catalog Performance">
-   <div class="wb-fb-kpi">
-    <span>Catalog Readiness</span>
-    <strong>${readyCount} / ${diagnosticsList.length}</strong>
-    <small>${avgScore}% feed health · ${attentionCount?`${attentionCount} need attention`:'All units ready'}</small>
-   </div>
-   <div class="wb-fb-kpi">
-    <span>Facebook Ad Clicks (30d)</span>
-    <strong>${fbClicks.toLocaleString('en-MY')}</strong>
-    <small>Tracked via UTM &amp; fbclid</small>
-   </div>
-   <div class="wb-fb-kpi">
-    <span>WhatsApp Ad Leads (30d)</span>
-    <strong>${fbLeads.toLocaleString('en-MY')}</strong>
-    <small>${fbClicks>0?`${convPct}% click-to-WhatsApp`:`${leadsTotal} total showroom leads`}</small>
-   </div>
-   <div class="wb-fb-kpi">
-    <span>Meta Pixel &amp; Catalog Feed</span>
-    <strong>${pixelId?'Pixel Active':'Feed Live'}</strong>
-    <small>${pixelId?`ID #${esc(pixelId)}`:'Set Pixel ID below for ViewContent/Lead'}</small>
-   </div>
-  </div>
-  <section class="wb-panel wb-catalog-bar">
-   <div class="wb-catalog-info">
-    <span class="wb-widget-eyebrow">META COMMERCE MANAGER · AUTOMOTIVE INVENTORY ADS (AIA) FEED</span>
-    <strong>Scheduled Data Feed URL &amp; Browser Pixel</strong>
-    <p>Paste the CSV feed URL into Meta Commerce Manager → Data Sources → Scheduled Feed so Carousel &amp; Dynamic Retargeting ads stay synced with your showroom prices and availability.</p>
-   </div>
-   <div class="wb-catalog-controls">
-    <div class="fb-link-row">
-     <input id="adsCatalogCsvUrl" type="text" readonly value="${esc(catalogCsvUrl)}" aria-label="Meta Automotive Catalog CSV Feed URL">
-     <button type="button" class="button quiet small" id="adsCopyCatalogUrlBtn">Copy Feed URL</button>
-     <button type="button" class="button quiet small" id="adsDownloadCsvBtn">Download CSV</button>
-     <a class="button quiet small" href="${esc(catalogJsonUrl)}" target="_blank" rel="noopener">JSON Feed ↗</a>
-    </div>
-    <div class="wb-pixel-inline">
-     <label for="adsQuickPixelInput">Meta Pixel ID</label>
-     <input id="adsQuickPixelInput" type="text" inputmode="numeric" pattern="[0-9]{8,24}" placeholder="Optional 15-digit Pixel ID (fires ViewContent &amp; Lead)" value="${esc(pixelId)}">
-     <button type="button" class="button quiet small" id="adsSavePixelBtn">Save Pixel</button>
-    </div>
-   </div>
-  </section>
-  ${selectedCar&&campaignData?`<div class="wb-ads-grid">
-   <section class="wb-panel" style="padding:22px">
-    <div class="wb-widget-head" style="margin-bottom:14px">
-     <div>
-      <span class="wb-widget-eyebrow">01. CAMPAIGN, LANGUAGE &amp; DESTINATION BUILDER</span>
-      <h3>Tracked Ad Link &amp; Multi-Language Hook</h3>
-     </div>
-     <span class="wb-trend-badge ${isSelectedLive?'is-avail':'is-booked'}">${isSelectedLive?'Live on Website':'Draft Only'}</span>
-    </div>
-    <div class="fb-sync-banner ${isSelectedLive?'is-live':'is-draft'}" style="margin-bottom:16px">
-     <strong>${esc(selectedCar.manufactureYear||selectedCar.year||'')} ${esc(selectedCar.make)} ${esc(selectedCar.model)} (#${esc(selectedCar.stockId)}) · ${money(selectedCar.priceRm)}</strong>
-     <span>${isSelectedLive?'Sharing or advertising this URL renders a rich vehicle OpenGraph card (photo, RM price & stock status) on Facebook & WhatsApp.':'Set status to Available or Booked and publish so Facebook Ad visitors can view this unit.'}</span>
-    </div>
-    <div class="fb-builder-grid">
-     <label class="field">
-      <span>Target Vehicle</span>
-      <select id="adsVehicleSelect">
-       ${pool.map(v=>`<option value="${esc(v.id)}" ${v.id===selectedCar.id?'selected':''}>${esc((v.year||v.manufactureYear||'')+' '+v.make+' '+v.model)} (#${esc(v.stockId)}) — ${v.status==='sold'?'SOLD':money(v.priceRm)}</option>`).join('')}
-      </select>
-     </label>
-     <label class="field">
-      <span>Facebook Ad Placement</span>
-      <select id="adsCampaignSelect">
-       ${FB_AD_PRESETS.map(p=>`<option value="${esc(p.id)}" ${p.id===adsCampaign?'selected':''}>${esc(p.label)}</option>`).join('')}
-      </select>
-     </label>
-    </div>
-    <div class="fb-lang-toolbar">
-     <div class="fb-seg-group" role="group" aria-label="Ad copy language">
-      ${FB_COPY_LANGUAGES.map(l=>`<button type="button" class="fb-seg-btn ${l.id===adsLang?'is-active':''}" data-ads-lang="${esc(l.id)}">${esc(l.label)}</button>`).join('')}
-     </div>
-     <label class="fb-inline-select">
-      <span class="sr-only">Copy Tone</span>
-      <select id="adsToneSelect" aria-label="Copy Tone">
-       ${FB_COPY_TONES.map(t=>`<option value="${esc(t.id)}" ${t.id===adsTone?'selected':''}>${esc(t.label)}</option>`).join('')}
-      </select>
-     </label>
-     <label class="fb-monthly-toggle">
-      <input type="checkbox" id="adsMonthlyToggle" ${adsIncludeMonthly?'checked':''}>
-      <span>Include monthly RM</span>
-     </label>
-    </div>
-    <label class="field" style="margin-top:12px">
-     <span>Promo Headline Hook (Optional)</span>
-     <input id="adsPromoInput" type="text" value="${esc(adsPromo)}" placeholder="e.g. Fresh Arrival · Verified Grade 4.5A" maxlength="80">
-    </label>
-    <div class="fb-promo-chips">
-     ${['Fresh Arrival','Verified Grade','Zero Deposit Option','Price Reduced','Low Mileage','Ready for Viewing'].map(tag=>`<button type="button" class="fb-promo-chip" data-ads-promo-chip="${esc(tag)}">+ ${esc(tag)}</button>`).join('')}
-    </div>
-    <div class="fb-link-box">
-     <label for="adsGeneratedUrl">Tracked Facebook Destination URL (Dynamic OG Preview Ready)</label>
-     <div class="fb-link-row">
-      <input id="adsGeneratedUrl" type="text" readonly value="${esc(campaignData.adUrl)}">
-      <button type="button" class="button quiet small" id="adsCopyUrlBtn">Copy URL</button>
-      <a class="button quiet small" id="adsShareFbBtn" href="${esc(campaignData.shareUrl)}" target="_blank" rel="noopener">Share on FB ↗</a>
-      <a class="button quiet small" id="adsOpenLanding" href="${esc(campaignData.adUrl)}" target="_blank" rel="noopener">Open ↗</a>
-     </div>
-    </div>
-    <div class="wb-spotlight-foot" style="margin-top:14px">
-     <a class="button quiet small" id="adsWhatsappTest" href="${esc(campaignData.whatsappUrl)}" target="_blank" rel="noopener">Test WhatsApp Ad Lead ↗</a>
-     <button type="button" class="button quiet small" data-edit="${esc(selectedCar.id)}">Edit Car Specs &amp; Photos →</button>
-    </div>
-   </section>
-   <section class="wb-panel wb-ads-right-panel" style="padding:22px;display:flex;flex-direction:column;gap:14px">
-    <div class="wb-widget-head" style="margin-bottom:0">
-     <div>
-      <span class="wb-widget-eyebrow">02. CREATIVE PREVIEW, AD COPY &amp; MARKETPLACE</span>
-      <h3>${adsRightTab==='preview'?'Live Facebook Ad Mockup':adsRightTab==='marketplace'?'1-Click Marketplace Listing Fields':'Ready-to-Post Primary Ad Copy'}</h3>
-     </div>
-     <div class="fb-seg-group" role="tablist" aria-label="Creative studio mode">
-      <button type="button" class="fb-seg-btn ${adsRightTab==='preview'?'is-active':''}" data-ads-tab="preview">Visual Preview</button>
-      <button type="button" class="fb-seg-btn ${adsRightTab==='copy'?'is-active':''}" data-ads-tab="copy">Ad Copy</button>
-      <button type="button" class="fb-seg-btn ${adsRightTab==='marketplace'?'is-active':''}" data-ads-tab="marketplace">Marketplace</button>
-     </div>
-    </div>
-    <div class="${adsRightTab==='preview'?'wb-ads-pane':'wb-ads-pane is-hidden'}" data-ads-pane="preview">
-     <div class="fb-preview-toolbar">
-      <div class="fb-seg-group" role="group" aria-label="Ad mockup format">
-       <button type="button" class="fb-seg-btn ${adsPreviewFormat==='feed'?'is-active':''}" data-ads-format="feed">Feed Ad</button>
-       <button type="button" class="fb-seg-btn ${adsPreviewFormat==='reels'?'is-active':''}" data-ads-format="reels">Reels 9:16</button>
-       <button type="button" class="fb-seg-btn ${adsPreviewFormat==='marketplace'?'is-active':''}" data-ads-format="marketplace">Marketplace</button>
-      </div>
-      <button type="button" class="button small" id="adsCopyPostQuickBtn">Copy Full Ad Copy</button>
-     </div>
-     <div id="adsPreviewStage" class="fb-preview-stage">${renderFacebookAdPreviewMarkup(campaignData,selectedCar,doc.profile,adsPreviewFormat,base)}</div>
-    </div>
-    <div class="${adsRightTab==='copy'?'wb-ads-pane':'wb-ads-pane is-hidden'}" data-ads-pane="copy">
-     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
-      <span class="field-hint">Headline: <strong id="adsSuggestedHeadline" style="color:var(--ink)">${esc(campaignData.headline)}</strong></span>
-      <button type="button" class="button small" id="adsCopyPostBtn">Copy Full Ad Copy</button>
-     </div>
-     <textarea id="adsGeneratedCopy" rows="14" spellcheck="true" style="width:100%;min-height:285px">${esc(campaignData.postText)}</textarea>
-     <p class="facebook-post-note" style="margin:8px 0 0">Switch EN / 中文 / BM / EN+中文 on the left to tailor your post for different buyer audiences.</p>
-    </div>
-    ${mpFields?`<div class="${adsRightTab==='marketplace'?'wb-ads-pane':'wb-ads-pane is-hidden'}" data-ads-pane="marketplace">
-     <p class="field-hint" style="margin:0 0 10px">Click any field below to copy clean, formatted values directly into Facebook Marketplace → Create Vehicle Listing.</p>
-     <div class="wb-mp-fields-grid">
-      ${[['Listing Title (≤99 chars)',mpFields.title],['Price (MYR)',mpFields.price],['Year',mpFields.year],['Make & Model',`${mpFields.make} ${mpFields.model}`.trim()],['Mileage (km)',mpFields.mileageKm],['Transmission',mpFields.transmission],['Body Style & Colour',`${mpFields.bodyStyle}${mpFields.exteriorColor?' · '+mpFields.exteriorColor:''}`],['Showroom Location',mpFields.location]].map(([lbl,val])=>`<div class="wb-mp-field-card"><div><small>${esc(lbl)}</small><strong>${esc(val||'—')}</strong></div><button type="button" class="button quiet small" data-mp-copy="${esc(val||'')}" data-mp-label="${esc(lbl)}">Copy</button></div>`).join('')}
-     </div>
-     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-      <button type="button" class="button small" id="adsCopyMpDescBtn">Copy Marketplace Description</button>
-      <a class="button quiet small" href="https://www.facebook.com/marketplace/create/vehicle" target="_blank" rel="noopener">Open FB Marketplace Create ↗</a>
-     </div>
-    </div>`:''}
-   </section>
-  </div>`:'<div class="wb-panel empty-state"><h3>Add a vehicle first</h3><p>Add or publish a vehicle to generate tracked Facebook Ad links.</p></div>'}
-  <section class="wb-panel wb-ads-matrix" style="margin-top:20px;padding:22px">
-   <div class="wb-widget-head" style="flex-wrap:wrap;gap:12px">
-    <div>
-     <span class="wb-widget-eyebrow">03. LIVE STOCK, CATALOG HEALTH &amp; PER-UNIT AD MATRIX</span>
-     <h3>Sync Latest Prices, Availability &amp; Catalog Readiness</h3>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-     <div class="fb-seg-group" role="group" aria-label="Filter matrix by catalog readiness">
-      <button type="button" class="fb-seg-btn ${adsMatrixFilter==='all'?'is-active':''}" data-ads-matrix-filter="all">All (${diagnosticsList.length})</button>
-      <button type="button" class="fb-seg-btn ${adsMatrixFilter==='ready'?'is-active':''}" data-ads-matrix-filter="ready">Catalog Ready (${readyCount})</button>
-      <button type="button" class="fb-seg-btn ${adsMatrixFilter==='attention'?'is-active':''}" data-ads-matrix-filter="attention">Needs Attention (${attentionCount})</button>
-     </div>
-    </div>
-   </div>
-   <div class="wb-ads-matrix-list">
-    ${filteredMatrix.slice(0,24).map(({vehicle:v,diag})=>{
-     const thumb=staticWbSrc(v.coverImageUrl);
-     const adUrl=buildFacebookAdUrl(v,liveOrigin,adsCampaign,{includeUtm:true});
-     const clicks=findAdClicks(v);
-     const diagTip=[...diag.issues,...diag.warnings].join(' · ')||'Ready for Meta Automotive Catalog & Dynamic Ads';
-     return `<div class="wb-ads-matrix-row ${v.id===adsSelectedId?'is-selected':''}">
-      <button type="button" class="wb-vehicle" data-select-ad-car="${esc(v.id)}">
-       ${thumb?`<img src="${esc(thumb)}" data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}" loading="lazy">`:`<span class="wb-photo-placeholder">${icon('photo')}</span>`}
-       <span><strong>${v.year||''} ${esc(v.make)} ${esc(v.model)}</strong><small>#${esc(v.stockId)} · ${v.gallery.length} photos · <em class="wb-diag-inline ${diag.ready?'is-ready':'is-warn'}" title="${esc(diagTip)}">${diag.ready?`Ready ${diag.score}%`:esc(diag.issues[0]||'Check fields')}</em></small></span>
-      </button>
-      <div class="quick-status-pills" role="group" aria-label="Sync status for ${esc(v.stockId)}">
-       ${[['available','Available'],['reserved','Booked'],['sold','Sold']].map(([st,lbl])=>`<button type="button" class="quick-status-btn ${v.status===st?'is-active '+st:''}" data-ads-status="${esc(v.id)}" data-status-val="${st}">${lbl}</button>`).join('')}
-      </div>
-      <label class="quick-price-field" aria-label="Sync price for ${esc(v.stockId)}">
-       <span class="quick-price-prefix">RM</span>
-       <input type="number" min="0" step="1000" class="quick-price-input" data-ads-price="${esc(v.id)}" value="${v.priceRm??''}" placeholder="Enquire">
-      </label>
-      <div class="wb-ads-clicks">
-       <strong>${clicks}</strong>
-       <small>ad clicks</small>
-      </div>
-      <div class="wb-ads-row-actions">
-       <button type="button" class="button quiet small" data-copy-ad-url="${esc(v.id)}" data-ad-url="${esc(adUrl)}">Copy Link</button>
-       <button type="button" class="button quiet small" data-fb-post="${esc(v.id)}">Ad Studio</button>
-      </div>
-     </div>`;
-    }).join('')||'<div class="empty-state"><p>No vehicles match this catalog filter.</p></div>'}
-   </div>
-  </section>
-  ${launches.length?`<section class="wb-panel" style="margin-top:20px;padding:22px">
-   <div class="wb-widget-head" style="margin-bottom:12px">
-    <div>
-     <span class="wb-widget-eyebrow">04. RECENT LAUNCHED CAMPAIGN LINKS</span>
-     <h3>Recently Copied &amp; Opened Facebook Ad Posts</h3>
-    </div>
-   </div>
-   <div class="wb-launches-list">
-    ${launches.slice(0,6).map(item=>`<div class="wb-launch-item">
-     <div><strong>${esc(item.title||item.stockId)}</strong><small>${esc(FB_AD_PRESETS.find(p=>p.id===item.campaign)?.label||item.campaign)} · ${esc(new Date(item.at).toLocaleString())}</small></div>
-     <a class="button quiet small" href="${esc(item.adUrl)}" target="_blank" rel="noopener">Verify Live Landing ↗</a>
-    </div>`).join('')}
-   </div>
-  </section>`:''}
-  <section class="wb-panel owner-visitors" style="margin-top:20px;padding:22px">
-   <div class="owner-overview-heading" style="padding:0 0 12px">
-    <div>
-     <span class="wb-widget-eyebrow">LIVE ATTRIBUTION &amp; WHATSAPP CONVERSION FUNNEL</span>
-     <h3>Facebook Ad Referral &amp; Lead Breakdown</h3>
-    </div>
-    <button type="button" class="button quiet small" id="refreshVisitorStats">Refresh</button>
-   </div>
-   <div id="ownerVisitorStats" aria-live="polite">Loading visitor statistics…</div>
-  </section>
- </section>`;
-}
 function mediaLibraryMarkup(){return `<section><p class="eyebrow">YOUR VEHICLE PHOTOGRAPHY</p><h2>Media Library</h2><p class="owner-intro">Choose a vehicle to upload, reorder or frame its photographs. Original images stay intact.</p><div class="owner-media-grid">${doc.vehicles.map(v=>`<article>${v.coverImageUrl?`<img data-source="${esc(v.coverImageUrl)}" alt="${esc(v.make+' '+v.model)}">`:'<div class="photo-placeholder">No cover photo</div>'}<p><strong>${esc(v.make+' '+v.model)}</strong><br>${v.gallery.length} photos · ${esc(v.stockId)}</p><button class="button quiet small" data-owner-media="${esc(v.id)}">Manage photos</button></article>`).join('')}</div></section>`;}
 function homepageEditorMarkup(){
  const isDeliveriesFirst=doc.homepage.sectionOrder==='deliveries-first';
@@ -1561,53 +1243,10 @@ async function publishWebsite(){
  if(busy||!doc)return;if(editorDirty)return toast('Save your current edits before publishing.',true);if(!cloudReady)return toast('Publishing is unavailable. Your local copy remains saved; reconnect and reload.',true);
  if(!await confirmAction('Publish website?','Your saved vehicles, homepage content, tint packages and approved delivery photographs will become visible to customers.'))return;
  setBusyState(true,'Publishing live website…');const b=$('#exportUpdate');b.disabled=true;b.textContent='Publishing…';
- try{const response=await fetch('/api/owner/publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({document:doc,baseRevision:serverRevision})});const result=await response.json();if(!response.ok)throw Error(result.error||'Publishing failed.');serverRevision=publishedRevision=result.revision;pendingDraftChanges=false;lastPublishedAt=result.updatedAt;cloudStatus='Website published';syncStatusBanner();toast('Website published. Your changes are now live.');if(view==='ads')render();}catch(e){toast(e.message,true);}finally{setBusyState(false);b.disabled=false;b.textContent='Publish options';}
+ try{const response=await fetch('/api/owner/publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({document:doc,baseRevision:serverRevision})});const result=await response.json();if(!response.ok)throw Error(result.error||'Publishing failed.');serverRevision=publishedRevision=result.revision;pendingDraftChanges=false;lastPublishedAt=result.updatedAt;cloudStatus='Website published';syncStatusBanner();toast('Website published. Your changes are now live.');}catch(e){toast(e.message,true);}finally{setBusyState(false);b.disabled=false;b.textContent='Publish options';}
 }
 function bindOwnerExtras(){
  enhanceLanguageControls();
- document.querySelectorAll('[data-fb-post]').forEach(btn=>{if(!btn.closest('#inventoryRowsMount'))btn.onclick=()=>openVehicleAdDialog(btn.dataset.fbPost);});
- if(view==='ads'){
-  const syncAdsComposer=()=>{
-   const selCar=doc.vehicles.find(v=>v.id===adsSelectedId);if(!selCar)return;
-   const liveOrigin=resolveLiveOrigin(document);
-   const next=buildFacebookAdCampaignData(selCar,doc.profile,liveOrigin,{campaign:adsCampaign,promoHeadline:adsPromo,lang:adsLang,tone:adsTone,includeMonthly:adsIncludeMonthly,finance:doc.finance,includeDraftLink:true});
-   if($('#adsGeneratedUrl'))$('#adsGeneratedUrl').value=next.adUrl;
-   if($('#adsShareFbBtn'))$('#adsShareFbBtn').href=next.shareUrl;
-   if($('#adsOpenLanding'))$('#adsOpenLanding').href=next.adUrl;
-   if($('#adsGeneratedCopy'))$('#adsGeneratedCopy').value=next.postText;
-   if($('#adsSuggestedHeadline'))$('#adsSuggestedHeadline').textContent=next.headline;
-   if($('#adsWhatsappTest'))$('#adsWhatsappTest').href=next.whatsappUrl;
-   if($('#adsPreviewStage'))$('#adsPreviewStage').innerHTML=renderFacebookAdPreviewMarkup(next,selCar,doc.profile,adsPreviewFormat,base);
-  };
-  if($('#adsVehicleSelect'))$('#adsVehicleSelect').onchange=e=>{adsSelectedId=e.target.value;render();};
-  if($('#adsCampaignSelect'))$('#adsCampaignSelect').onchange=e=>{adsCampaign=e.target.value;if(adsCampaign==='fb_reels_ad')adsPreviewFormat='reels';else if(adsCampaign==='fb_marketplace')adsPreviewFormat='marketplace';else adsPreviewFormat='feed';render();};
-  if($('#adsToneSelect'))$('#adsToneSelect').onchange=e=>{adsTone=e.target.value;syncAdsComposer();};
-  if($('#adsMonthlyToggle'))$('#adsMonthlyToggle').onchange=e=>{adsIncludeMonthly=e.target.checked;syncAdsComposer();};
-  document.querySelectorAll('[data-ads-lang]').forEach(btn=>btn.onclick=()=>{adsLang=btn.dataset.adsLang||'en';document.querySelectorAll('[data-ads-lang]').forEach(b=>b.classList.toggle('is-active',b.dataset.adsLang===adsLang));syncAdsComposer();});
-  document.querySelectorAll('[data-ads-tab]').forEach(btn=>btn.onclick=()=>{adsRightTab=btn.dataset.adsTab||'preview';render();});
-  document.querySelectorAll('[data-ads-format]').forEach(btn=>btn.onclick=()=>{adsPreviewFormat=btn.dataset.adsFormat||'feed';document.querySelectorAll('[data-ads-format]').forEach(b=>b.classList.toggle('is-active',b.dataset.adsFormat===adsPreviewFormat));syncAdsComposer();});
-  document.querySelectorAll('[data-ads-matrix-filter]').forEach(btn=>btn.onclick=()=>{adsMatrixFilter=btn.dataset.adsMatrixFilter||'all';render();});
-  if($('#adsPromoInput'))$('#adsPromoInput').oninput=e=>{adsPromo=e.target.value;syncAdsComposer();};
-  document.querySelectorAll('[data-ads-promo-chip]').forEach(btn=>btn.onclick=()=>{adsPromo=btn.dataset.adsPromoChip;if($('#adsPromoInput'))$('#adsPromoInput').value=adsPromo;syncAdsComposer();});
-  if($('#adsCopyCatalogUrlBtn'))$('#adsCopyCatalogUrlBtn').onclick=async()=>{const feedUrl=$('#adsCatalogCsvUrl')?.value||'';if(!feedUrl)return;try{await navigator.clipboard.writeText(feedUrl);toast('Meta Catalog CSV Feed URL copied! Paste into Meta Commerce Manager.');}catch{toast('Copy the feed URL manually.',true);}};
-  if($('#adsDownloadCsvBtn'))$('#adsDownloadCsvBtn').onclick=()=>{const feed=buildFacebookCatalogFeed(doc,{origin:resolveLiveOrigin(document),includeSold:false});const blob=new Blob([feed.csv],{type:'text/csv;charset=utf-8'});download('danny-facebook-catalog.csv',blob);toast(`Downloaded Meta Catalog CSV (${feed.count} vehicles).`);};
-  if($('#adsSavePixelBtn'))$('#adsSavePixelBtn').onclick=async()=>{const val=String($('#adsQuickPixelInput')?.value||'').trim();if(val&&!/^\d{8,24}$/.test(val))return toast('Enter an 8–24 digit Meta Pixel ID (or leave blank to clear).',true);const before=structuredClone(doc);doc.profile.facebookPixelId=val;try{await persist();if(cloudReady)await publishItem({section:'settings'});render();toast(val?`Meta Pixel #${val} saved & active.`:'Meta Pixel cleared.');}catch(err){doc=before;toast(err.message,true);}};
-  if($('#adsCopyUrlBtn'))$('#adsCopyUrlBtn').onclick=async()=>{const url=$('#adsGeneratedUrl')?.value||'';const v=doc.vehicles.find(x=>x.id===adsSelectedId);if(!url)return;try{await navigator.clipboard.writeText(url);if(v){recordCampaignLaunch({vehicleId:v.id,stockId:v.stockId,title:`${v.year||''} ${v.make} ${v.model}`.trim(),campaign:adsCampaign,adUrl:url,status:v.status});recordActivityLog({vehicleId:v.id,stockId:v.stockId||'DRS',title:`${v.year||''} ${v.make} ${v.model}`.trim(),cover:v.coverImageUrl||'',kind:'ad',campaign:adsCampaign,priceRm:Number(v.priceRm)||0,status:v.status});}toast('Tracked Facebook Ad link copied! Paste into Ads Manager.');}catch{toast('Copy the destination URL manually.',true);}};
-  const copyFullPost=async()=>{const selCar=doc.vehicles.find(x=>x.id===adsSelectedId);const liveOrigin=resolveLiveOrigin(document);const built=selCar?buildFacebookAdCampaignData(selCar,doc.profile,liveOrigin,{campaign:adsCampaign,promoHeadline:adsPromo,lang:adsLang,tone:adsTone,includeMonthly:adsIncludeMonthly,finance:doc.finance,includeDraftLink:true}):null;const txt=$('#adsGeneratedCopy')?.value||built?.postText||'';const url=$('#adsGeneratedUrl')?.value||built?.adUrl||'';if(!txt)return;try{await navigator.clipboard.writeText(txt);if(selCar){recordCampaignLaunch({vehicleId:selCar.id,stockId:selCar.stockId,title:`${selCar.year||''} ${selCar.make} ${selCar.model}`.trim(),campaign:adsCampaign,adUrl:url,status:selCar.status});recordActivityLog({vehicleId:selCar.id,stockId:selCar.stockId||'DRS',title:`${selCar.year||''} ${selCar.make} ${selCar.model}`.trim(),cover:selCar.coverImageUrl||'',kind:'ad',campaign:adsCampaign,priceRm:Number(selCar.priceRm)||0,status:selCar.status});render();}toast('Facebook Ad copy copied & campaign logged!');}catch{toast('Copy the ad text manually.',true);}};
-  if($('#adsCopyPostBtn'))$('#adsCopyPostBtn').onclick=copyFullPost;
-  if($('#adsCopyPostQuickBtn'))$('#adsCopyPostQuickBtn').onclick=copyFullPost;
-  document.querySelectorAll('[data-mp-copy]').forEach(btn=>btn.onclick=async()=>{const val=btn.dataset.mpCopy||'';if(!val)return toast('Field is empty on this vehicle.',true);try{await navigator.clipboard.writeText(val);toast(`Copied ${btn.dataset.mpLabel||'field'}!`);}catch{toast('Copy manually.',true);}});
-  if($('#adsCopyMpDescBtn'))$('#adsCopyMpDescBtn').onclick=async()=>{const selCar=doc.vehicles.find(x=>x.id===adsSelectedId);if(!selCar)return;const mp=buildMarketplaceListingFields(selCar,doc.profile,resolveLiveOrigin(document),doc.finance);try{await navigator.clipboard.writeText(mp.description);toast('Marketplace description copied!');}catch{toast('Copy failed.',true);}};
-  if($('#adsPublishNow'))$('#adsPublishNow').onclick=publishWebsite;
-  if($('#adsRefreshStats'))$('#adsRefreshStats').onclick=()=>{analyticsSnapshot=null;void ensureAnalyticsSnapshot(true);$('#refreshVisitorStats')?.click();toast('Refreshing live ad analytics…');};
-  document.querySelectorAll('[data-select-ad-car]').forEach(btn=>btn.onclick=()=>{adsSelectedId=btn.dataset.selectAdCar;render();window.scrollTo({top:0,behavior:'smooth'});});
-  document.querySelectorAll('[data-copy-ad-url]').forEach(btn=>btn.onclick=async()=>{const url=btn.dataset.adUrl;const v=doc.vehicles.find(x=>x.id===btn.dataset.copyAdUrl);if(!url)return;try{await navigator.clipboard.writeText(url);if(v){recordCampaignLaunch({vehicleId:v.id,stockId:v.stockId,title:`${v.year||''} ${v.make} ${v.model}`.trim(),campaign:adsCampaign,adUrl:url,status:v.status});recordActivityLog({vehicleId:v.id,stockId:v.stockId||'DRS',title:`${v.year||''} ${v.make} ${v.model}`.trim(),cover:v.coverImageUrl||'',kind:'ad',campaign:adsCampaign,priceRm:Number(v.priceRm)||0,status:v.status});}toast(`Copied Ad URL for #${v?.stockId||''}`);}catch{toast('Copy failed — select from builder above.',true);}});
-  document.querySelectorAll('[data-ads-status]').forEach(btn=>btn.onclick=async()=>{const v=doc.vehicles.find(x=>x.id===btn.dataset.adsStatus),next=btn.dataset.statusVal;if(!v||!next||v.status===next)return;const prev=v.status;v.status=next;recordActivityLog({vehicleId:v.id,stockId:v.stockId||'DRS',title:`${v.year||''} ${v.make} ${v.model}`.trim(),cover:v.coverImageUrl||'',kind:'status',prevStatus:prev,nextStatus:next,priceRm:Number(v.priceRm)||0,status:next});try{await persist();if(cloudReady)await publishItem({collection:'vehicles',id:v.id});render();}catch(err){v.status=prev;toast(err.message,true);}});
-  document.querySelectorAll('[data-ads-price]').forEach(inp=>{
-   inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();inp.blur();}};
-   inp.onchange=async()=>{const v=doc.vehicles.find(x=>x.id===inp.dataset.adsPrice);if(!v)return;const raw=inp.value.trim(),next=raw===''?null:Number(raw);if(next!=null&&(Number.isNaN(next)||next<0))return toast('Enter a valid price in RM.',true);if(v.priceRm===next)return;const prev=v.priceRm;v.priceRm=next;if(prev!=null&&next!=null){recordActivityLog({vehicleId:v.id,stockId:v.stockId||'DRS',title:`${v.year||''} ${v.make} ${v.model}`.trim(),cover:v.coverImageUrl||'',kind:'price',prevPrice:Number(prev),nextPrice:Number(next),delta:Number(next)-Number(prev),status:v.status});}try{await persist();inp.classList.add('is-saved');setTimeout(()=>inp.classList.remove('is-saved'),1200);if(cloudReady)await publishItem({collection:'vehicles',id:v.id});if(v.id===adsSelectedId)syncAdsComposer();}catch(err){v.priceRm=prev;inp.value=prev??'';toast(err.message,true);}};
-  });
- }
  document.querySelectorAll('[data-chart-tab]').forEach(btn=>btn.onclick=()=>{overviewChartTab=btn.dataset.chartTab;render();});
  document.querySelectorAll('[data-activity-filter]').forEach(btn=>btn.onclick=()=>{overviewActivityFilter=btn.dataset.activityFilter||'all';render();});
  document.querySelectorAll('[data-activity-edit]').forEach(btn=>btn.onclick=()=>{if(busy)return;openVehicleEditor(btn.dataset.activityEdit,false);});

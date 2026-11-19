@@ -35,7 +35,13 @@ for(const width of [1280,390])test(`homepage at ${width}px renders stock states,
   assert.equal(Boolean(card.querySelector('.stock-price s')),status!=='available');
   if(status!=='available')assert.equal(win.getComputedStyle(card.querySelector('.stock-photo img')).filter,'grayscale(1)');
  }
- const location=win.document.querySelector('#contact [data-showroom-address]');
+ const contact=win.document.querySelector('#contact');
+ assert.equal(contact.querySelector(':scope > header h2')?.textContent,'Contact Danny');
+ assert.equal(contact.querySelector('.concierge-protocol-cards'),null);
+ assert.equal(contact.querySelector('.contact-primary a[href^="https://wa.me/"]')===null,false);
+ assert.equal(contact.querySelectorAll('[data-showroom]').length,3);
+ for(const surface of ['brand-system.css','customer-refinements.css'])assert.ok(win.document.querySelector(`link[href^="/${surface}"]`));
+ const location=contact.querySelector('[data-showroom-address]');
  assert.match(location.textContent,/4, Jalan Para U8\/103/);
  const map=win.document.querySelector('#contact [data-showroom-map]');assert.match(decodeURIComponent(map.src),/4, Jalan Para U8\/103/);
  assert.equal(win.document.querySelectorAll('.concierge-title-row .brand-logo').length,0);

@@ -2,7 +2,7 @@ import {icon} from './stock-icons.mjs';
 import {themeButtonMarkup} from './site-theme.mjs';
 
 const groups=[
- ['Workspace',[['overview','Overview','grid'],['inventory','Vehicles','car'],['ads','Facebook Ads','share']]],
+ ['Workspace',[['overview','Overview','grid'],['inventory','Vehicles','car']]],
  ['Website',[['homepage','Homepage','home'],['deliveries','Deliveries','check'],['services','Services &amp; Tint','gear'],['media','Media library','photo']]],
  ['Administration',[['settings','Website settings','filter'],['advanced','Backups','archive']]],
 ];

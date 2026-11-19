@@ -408,36 +408,3 @@ html body.exhibition-home #inventory .stock-photo { background: #20262a; }
 .workbench .owner-resume button { display: grid; grid-template-columns: 1fr auto auto; width: 100%; min-width: 0; text-align: start; }
 .workbench .owner-resume button small { color: var(--muted); }
 .workbench .owner-reports > :not(summary) { margin: 0 12px 12px; }
-
-/* Put stock search in the hero, with the mobile photo in its own row. */
-body .mountain-hero .hero-stock-search:not([hidden]) {
- display: grid;
- grid-template-columns: minmax(0,1fr) auto;
- align-items: stretch;
- gap: 6px;
- max-width: 430px;
- margin: 18px 0 12px;
- padding: 5px;
- background: var(--surface);
- border: 1px solid var(--line);
- border-radius: 12px;
-}
-body .mountain-hero .hero-stock-search input {
- min-width: 0;
- width: 100%;
- padding: 8px 10px;
- border: 0;
- background: transparent;
- font-size: 16px;
-}
-body .mountain-hero .hero-stock-search .button { padding-inline: 14px; border-radius: 8px; white-space: nowrap; }
-@media(max-width:700px){
- html body.exhibition-home main>.showroom-hero.mountain-hero { display: flex; flex-direction: column; align-items: stretch; height: auto!important; }
- html body.exhibition-home .mountain-hero .mountain-copy { order: 0; margin: 0; width: 100%; padding: 88px 18px 8px !important; }
- html body.exhibition-home .mountain-hero .mountain-copy h1 { font-size: clamp(32px, 8.5vw, 40px); text-wrap: pretty; }
- html body.exhibition-home .mountain-hero .mountain-copy .actions { display: flex; flex-wrap: wrap; gap: 8px; }
- html body.exhibition-home .mountain-hero .mountain-copy .actions .button { padding-inline: 12px; min-width: 0; width: auto; }
- html body .mountain-hero .mountain-scene { order: 1; position: relative; inset: auto!important; height: auto!important; min-height: 0; aspect-ratio: 2 / 1; z-index: 0; }
- html body .mountain-hero .mountain-scene img { width: 100%; height: 100%; object-fit: cover; object-position: 67% center; }
- html body .mountain-hero .hero-stock-search:not([hidden]) { margin-top: 12px; }
-}

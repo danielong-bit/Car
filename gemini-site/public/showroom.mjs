@@ -8,7 +8,6 @@ import './choice-controls.mjs';
 import {showroomLocation} from './showroom-location.mjs';
 import {renderContactFaq} from './contact-faq.mjs';
 import {recordVisit,recordConversionEvent,initMetaPixel,trackMetaPixelEvent} from './visitor-stats.mjs';
-import {buildFacebookShareSharerUrl} from './facebook-post.mjs';
 import {renderShell} from './site-shell.mjs';
 import {renderBuyingTools} from './buying-tools.mjs';
 import {applyTheme} from './site-theme.mjs';
@@ -41,7 +40,7 @@ document.addEventListener('click',event=>{
 },{capture:true});
 const localPreview=new URLSearchParams(location.search).get('local-preview')==='1';
 const url=(route='')=>base+route.replace(/^\//,''),canonicalDetailsUrl=v=>localPreview?url('audi/?vehicle='+encodeURIComponent(v.id)+'&local-preview=1'):url('vehicle/'+encodeURIComponent(v.id)+'/'),details=v=>typeof document!=='undefined'&&document.body?.classList?.contains('exhibition-home')?url('?vehicle='+encodeURIComponent(v.id)+(localPreview?'&local-preview=1':'')):canonicalDetailsUrl(v),wa=message=>'https://wa.me/'+(d.profile.phone||'60125686528')+'?text='+encodeURIComponent(message);
-const enquiry=v=>{const ad=activeAdContext();const tag=ad.isFacebookAd?` [Facebook Ad · Stock #${v.stockId}]`:'';return wa(`Hi Danny,${tag} ${v.status==='reserved'||v.status==='sold'?'please share similar available stock to':'I am interested in'} ${v.year||''} ${v.make} ${v.model} ${v.variant}, Stock #${v.stockId}, ${money(v.priceRm)}. Please share the details.\n${location.origin}${canonicalDetailsUrl(v)}`);};
+const enquiry=v=>wa(`Hi Danny, ${v.status==='reserved'||v.status==='sold'?'please share similar available stock to':'I am interested in'} ${v.year||''} ${v.make} ${v.model} ${v.variant}, Stock #${v.stockId}, ${money(v.priceRm)}. Please share the details.\n${location.origin}${canonicalDetailsUrl(v)}`);
 let lazyObserver,revealObserver;
 function staticImgSrc(u){return displayPhoto(u,'card',base);}
 function markImgReady(img){
@@ -175,12 +174,10 @@ function renderViewToggle(){
 function controls(){
  const tr=translator(lang),makes=visibleBrandFilters(d);
  const statuses=[['','All stock'],['available','Available'],['reserved','Booked'],...(d.homepage.showSoldVehicles?[['sold','Sold']]:[])];
- const heroSearch=$('#heroSearchQuery');
- if(heroSearch&&document.activeElement!==heroSearch)heroSearch.value=filters.search;
  const currentStatus=statuses.find(([status])=>status===filters.status)?.[1]||'All stock';
  $('#inventoryControls').innerHTML=`<div class="inventory-controls"><div class="controls-top-row"><label class="search-field">${icon('search')}<input id="publicSearch" type="search" value="${esc(filters.search)}" placeholder="${tr('Search model, stock #…','搜索车型、库存编号…','Cari model, nombor stok…')}" aria-label="${t('Search model, stock #, colour...')}"></label>${selectControl('Sort','sort',stockSortChoices(lang))}</div><div class="filter-pills" role="group" aria-label="${t('Filter')}"><div class="pill-group" role="group" aria-label="${t('Status')}">${statuses.map(([status,title])=>`<button type="button" data-public-status="${status}" aria-pressed="${filters.status===status}">${t(title)} <span>${d.vehicles.filter(v=>(!status||v.status===status)&&matchesInventorySelection(v,{make:filters.make})).length}</span></button>`).join('')}</div>${makes.length?`<span class="pill-divider" aria-hidden="true"></span><div class="pill-group" role="group" aria-label="${t('Make')}">${makes.map(make=>`<button type="button" data-public-make="${esc(make)}" aria-pressed="${filters.make===make}">${esc(make)} <span>${d.vehicles.filter(v=>matchesInventorySelection(v,{make,status:filters.status})).length}</span></button>`).join('')}</div>`:''}<button type="button" id="resetPublic" class="pill-reset">${t('Reset')} ↺</button></div><div class="inventory-filter-note" ${filters.make?'':'hidden'}><span>${tr('Showing','当前筛选','Paparan')}: ${esc(t(currentStatus))} · <strong>${esc(filters.make)}</strong></span><button type="button" id="clearBrandFilter">${tr('Clear brand','清除品牌','Kosongkan jenama')} ×</button></div></div>`;
  window.dispatchEvent(new CustomEvent('danny:inventory-filter-config',{detail:filterSheetConfig()}));
- $('#publicSearch').oninput=e=>{filters.search=e.target.value;if(heroSearch)heroSearch.value=filters.search;renderCards();};
+ $('#publicSearch').oninput=e=>{filters.search=e.target.value;renderCards();};
  document.querySelectorAll('[data-filter]').forEach(select=>select.onchange=()=>{filters[select.dataset.filter]=select.value;renderCards();});
  document.querySelectorAll('[data-public-status]').forEach(button=>button.onclick=()=>{filters.status=button.dataset.publicStatus;controls();renderCards();document.querySelector(`[data-public-status="${filters.status}"]`)?.focus({preventScroll:true});});
  document.querySelectorAll('[data-public-make]').forEach(button=>button.onclick=()=>{const make=button.dataset.publicMake;filters.make=filters.make===make?'':make;controls();renderCards();[...document.querySelectorAll('[data-public-make]')].find(b=>b.dataset.publicMake===make)?.focus({preventScroll:true});});
@@ -343,23 +340,6 @@ function renderHome(){
  const tr=translator(lang);
  if($('#findYourCar'))$('#findYourCar').onclick=()=>openCarFinder($('#carFinder'),{vehicles:d.vehicles,lang,details,wa,hydrate:()=>{hydrateImages();styleWhatsAppActions();}});
  syncHeroStockBadge();
- const stockSearch=$('#heroStockSearch');
- if(stockSearch){
-  const input=$('#heroSearchQuery');
-  input.placeholder=tr('Search model or stock #','搜索车型或库存编号','Cari model atau nombor stok');
-  input.setAttribute('aria-label',input.placeholder);
-  stockSearch.querySelector('button').textContent=tr('Search stock','搜索现车','Cari stok');
-  stockSearch.onsubmit=event=>{
-   event.preventDefault();
-   filters={...filters,search:input.value.trim(),make:'',status:'',featured:false};
-   if($('#featuredFilter'))$('#featuredFilter').checked=false;
-   controls();
-   renderCards();
-   $('#inventoryTitle').focus({preventScroll:true});
-   $('#inventory').scrollIntoView({block:'start'});
-  };
-  stockSearch.hidden=false;
- }
  const heroWhatsApp=$('#heroWhatsApp');if(heroWhatsApp)heroWhatsApp.href=wa('Hi Danny, I would like to ask about your current Japanese reconditioned cars.');
  controls();renderCards();comparisonBar();
  $('#stockProvenance').textContent=d.vehicles.some(v=>v.sample)?({en:'Some listings and cover images are examples. Confirm current stock, specifications and price with Danny. Monthly figures use the calculator’s example settings.',zh:'部分车辆与封面图片为示例。实际库存、配置和价格请向 Danny 确认。月供使用计算器的示例设置。',ms:'Sesetengah senarai dan foto ialah contoh. Sahkan stok, spesifikasi dan harga dengan Danny. Anggaran bulanan menggunakan tetapan contoh kalkulator.'}[lang]):({en:'Monthly figures use example calculator settings. Confirm vehicle details and pricing with Danny.',zh:'月供使用示例设置，车辆资料和价格请向 Danny 确认。',ms:'Anggaran bulanan menggunakan tetapan contoh. Sahkan butiran dan harga dengan Danny.'}[lang]);
@@ -394,14 +374,6 @@ function findVehicleInStore(vehicleId){
  if(!vehicleId)return null;
  const key=String(vehicleId).trim();
  return d.vehicles.find(car=>car.id===key||car.stockId===key||((key==='audi'||key==='audi.html')&&car.id==='audi-s5'))||null;
-}
-function activeAdContext(){
- const p=new URLSearchParams(location.search);
- const utmSource=p.get('utm_source')||'';
- const utmCampaign=p.get('utm_campaign')||'';
- const fbclid=p.get('fbclid')||'';
- const isFacebookAd=Boolean(fbclid||/^fb|facebook/i.test(utmSource)||/^fb_/i.test(utmCampaign));
- return {isFacebookAd,utmSource,utmCampaign};
 }
 async function fetchVehicleDetail(vehicleId){
  const existing=findVehicleInStore(vehicleId);
@@ -587,11 +559,8 @@ async function renderDetail(targetNode=$('#vehicleContent'),vehicleOverride=null
  }).slice(0,3);
  const condEyebrow=v.conditionType==='Recond'?'JAPAN RECOND':String(v.conditionType||'JAPAN RECOND').toUpperCase();
  const statusText=t(v.status==='available'?'Available':v.status==='reserved'?'Booked':v.status==='sold'?'Sold':label(v.status));
- const shareLabel=tr('Copy link','复制链接','Salin pautan');
- const fbShareLabel=tr('FB Share','分享至 FB','Kongsi FB');
- const shareTargetUrl=location.origin+(document.body.classList.contains('exhibition-home')?url('?vehicle='+encodeURIComponent(v.id)):canonicalDetailsUrl(v));
- const fbSharerHref=buildFacebookShareSharerUrl(shareTargetUrl,`${title} · ${v.status==='sold'?t('SOLD'):money(v.priceRm)} (Stock #${v.stockId})`);
- const shareBtnMarkup=`<a class="share-car-btn share-fb-btn" id="shareFacebookButton" href="${esc(fbSharerHref)}" target="_blank" rel="noopener" aria-label="${esc(fbShareLabel)}"><span>f</span><span>${esc(fbShareLabel)}</span></a><button type="button" class="share-car-btn" id="shareCarButton" aria-label="${esc(shareLabel)}">${icon('share')}<span>${esc(shareLabel)}</span></button>`;
+ const shareLabel=tr('Share car','分享车辆','Kongsi kereta');
+ const shareBtnMarkup=`<button type="button" class="share-car-btn" id="shareCarButton" aria-label="${esc(shareLabel)}">${icon('share')}<span>${esc(shareLabel)}</span></button>`;
  const priceRowMarkup=v.status==='sold'
   ? `<div class="purchase-price-row is-sold-row"><div class="purchase-price-head"><p class="stock-price is-sold">${t('SOLD')}</p><div class="purchase-stock-actions">${shareBtnMarkup}</div></div><a class="sold-similar-banner" href="${esc(enquiry(v))}" target="_blank" rel="noopener"><span aria-hidden="true">✅</span><span>${tr('Sold — looking for something similar? Ask me.','已售 — 想找同款或类似车型？直接问 Danny。','Terjual — mencari kereta serupa? Tanya Danny.')}</span></a></div>`
   : `<div class="purchase-price-row"><div class="purchase-price-main"><p class="stock-price">${money(v.priceRm)}</p>${monthly!=null?`<p class="detail-monthly-est">≈ ${money(monthly)}${tr('/month est.','/月供估算','/bln anggaran')}</p>`:''}</div><div class="purchase-stock-actions">${shareBtnMarkup}</div></div>`;
@@ -630,32 +599,6 @@ async function renderDetail(targetNode=$('#vehicleContent'),vehicleOverride=null
    if(inModal){event.preventDefault();details.scrollIntoView({behavior:'smooth',block:'center'});}
   }
  });
- const adCtx=activeAdContext();
- if(adCtx.isFacebookAd){
-  const heading=targetNode.querySelector('.purchase-heading');
-  if(heading){
-   const syncNote=document.createElement('div');
-   syncNote.className=`ad-live-sync-note is-${v.status}`;
-   const campaignText=adCtx.utmCampaign?` · ${adCtx.utmCampaign.replaceAll('_',' ')}`:'';
-   if(v.status==='available'){
-    syncNote.innerHTML=`<strong>${tr('Verified Facebook Ad · Live Stock','Facebook 广告直达 · 展厅实时现车','Iklan Facebook Disahkan · Stok Semasa')}</strong><span>${tr(`Synced latest price (${money(v.priceRm)}${monthly!=null?` · ≈ ${money(monthly)}/mo`:''}) · Ready for viewing`,`已同步最新价格（${money(v.priceRm)}${monthly!=null?` · 约 ${money(monthly)}/月`:''}）· 现车可预约看车`,`Harga terkini (${money(v.priceRm)}${monthly!=null?` · ≈ ${money(monthly)}/bln`:''}) · Tersedia`)}${esc(campaignText)}</span>`;
-   }else{
-    const soldOrBooked=v.status==='sold'?tr('Sold','已售','Terjual'):tr('Booked','已预订','Ditempah');
-    syncNote.innerHTML=`<strong>${tr(`Status Update: ${soldOrBooked}`,`最新库存状态：${soldOrBooked}`,`Kemas kini stok: ${soldOrBooked}`)}</strong><span>${tr('This unit has changed status since the Facebook ad was posted.','这辆车在广告发布后已更新状态。','Status kereta ini telah berubah sejak iklan Facebook disiarkan.')}</span><button type="button" class="button quiet small" data-browse-similar-make="${esc(v.make)}">${tr('View similar available cars →','查看同品牌在售现车 →','Lihat kereta serupa tersedia →')}</button>`;
-   }
-   heading.prepend(syncNote);
-   const simBtn=syncNote.querySelector('[data-browse-similar-make]');
-   if(simBtn){
-    simBtn.onclick=()=>{
-     filters.status='available';
-     filters.make=d.vehicles.some(x=>x.status==='available'&&x.make===simBtn.dataset.browseSimilarMake)?simBtn.dataset.browseSimilarMake:'';
-     if(inModal)closeVehicleDetailModal();
-     controls();renderCards();
-     $('#inventory')?.scrollIntoView({behavior:'smooth',block:'start'});
-    };
-   }
-  }
- }
  if(localPreview){const notice=document.createElement('p');notice.className='vehicle-preview-notice';notice.textContent=tr('Preview · Not published','预览 · 尚未发布','Pratonton · Belum diterbitkan');targetNode.querySelector('.purchase-heading')?.prepend(notice);}
  targetNode.querySelectorAll('[data-modal-close]').forEach(btn=>{btn.onclick=()=>closeVehicleDetailModal();});
  if(inModal){
@@ -679,11 +622,8 @@ async function renderDetail(targetNode=$('#vehicleContent'),vehicleOverride=null
   };
  }
  trackMetaPixelEvent('ViewContent',{content_ids:[v.stockId||v.id],content_name:title,content_type:'vehicle',value:Number(v.priceRm)||0,currency:'MYR'});
- if(targetNode.querySelector('#shareFacebookButton')){
-  targetNode.querySelector('#shareFacebookButton').onclick=()=>{void recordConversionEvent('fb_share',{vehicleId:v.id});};
- }
  if($('#shareCarButton'))$('#shareCarButton').onclick=async()=>{
-  const shareUrl=shareTargetUrl,shareText=`${title} · ${v.status==='sold'?t('SOLD'):money(v.priceRm)} (Stock #${v.stockId}) — Danny Recond Select`;
+  const shareUrl=location.origin+canonicalDetailsUrl(v),shareText=`${title} · ${v.status==='sold'?t('SOLD'):money(v.priceRm)} (Stock #${v.stockId}) — Danny Recond Select`;
   if(navigator.share){try{await navigator.share({title:`${title} · Danny Recond Select`,text:shareText,url:shareUrl});return;}catch(err){if(err?.name==='AbortError')return;}}
   try{await navigator.clipboard.writeText(shareUrl);}catch{const ta=document.createElement('textarea');ta.value=shareUrl;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}
   const btn=$('#shareCarButton'),copiedText=tr('Link copied!','链接已复制！','Pautan disalin!');
