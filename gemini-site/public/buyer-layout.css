@@ -44,6 +44,7 @@ html body.exhibition-home #mobileWaFab { display: none !important; }
  border-radius: 10px;
 }
 .buyer-inventory .stock-intro [hidden] { display: none; }
+html body.exhibition-home #inventory .inventory-result { margin-block: 8px 14px; border-top: 0; }
 html body.exhibition-home #inventory .stock-card .view-link {
  display: inline-flex;
  align-items: center;
@@ -126,6 +127,8 @@ html body .detail-topline.buyer-detail-topline { display: flex !important; justi
  .buyer-inventory .stock-intro { padding-bottom: 14px; margin-bottom: 12px; gap: 10px; align-items: flex-start; flex-direction: column; }
  .stock-intro-copy h1 { font-size: clamp(33px,8vw,46px); }
  .stock-availability:not([hidden]) { display: none; }
+ html body.exhibition-home #inventory .inventory-result { padding-top: 0; }
+ html body.exhibition-home #inventory .inventory-count-mount { min-height: 36px; }
  html body.exhibition-home #inventory #viewToggle button { min-height: 32px; padding-inline: 8px; }
  html body #vehicleModalContent .buyer-detail-toolbar { display: contents; }
  .stock-intro-photo:not([hidden]) { width: 100%; height: 112px; }
@@ -142,6 +145,13 @@ html body .detail-topline.buyer-detail-topline { display: flex !important; justi
  html body .vehicle-summary-facts { gap: 8px 12px; margin-top: 9px; padding-top: 9px; }
  html body .vehicle-summary-facts dd { font-size: 13px; }
 }
+@media (min-width: 375px) and (max-width: 700px) {
+ html body.exhibition-home #inventory.buyer-inventory .inventory-result {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 6px;
+ }
+}
 /* The display face has real weights. Keep labels in the system UI face. */
 body.exhibition-home, body.exhibition-detail {
  --buyer-display: Outfit, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -150,31 +160,37 @@ body.exhibition-home, body.exhibition-detail {
 html body.exhibition-home .buyer-inventory,
 html body :is(#vehicleDetailModal, #vehicleContent) .detail-grid { font-family: var(--buyer-ui); }
 html body.exhibition-home .buyer-inventory .stock-intro {
- align-items: center;
- min-height: 0;
- padding: 0;
- margin: 0 0 20px;
- border: 0;
- border-radius: 0;
- background: transparent;
+ position: relative;
+ isolation: isolate;
+ min-height: 120px;
+ padding: 18px 24px;
+ border: 1px solid var(--line);
+ border-inline-start: 3px solid var(--price-accent);
+ border-radius: 0 12px 12px 0;
+ background: color-mix(in srgb, var(--surface) 75%, var(--page));
+}
+.buyer-inventory .stock-intro::before {
+ content: "";
+ position: absolute;
+ inset: 0 0 0 auto;
+ width: min(36%,410px);
+ z-index: -1;
+ border-radius: inherit;
+ background: repeating-linear-gradient(123deg,transparent 0 32px,color-mix(in srgb,var(--price-accent) 19%,transparent) 32px 33px,transparent 33px 58px);
+ mask-image: linear-gradient(90deg,transparent,#000);
+ pointer-events: none;
 }
 html body.exhibition-home .stock-intro-copy h1 {
- font: 520 clamp(35px,3.4vw,50px)/1.12 var(--buyer-display);
+ font: 550 clamp(36px,4vw,55px)/1.12 var(--buyer-display);
  letter-spacing: -.026em;
 }
 html body.exhibition-home .stock-intro-copy .eyebrow {
- color: var(--muted);
- font-size: 12px;
- font-weight: 500;
- letter-spacing: .035em;
+ color: var(--price-accent);
+ font-size: 11px;
+ font-weight: 650;
+ letter-spacing: .12em;
 }
-.stock-availability:not([hidden]) {
- padding: 0;
- border: 0;
- border-radius: 0;
- background: transparent;
- color: var(--muted);
-}
+.stock-availability:not([hidden]) { background: var(--surface); }
 html body.exhibition-home #inventory.buyer-inventory :is(.stock-info,.compact-main) h3 {
  font-family: var(--buyer-display);
  font-size: clamp(16px,1.55vw,21px);
@@ -194,6 +210,12 @@ html body.exhibition-home #inventory.buyer-inventory :is(.spec-row,.compact-meta
 }
 html body.exhibition-home #inventory.buyer-inventory :is(.spec-row,.compact-meta) strong { font-weight: 580; }
 html body.exhibition-home #inventory.buyer-inventory :is(.stock-card,.compact-row) .monthly-price { font-weight: 450; }
+html body.exhibition-home #inventory.buyer-inventory .filter-pills button[aria-pressed=true] {
+ color: var(--surface);
+ background: var(--ink);
+ border-color: var(--ink);
+}
+html body.exhibition-home #inventory.buyer-inventory .filter-pills button[aria-pressed=true] span { color: inherit; opacity: .85; }
 html body :is(#vehicleDetailModal,#vehicleContent) .purchase-heading h1 {
  font: 550 clamp(26px,3.1vw,39px)/1.12 var(--buyer-display) !important;
  letter-spacing: -.022em;
@@ -313,7 +335,10 @@ html body #photoModal[data-gallery=true] .lightbox-stage .gallery-arrow {
  backdrop-filter: none !important;
 }
 @media (max-width: 800px) {
- html body.exhibition-home .buyer-inventory .stock-intro { align-items: flex-start; margin-bottom: 15px; }
+ html body.exhibition-home .buyer-inventory .stock-intro {
+  min-height: auto;
+  padding: 14px 15px;
+ }
  html body.exhibition-home .stock-intro-copy h1 { font-size: clamp(31px,8vw,43px); }
  html body.exhibition-home #inventory.buyer-inventory .stock-card .view-link { min-height: 42px; }
 }
@@ -330,330 +355,20 @@ html body :is(#vehicleDetailModal,#vehicleContent) .detail-grid :is(.detail-card
 }
 html body #vehicleGallery .gallery-toolbar #galleryCaption { overflow-wrap: anywhere; }
 .gallery-toolbar :is(.gallery-step,.gallery-expand) { min-height: 44px; }
-
-/* Keep one row of controls so the inventory is the first thing buyers see. */
-html body.exhibition-home .buyer-inventory .inventory-toolbar {
- display: grid;
- grid-template-columns: minmax(0,1fr) auto auto;
- align-items: center;
- gap: 8px;
- padding: 0 0 18px;
- border-bottom: 1px solid var(--line);
- margin-bottom: 19px;
-}
-html body.exhibition-home #inventory .inventory-toolbar .inventory-controls {
- padding: 0;
- margin: 0;
- border: 0;
- background: transparent;
-}
-html body.exhibition-home #inventory .inventory-toolbar .controls-top-row {
- grid-template-columns: minmax(170px,390px) minmax(150px,175px);
- justify-content: space-between;
- gap: 10px;
-}
-html body.exhibition-home #inventory .inventory-toolbar :is(.search-field,.compact-field select) {
- min-height: 44px;
- border-color: var(--line);
- border-radius: 8px;
- background: var(--surface);
-}
-html body.exhibition-home #inventory .inventory-toolbar .search-field:focus-within {
- outline: 2px solid var(--price-accent);
- outline-offset: 2px;
-}
-html body.exhibition-home #inventory .inventory-toolbar #mobileFilterSheetMount {
- display: block !important;
- margin: 0;
-}
-html body.exhibition-home #inventory .inventory-toolbar .mobile-filter-sheet-trigger {
- min-height: 44px;
- gap: 6px;
- padding-inline: 11px;
- border-radius: 8px;
- font-size: 13px;
-}
-html body.exhibition-home #inventory .inventory-toolbar #viewToggle.view-toggle {
- display: inline-flex;
- padding: 2px;
- margin: 0;
- border-radius: 8px;
- min-height: 44px;
-}
-html body.exhibition-home #inventory .inventory-toolbar #viewToggle button {
- width: 40px;
- min-height: 38px;
- padding: 0;
- justify-content: center;
-}
-.inventory-toolbar #viewToggle button span { display: none; }
-#inventory.buyer-inventory #inventoryGrid[data-hide-available-badge=true] .photo-status.available { display: none !important; }
-html body.exhibition-home #inventory.buyer-inventory .stock-card {
- display: grid;
- grid-template-rows: auto 1fr;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-info {
- display: flex;
- flex-direction: column;
- padding: 13px 14px;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-pricing-block { margin-top: auto; }
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-identifiers { margin-block: 3px 10px; }
-html body.exhibition-home #inventory.buyer-inventory :is(.stock-card,.compact-row) .stock-price { color: var(--ink); font-weight: 530; }
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-variant-tag { color: var(--muted); font-weight: 500; }
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-card-footer {
- margin-top: 11px;
- border-top: 1px solid var(--line);
- border-radius: 0;
- padding-top: 5px;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .view-link {
- min-height: 36px;
- padding: 4px 0;
- border: 0;
- border-radius: 0;
- background: transparent;
-}
-@media (min-width: 901px) {
- html body.exhibition-home .mobile-filter-sheet-content.mobile-filter-sheet-panel {
-  inset: 14vh 0 auto;
-  max-width: 520px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 18px;
-  animation: none;
- }
- html body.exhibition-home .mobile-filter-sheet-handle { display: none; }
-}
-@media (max-width: 900px) {
- html body.exhibition-home #inventory .inventory-toolbar .controls-top-row { grid-template-columns: minmax(0,1fr); }
-}
-@media (max-width: 540px) {
- html body.exhibition-home .buyer-inventory .inventory-toolbar {
-  grid-template-columns: minmax(0,1fr) auto auto;
-  gap: 5px;
-  padding-bottom: 12px;
-  margin-bottom: 13px;
- }
- html body.exhibition-home #inventory .inventory-toolbar #viewToggle button { width: 31px; }
- html body.exhibition-home #inventory .inventory-toolbar .mobile-filter-sheet-trigger { padding-inline: 7px; }
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-info { padding: 10px; }
- html body.exhibition-home #inventory.buyer-inventory .stock-card .view-link { min-height: 44px; }
-}
-
-/* A single surface separates the car itself from the next steps. */
-html body dialog#vehicleDetailModal.vehicle-detail-modal[open] {
- background: var(--surface) !important;
-}
-html body dialog#vehicleDetailModal:focus { outline: none; }
-html body #vehicleDetailModal .buyer-detail-toolbar,
-html body #vehicleDetailModal .buyer-detail-topline {
- background: var(--surface);
-}
-html body :is(#vehicleDetailModal,#vehicleContent) .detail-grid.vehicle-overview {
- gap: 26px 32px;
-}
-html body :is(#vehicleDetailModal,#vehicleContent) .vehicle-overview > .purchase-heading {
- grid-column: 2;
- grid-row: 1;
- padding: 10px 0 8px 24px !important;
- border: 0;
- border-inline-start: 1px solid var(--line);
- border-radius: 0;
- background: transparent;
- box-shadow: none;
-}
-html body :is(#vehicleDetailModal,#vehicleContent) .vehicle-overview > .vehicle-reading-column {
- grid-column: 1;
- grid-row: 2;
-}
-html body :is(#vehicleDetailModal,#vehicleContent) .vehicle-overview > .vehicle-next-steps {
- grid-column: 2;
- grid-row: 2;
-}
-html body :is(#vehicleDetailModal,#vehicleContent) .vehicle-overview :is(.vehicle-specifications,.vehicle-contact,.vehicle-calculator) {
- padding: 17px 0 12px !important;
- border: 0;
- border-top: 1px solid var(--line);
- border-radius: 0;
- background: transparent;
- box-shadow: none;
-}
-html body :is(#vehicleDetailModal,#vehicleContent) .vehicle-overview .vehicle-showroom small { display: none; }
-html body :is(#vehicleDetailModal,#vehicleContent) .vehicle-overview .viewing-disclosure > summary {
- border-color: var(--line);
- background: var(--page);
- color: var(--ink);
-}
-html body :is(#vehicleDetailModal,#vehicleContent) .vehicle-overview .purchase-price-row {
- margin-bottom: 12px;
-}
-html body :is(#vehicleDetailModal,#vehicleContent) .vehicle-overview .share-car-btn {
- box-shadow: none;
- background: transparent;
- border-color: var(--line);
-}
-html body #vehicleDetailModal .vehicle-overview #vehicleGallery {
- border: 0;
- border-radius: 0;
- background: transparent;
-}
-html body :is(#vehicleDetailModal,#vehicleContent) .vehicle-overview #vehicleGallery .gallery-toolbar {
- margin-top: 4px;
- padding: 0;
- border: 0;
- border-bottom: 1px solid var(--line);
- border-radius: 0;
- background: transparent;
-}
-html body :is(#vehicleDetailModal,#vehicleContent) .vehicle-overview #vehicleGallery #galleryThumbnails {
- margin-top: 0;
- padding-block: 8px 4px !important;
-}
-@media (max-width: 800px) {
- html body #vehicleDetailModal #vehicleModalContent .buyer-detail-topline {
-  background: var(--surface);
- }
- html body :is(#vehicleDetailModal,#vehicleContent) .detail-grid.vehicle-overview {
-  gap: 15px;
- }
- html body :is(#vehicleDetailModal,#vehicleContent) .vehicle-overview > .purchase-heading {
-  grid-column: 1;
-  grid-row: 1;
-  padding: 4px 0 6px !important;
-  border: 0;
- }
- html body :is(#vehicleDetailModal,#vehicleContent) .vehicle-overview > .vehicle-next-steps { display: contents; }
-}
-
-/* Approved showroom palette and large photographic inventory. */
+/* Restore the owner's layout with graphite and green accents. */
 body.exhibition-home,body.exhibition-detail {
- --price-accent:#075c3c; --champagne:#075c3c; --mint:#075c3c;
- --blue:#075c3c; --blue-hover:#06472f; --sky:#075c3c;
-}
-html:not([data-theme=dark]) body.exhibition-home,
-html:not([data-theme=dark]) body.exhibition-detail {
- --page:#fff; --surface:#fff; --surface-2:#f4f6f5;
- --line:#dfe5e2; --ink:#151b19; --muted:#606b66; --on-accent:#fff;
+ --price-accent:#26332e;
+ --champagne:#176b4a;
+ --sky:#176b4a;
 }
 html[data-theme=dark] body.exhibition-home,
 html[data-theme=dark] body.exhibition-detail {
- --price-accent:#87c5a7; --champagne:#87c5a7; --mint:#87c5a7;
- --blue:#87c5a7; --blue-hover:#a8d9c0; --sky:#87c5a7;
- --page:#101613; --surface:#161e1a; --surface-2:#202b25;
- --line:#344239; --ink:#f3f7f4; --muted:#b3c0b8; --on-accent:#102017;
+ --price-accent:#e5ebe7;
+ --champagne:#79ba98;
+ --sky:#79ba98;
+ --blue:#79ba98;
+ --blue-hover:#a0d0b6;
 }
-html body.exhibition-home .buyer-inventory .stock-intro {
- position:relative; padding-block:15px 12px; margin-bottom:20px;
-}
-html body.exhibition-home .buyer-inventory .stock-intro::after {
- content:""; height:1px; flex:1; max-width:270px; margin-inline:24px;
- background:linear-gradient(90deg,transparent,var(--line),var(--price-accent));
-}
-html body.exhibition-home .stock-intro-copy h1 {
- font-size:clamp(34px,3.8vw,57px);font-weight:540;letter-spacing:-.025em;
-}
-html body.exhibition-home .stock-intro-copy .eyebrow {
- font-family:var(--buyer-ui);font-size:11px;letter-spacing:.16em;
- color:var(--muted);margin-bottom:10px;
-}
-html body.exhibition-home .stock-availability {order:2;font-size:13px;}
-html body.exhibition-home #inventory.buyer-inventory #inventoryGrid:not(.compact-view) {
- display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
- gap:24px;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card {
- border:1px solid var(--line);border-radius:5px;box-shadow:none;overflow:hidden;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-photo {
- aspect-ratio:2 / 1;min-height:0;border-radius:0;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-info {
- display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 18px;
- padding:14px 18px 10px;align-items:start;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .card-heading-row {
- grid-column:1;grid-row:1;min-width:0;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-info h3 {
- font-size:clamp(19px,1.8vw,25px);font-weight:560;line-height:1.25;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .spec-row {
- grid-column:1;grid-row:2;padding:5px 0 0;gap:3px 9px;font-size:12px;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-pricing-block {
- grid-column:2;grid-row:1 / span 2;text-align:right;margin:0;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-price {
- color:var(--ink);font-size:clamp(21px,2vw,28px);line-height:1.15;font-weight:550;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .monthly-price {
- font-size:11px;margin:5px 0 0;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-identifiers {
- grid-column:1;grid-row:3;justify-content:flex-start;gap:9px;
- margin:3px 0 0;align-self:center;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-identifiers code {
- font-family:var(--buyer-ui);font-size:10px;font-weight:450;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-variant-tag {
- font-size:10px;font-weight:450;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-card-footer {
- grid-column:2;grid-row:3;border:0;padding:0;margin:0;gap:0;justify-content:flex-end;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .compare-check {
- margin-right:12px;font-size:10px;
-}
-html body.exhibition-home #inventory.buyer-inventory .stock-card .view-link {
- font-size:12px;color:var(--price-accent);font-weight:600;
-}
-html body.exhibition-home #inventory .inventory-toolbar #viewToggle button[aria-pressed=true] {
- background:var(--price-accent);color:var(--on-accent);
-}
-html body.exhibition-home #inventory .inventory-toolbar .controls-top-row {
- grid-template-columns:minmax(170px,1fr) minmax(150px,190px);gap:14px;
-}
-html body.exhibition-home .buyer-inventory .inventory-toolbar {border:0;margin-bottom:8px;}
-html body :is(#vehicleDetailModal,#vehicleContent) .vehicle-availability[data-status=available] {
- color:var(--price-accent);background:var(--surface-2);
-}
-@media(max-width:1100px){
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-info {
-  grid-template-columns:minmax(0,1fr);gap:0;padding:13px;
- }
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-pricing-block {
-  grid-column:1;grid-row:3;text-align:left;margin-top:10px;
- }
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-identifiers {grid-row:4;}
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-card-footer {grid-column:1;grid-row:5;justify-content:space-between;margin-top:4px;}
-}
-@media(max-width:900px){
- html body.exhibition-home #inventory .inventory-toolbar .controls-top-row {grid-template-columns:minmax(0,1fr);}
- .buyer-inventory .stock-intro::after {display:none;}
-}
-@media(max-width:600px){
- html body.exhibition-home #inventory.buyer-inventory #inventoryGrid:not(.compact-view) {
-  grid-template-columns:minmax(0,1fr)!important;gap:18px;
- }
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-info {
-  grid-template-columns:minmax(0,1fr) auto;gap:0 10px;
- }
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-info h3 {font-size:19px;}
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-pricing-block {
-  grid-column:2;grid-row:1 / span 2;text-align:right;margin:0;
- }
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-price {font-size:21px;}
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-identifiers {grid-row:3;}
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-card-footer {grid-column:1 / -1;grid-row:4;}
- html body.exhibition-home .buyer-inventory .stock-intro {padding-block:0;margin-bottom:15px;}
-}
-@media(max-width:360px){
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-pricing-block {grid-column:1;grid-row:3;text-align:left;margin-top:9px;}
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-identifiers {grid-row:4;}
- html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-card-footer {grid-row:5;}
-}
-
-html body.exhibition-home .buyer-inventory #stockIntroLabel { color:var(--muted) !important; }
-html body.exhibition-home :is(.deliveries-section,.about-section) .eyebrow { color:var(--price-accent) !important; }
+html body.exhibition-home #inventory.buyer-inventory .stock-card .stock-variant-tag,
+html body.exhibition-home #stockIntroLabel { color:var(--muted) !important; }
+html body.exhibition-home :is(.deliveries-section,.about-section) .eyebrow { color:var(--muted) !important; }

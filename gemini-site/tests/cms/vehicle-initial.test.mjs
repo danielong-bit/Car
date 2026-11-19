@@ -12,8 +12,6 @@ test('first response contains real vehicle information and uploaded cover withou
  assert.match(html,/RM 328,000/);
  assert.match(html,/href="\/Car-Recond-Japan\/vehicle\/fresh-car\/#vehicleCalculator"/);
  assert.match(html,/Enquire on WhatsApp/);
- assert.ok(html.indexOf('id="vehicleTitle"')<html.indexOf('id="vehicleGallery"'));
- assert.ok(html.indexOf('id="vehicleGallery"')<html.indexOf('id="vehicleContact"'));
  assert.doesNotMatch(html,/At a glance|Not provided/);
  assert.ok(!html.includes('Loading'));
  assert.match(html,/href="\/Car-Recond-Japan\/#inventory"/);

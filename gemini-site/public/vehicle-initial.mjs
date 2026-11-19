@@ -18,10 +18,7 @@ export function initialVehicleMarkup(input,document,{base='/',pathname=''}={}){
  const gallery=galleryMarkup(photos,title,'en');
  return `<div class="buyer-detail-toolbar"><div class="detail-topline buyer-detail-topline"><a class="detail-back-btn" href="${esc(stock)}" id="detailBackBtn"><span class="back-arrow" aria-hidden="true">←</span><span>Back to Stock</span></a></div>
  <nav class="detail-section-nav" aria-label="Vehicle sections">${sections.map(([id,name],i)=>`<a href="${esc(pathname)}#${id}" data-detail-section="${id}" ${i===0?'aria-current="location"':''}>${name}</a>`).join('')}</nav></div>
- <div class="detail-grid vehicle-overview" data-initial-vehicle="${esc(v.id)}">
- ${vehicleSummaryMarkup(v,{monthly,price:money(v.priceRm),anchor:pathname,enquiry})}
- ${gallery}
- <div class="vehicle-reading-column"><section class="detail-info vehicle-specifications" id="vehicleSpecifications"><h2 class="spec-list-heading">Key specifications</h2><dl class="full-spec-list">${specs.filter(([,value])=>value).map(([name,value])=>`<div><dt>${name}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl></section></div>
- <aside class="detail-purchase vehicle-next-steps" aria-label="Viewing and financing">
+ <div class="detail-grid" data-initial-vehicle="${esc(v.id)}"><div class="vehicle-reading-column">${gallery}<section class="detail-info vehicle-specifications" id="vehicleSpecifications"><h2 class="spec-list-heading">Key specifications</h2><dl class="full-spec-list">${specs.filter(([,value])=>value).map(([name,value])=>`<div><dt>${name}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl></section></div>
+ <aside class="detail-purchase" aria-label="Vehicle summary and enquiries">${vehicleSummaryMarkup(v,{monthly,price:money(v.priceRm),anchor:pathname,enquiry})}
  <section class="vehicle-contact" id="vehicleContact"><h2 class="detail-card-title">Visit the showroom</h2>${document.profile?.location?`<p>${esc(document.profile.location)}</p>`:''}</section>${calculatorMarkup(v,document.finance,'en')}</aside></div>`;
 }

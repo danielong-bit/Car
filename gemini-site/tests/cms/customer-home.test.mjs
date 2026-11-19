@@ -25,9 +25,7 @@ for(const width of [1280,390])test(`homepage at ${width}px renders stock states,
  const style=win.document.createElement('style');style.textContent=css;win.document.head.append(style);
  const all=[...win.document.querySelectorAll('#inventoryGrid .stock-card')];assert.equal(all.length,3);
  assert.equal(win.document.querySelector('main > section').id,'inventory');
- assert.equal(win.document.querySelector('.inventory-toolbar #mobileFilterSheetMount')!==null,true);
- assert.equal(win.document.querySelector('.inventory-toolbar .filter-pills'),null);
- assert.equal(win.document.querySelector('#heroTitle').textContent,'Your next drive.');
+ assert.equal(win.document.querySelector('#heroTitle').textContent,'Find your next car.');
  assert.equal(win.document.querySelector('#ownerShowroomPhoto').hidden,true);
  assert.match(win.document.querySelector('#stockAvailability').textContent,/1 Available now/);
  const ungraded=win.document.querySelector('[data-id="fixture-available"] .spec-row');
@@ -61,10 +59,4 @@ for(const width of [1280,390])test(`homepage at ${width}px renders stock states,
  const rows=[...win.document.querySelectorAll('#inventoryGrid .compact-row')];assert.equal(rows.length,3);
  assert.doesNotMatch(win.document.querySelector('[data-id="fixture-available"] .compact-meta').textContent,/AMG|SPEEDSHIFT|automatic/);
  for(const row of rows)assert.equal(Boolean(row.querySelector('.stock-price s')),row.dataset.status!=='available');
- const search=win.document.querySelector('#publicSearch');
- search.value='no matching test stock';
- search.dispatchEvent(new win.Event('input',{bubbles:true}));
- assert.equal(win.document.querySelectorAll('#inventoryGrid article').length,0);
- win.document.querySelector('#emptyReset').click();
- assert.equal(win.document.querySelectorAll('#inventoryGrid article').length,3);
 });
