@@ -154,7 +154,7 @@ function MobileFilterSheet() {
                     aria-pressed={draft.make === make}
                     onClick={() => setDraft((current) => ({ ...current, make: current.make === make ? "" : make }))}
                   >
-                    {make}
+                    {/^(bmw)$/i.test(make) ? "BMW" : make}
                     {draft.make === make && <Check aria-hidden="true" />}
                   </button>
                 ))}

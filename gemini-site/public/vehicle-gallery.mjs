@@ -33,6 +33,7 @@ export function galleryMarkup(photos,title,lang){
  if(!photos.length)return `<section class="vehicle-gallery" id="vehicleGallery"><div class="gallery-empty">${tr('Photos will be added soon.','照片待上传。','Foto akan ditambah.')}</div></section>`;
  const first=photos[0],firstUrl=staticSrc(first.url);
  const groups=[...new Set(photos.map(m=>photoCategory(m.category)))];
+ const showCaption=groups.some(group=>group!=='details');
  const enlarge=tr('Enlarge photo','放大照片','Besarkan foto');
  const arrows=[['Previous',tr('Previous photo','上一张照片','Foto sebelumnya'),'m15 18-6-6 6-6'],['Next',tr('Next photo','下一张照片','Foto seterusnya'),'m9 18 6-6-6-6']];
  return `<section class="vehicle-gallery" id="vehicleGallery" data-photo-count="${photos.length}" aria-label="${tr('Photo gallery','车辆图库','Galeri foto')}" tabindex="0">
@@ -43,7 +44,7 @@ export function galleryMarkup(photos,title,lang){
     <span id="galleryStageCount" aria-hidden="true">1 / ${photos.length}</span>
     <span id="galleryCount" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></span>
    </div>
-   <span id="galleryCaption">${labels[photoCategory(first.category)]}</span>
+   <span id="galleryCaption">${showCaption?labels[photoCategory(first.category)]:''}</span>
    <button type="button" class="gallery-expand" id="galleryExpand" aria-label="${enlarge}">
     <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/></svg><span>${tr('Enlarge','放大','Besarkan')}</span>
    </button>
@@ -56,6 +57,7 @@ export function galleryMarkup(photos,title,lang){
 export function bindGallery(photos,title,lang,base,openPhoto){
  const stage=document.getElementById('vehicleGallery');if(!stage||!photos.length)return;
  const tr=translator(lang),labels=galleryLabels(tr),dialog=document.getElementById('photoModal');
+ const showCaption=photos.some(photo=>photoCategory(photo.category)!=='details');
  let filtered=photos.map((_,i)=>i),position=0,displayedPosition=0,displayedPhotoIndex=0,request=0,touch=null,swiped=false;
  const cache=createGalleryPhotoCache(path=>photoUrl(path,base));
  const current=()=>photos[filtered[position]];
@@ -125,7 +127,7 @@ export function bindGallery(photos,title,lang,base,openPhoto){
    const count=`${selectedPosition+1} / ${filtered.length}`;
    document.getElementById('galleryCount').textContent=count;
    document.getElementById('galleryStageCount').textContent=count;
-   document.getElementById('galleryCaption').textContent=labels[photoCategory(photo.category)];
+   document.getElementById('galleryCaption').textContent=showCaption?labels[photoCategory(photo.category)]:'';
    if(!wasShown){
     const strip=document.getElementById('galleryThumbnails');
     strip.querySelectorAll('[data-photo]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.photo)===selectedPosition)));
