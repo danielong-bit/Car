@@ -16,7 +16,7 @@ import {openCarFinder} from './car-finder.mjs';
 import {loadSiteUi} from './site-ui-loader.mjs';
 import {mountContactLanyard} from './contact-lanyard.mjs';
 import {visibleBrandFilters,matchesInventorySelection} from './inventory-brand-filters.mjs?v=stock-20261019d';
-import {galleryMarkup,bindGallery} from './vehicle-gallery.mjs';
+import {galleryMarkup,bindGallery} from './vehicle-gallery.mjs?v=gallery-20261119';
 import {renderServiceCare} from './service-care.mjs';
 import {calculatorMarkup,bindVehicleCalculator,conditionValues,translator} from './vehicle-tools.mjs';
 import {normalizeDocument,deriveSpecialBadges,estimate,label} from './inventory-domain.mjs?v=stock-themes-20261019';
