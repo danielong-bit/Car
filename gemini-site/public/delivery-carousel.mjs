@@ -1,12 +1,12 @@
 const activeCarousels=new WeakMap();
 
-export function startDeliveryCarousel(rail,{previous,next,pause,interval=4500,labels={pause:'Pause slideshow',play:'Play slideshow'}}={}) {
+export function startDeliveryCarousel(rail,{previous,next,pause,interval=4500,startPaused=false,labels={pause:'Pause slideshow',play:'Play slideshow'}}={}) {
  activeCarousels.get(rail)?.destroy();
  rail.querySelectorAll(':scope > [data-carousel-clone="true"]').forEach(node=>node.remove());
  const win=rail.ownerDocument.defaultView,doc=rail.ownerDocument;
  const media=win.matchMedia('(prefers-reduced-motion: reduce)');
  const originals=[...rail.children],clones=[];
- let paused=media.matches,hover=false,focused=false,visible=true,destroyed=false;
+ let paused=startPaused||media.matches,hover=false,focused=false,visible=true,destroyed=false;
  const step=()=>{
   const first=rail.firstElementChild;
   return first?first.getBoundingClientRect().width+(parseFloat(win.getComputedStyle(rail).columnGap)||parseFloat(win.getComputedStyle(rail).gap)||16):0;

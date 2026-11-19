@@ -93,21 +93,21 @@ export function trackMetaPixelEvent(eventName,params={}){
 
 let report,loading;
 export function loadVisitorStats(){
- if(window.DANNY_PREVIEW_EDITOR===true){const host=document.getElementById('ownerVisitorStats');if(host)host.textContent='Live visitor statistics are available in the connected Cloudflare dashboard.';return;}
  const host=document.getElementById('ownerVisitorStats');if(!host)return;
  const refresh=document.getElementById('refreshVisitorStats');if(refresh)refresh.onclick=()=>{report=undefined;loadVisitorStats();};
  if(report&&Date.now()-Date.parse(report.updatedAt)<60000){paint(host,report);return;}
  loading??=fetch('/api/owner/analytics',{credentials:'same-origin',cache:'no-store'}).then(async response=>{if(!response.ok)throw Error();const value=await response.json();if(!Number.isFinite(value.total))throw Error();report=value;return value;}).finally(()=>{loading=undefined;});
  loading.then(value=>{const target=document.getElementById('ownerVisitorStats');if(target)paint(target,value);}).catch(()=>{
   const target=document.getElementById('ownerVisitorStats');
-  if(target)paint(target,{total:0,today:0,devices:[],countries:[],offline:true});
+  if(target)paint(target,{total:0,today:0,leadsTotal:0,leadsToday:0,fbClicks:0,fbLeads:0,devices:[],countries:[],campaigns:[],topAdVehicles:[],topLeadVehicles:[],offline:true});
  });
 }
+
 function paint(host,data){
  const escape=value=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
  const country=value=>{try{return new Intl.DisplayNames(['en'],{type:'region'}).of(value)||value;}catch{return value;}};
  const barList=(items,regions=false,accent='var(--mint)')=>{
-  if(!items||!items.length)return '<p class="visitor-empty">No visits recorded yet.</p>';
+  if(!items||!items.length)return '<p class="visitor-empty">No events recorded yet.</p>';
   const sum=Math.max(1,items.reduce((acc,it)=>acc+(Number(it.count)||0),0));
   return `<div class="visitor-bars">${items.map(item=>{
    const c=Number(item.count)||0;
@@ -120,8 +120,16 @@ function paint(host,data){
  const maxDay=Math.max(1,...daily);
  const dayNames=['6d','5d','4d','3d','2d','1d','Today'];
  const sparkBars=daily.map((v,i)=>{
-  const h=v>0?Math.max(4,Math.round((v/maxDay)*100)):0;
+  const h=v===0?0:Math.max(8,Math.round((v/maxDay)*100));
   return `<div class="visitor-spark-col" title="${dayNames[i]}: ${v} visits"><div class="visitor-spark-bar-wrap"><span class="visitor-spark-bar${i===daily.length-1?' is-today':''}" style="height:${h}%"></span></div><small>${dayNames[i]}</small></div>`;
  }).join('');
- host.innerHTML=`<div class="visitor-totals"><div class="visitor-kpi-box"><span>Visits · last 30 days</span><strong>${Number(data.total||0).toLocaleString()}</strong><small>Deduplicated 30-min browser sessions</small></div><div class="visitor-kpi-box"><span>Today · Malaysia time</span><strong>${Number(data.today||0).toLocaleString()}</strong><small>Active showroom traffic today</small></div><div class="visitor-kpi-box visitor-spark-box"><span>7-day session pulse</span><div class="visitor-spark-chart" aria-label="Last 7 days traffic trend">${sparkBars||'<span class="visitor-empty">Daily traffic is unavailable.</span>'}</div></div></div><div class="visitor-details"><section class="visitor-chart-card"><h4>Device Breakdown</h4>${barList(data.devices,false,'var(--mint)')}</section><section class="visitor-chart-card"><h4>Top Regions</h4>${barList(data.countries,true,'var(--price-accent)')}</section></div><p class="visitor-note">${data.offline?'Visitor statistics will populate automatically when connected to live Cloudflare analytics.':'Visits are browser sessions, not an exact count of people. Country is approximate. Owner visits are excluded.'}</p>`;
+ const leadsTotal=Number(data.leadsTotal||0);
+ const leadsToday=Number(data.leadsToday||0);
+ const fbClicks=Number(data.fbClicks||0);
+ const fbLeads=Number(data.fbLeads||0);
+ const fbConvPct=fbClicks>0?((fbLeads/fbClicks)*100).toFixed(1):null;
+ const campaigns=Array.isArray(data.campaigns)&&data.campaigns.length?`<section class="visitor-chart-card"><h4>Facebook Ads &amp; Referral Channels</h4>${barList(data.campaigns,false,'#1877f2')}</section>`:'';
+ const adVehicles=Array.isArray(data.topAdVehicles)&&data.topAdVehicles.length?`<section class="visitor-chart-card"><h4>Most Clicked Ad Listings</h4>${barList(data.topAdVehicles,false,'var(--mint)')}</section>`:'';
+ const leadVehicles=Array.isArray(data.topLeadVehicles)&&data.topLeadVehicles.length?`<section class="visitor-chart-card"><h4>Top WhatsApp Lead Vehicles</h4>${barList(data.topLeadVehicles,false,'#25d366')}</section>`:'';
+ host.innerHTML=`<div class="visitor-totals visitor-totals-4"><div class="visitor-kpi-box"><span>Visits · last 30 days</span><strong>${Number(data.total||0).toLocaleString()}</strong><small>Deduplicated 30-min sessions</small></div><div class="visitor-kpi-box"><span>Today · Malaysia time</span><strong>${Number(data.today||0).toLocaleString()}</strong><small>Active showroom traffic today</small></div><div class="visitor-kpi-box"><span>WhatsApp Leads · 30d</span><strong>${leadsTotal.toLocaleString()}</strong><small>${leadsToday} today${fbConvPct?` · ${fbConvPct}% FB Ad conv.`:''}</small></div><div class="visitor-kpi-box visitor-spark-box"><span>7-day session pulse</span><div class="visitor-spark-chart" aria-label="Last 7 days traffic trend">${sparkBars}</div></div></div><div class="visitor-details">${campaigns}${adVehicles}${leadVehicles}<section class="visitor-chart-card"><h4>Device Breakdown</h4>${barList(data.devices,false,'var(--mint)')}</section><section class="visitor-chart-card"><h4>Top Regions</h4>${barList(data.countries,true,'var(--price-accent)')}</section></div><p class="visitor-note">${data.offline?'Visitor statistics will populate automatically when connected to live analytics.':'Visits & WhatsApp enquiries are attributed anonymously to Facebook Ad UTM channels.'}</p>`;
 }

@@ -7,7 +7,7 @@ import {
   buildFacebookAdCampaignData,
   buildFacebookShareSharerUrl,
   buildMarketplaceListingFields,
-
+  renderFacebookAdPreviewMarkup,
   generateFacebookPost,
   FB_AD_PRESETS,
   FB_COPY_LANGUAGES,
@@ -74,7 +74,7 @@ test('buildFacebookAdCampaignData reflects live vehicle status and builds WhatsA
   assert.equal(FB_COPY_LANGUAGES.length, 4);
 });
 
-test('multi-language Facebook copy and Marketplace fields use live data', () => {
+test('multi-language Facebook copy, Marketplace fields, and Feed/Reels/Marketplace mockups render cleanly', () => {
   const car = {
     id: 'alphard-sc',
     stockId: 'ALP-2022',
@@ -118,6 +118,13 @@ test('multi-language Facebook copy and Marketplace fields use live data', () => 
   assert.equal(mp.price, '268000');
   assert.equal(mp.mileageKm, '19500');
 
+  const campaignData = buildFacebookAdCampaignData(car, { name: 'Danny Ong' }, 'https://danny.stocklist.workers.dev', {
+    campaign: 'fb_whatsapp_ctwa',
+  });
+  assert.equal(campaignData.ctaLabel, 'WhatsApp Danny');
+  assert.match(renderFacebookAdPreviewMarkup(campaignData, car, {}, 'feed'), /fb-mock-card is-feed/);
+  assert.match(renderFacebookAdPreviewMarkup(campaignData, car, {}, 'reels'), /fb-mock-card is-reels/);
+  assert.match(renderFacebookAdPreviewMarkup(campaignData, car, {}, 'marketplace'), /fb-mock-card is-marketplace/);
   assert.match(buildFacebookShareSharerUrl('https://danny.stocklist.workers.dev/?vehicle=alphard-sc', 'Alphard'), /sharer\.php/);
 });
 
