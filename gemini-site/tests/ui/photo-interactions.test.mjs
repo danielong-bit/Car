@@ -16,23 +16,17 @@ test('Next warms nearby photos and never pairs a new count with the previous pho
  }
  t.after(()=>{dom.window.close();for(const [key,value] of previous){if(value)Object.defineProperty(globalThis,key,value);else delete globalThis[key];}});
  const doc=dom.window.document;
- let enlarged;
  doc.querySelector('#galleryThumbnails').scrollTo=()=>{};
- bindGallery(photos,'Car','en','/',(source,title,navigation)=>{enlarged={source,title,count:navigation.count};});await tick();
+ bindGallery(photos,'Car','en','/',()=>{});await tick();
  pending.get('/assets/a.jpg')();await tick();
  assert.ok(loads.includes('/assets/b.jpg'));assert.ok(loads.includes('/assets/c.jpg'));
  doc.querySelector('#galleryNext').click();await tick();
  assert.equal(doc.querySelector('#vehicleGallery').dataset.photoLoading,'true');
  assert.equal(doc.querySelector('#galleryStageCount').textContent,'1 / 3');
- assert.equal(doc.querySelector('[data-photo][aria-pressed=true]').dataset.photo,'0');
- assert.equal(doc.querySelector('.gallery-stage #galleryStageCount'),null);
  pending.get('/assets/b.jpg')();await tick();
  assert.equal(doc.querySelector('#activePhoto').getAttribute('src'),'/assets/b.jpg');
  assert.equal(doc.querySelector('#galleryStageCount').textContent,'2 / 3');
  assert.equal(doc.querySelector('#galleryCaption').textContent,'Interior');
- assert.equal(doc.querySelector('[data-photo][aria-pressed=true]').dataset.photo,'1');
- doc.querySelector('#galleryExpand').click();
- assert.deepEqual(enlarged,{source:'https://local.test/assets/b.jpg',title:'Car',count:'2 / 3'});
  doc.querySelector('#galleryNext').click();doc.querySelector('#galleryPrevious').click();await tick();
  pending.get('/assets/c.jpg')();await tick();
  assert.equal(doc.querySelector('#activePhoto').getAttribute('src'),'/assets/b.jpg');

@@ -1,0 +1,17 @@
+/* Original showroom with graphite prices and green details. */
+body.exhibition-home,body.exhibition-detail {
+ --price-accent:#26332e;
+ --champagne:#176b4a;
+ --sky:#176b4a;
+}
+html[data-theme=dark] body.exhibition-home,
+html[data-theme=dark] body.exhibition-detail {
+ --price-accent:#e5ebe7;
+ --champagne:#79ba98;
+ --sky:#79ba98;
+ --blue:#79ba98;
+ --blue-hover:#a0d0b6;
+}
+html body.exhibition-home #inventory .stock-price {color:var(--ink);}
+html body.exhibition-home .stock-variant-tag {color:var(--muted);}
+html body.exhibition-home .eyebrow {color:var(--muted);}
